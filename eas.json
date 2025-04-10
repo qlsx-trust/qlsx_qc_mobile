@@ -15,7 +15,7 @@
       "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_ENV": "staging",
-        "EXPO_PUBLIC_BACKEND_URL": "https://qa."
+        "EXPO_PUBLIC_BACKEND_URL": "http://192.168.1.14:5000"
       }
     },
     "production": {
@@ -23,23 +23,23 @@
       "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_ENV": "production",
-        "EXPO_PUBLIC_BACKEND_URL": "https://prod"
+        "EXPO_PUBLIC_BACKEND_URL": "http://192.168.1.14:5000"
       }
     }
   },
   "submit": {
     "preview": {
       "ios": {
-        "appleId": "nhethanh97@gmail.com",
-        "ascAppId": "6529534382",
-        "appleTeamId": "XA9XQ5C874"
+        "appleId": "anhnph.dev@gmail.com",
+        "ascAppId": "6744459336",
+        "appleTeamId": "8W6YT3A8VE"
       }
     },
     "production": {
       "ios": {
-        "appleId": "nhethanh97@gmail.com",
-        "ascAppId": "6479838075",
-        "appleTeamId": "XA9XQ5C874"
+        "appleId": "anhnph.dev@gmail.com",
+        "ascAppId": "6744459336",
+        "appleTeamId": "8W6YT3A8VE"
       }
     }
   }
