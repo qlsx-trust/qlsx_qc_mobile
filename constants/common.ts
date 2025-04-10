@@ -14,6 +14,11 @@ export const ZOOM_CONFIG: any = {
 };
 
 
+export const TIMEOUT_REQUEST = {
+    NORMAL: 2 * 60 * 1000
+}
+
+
 export enum OS {
     ANDROID = 'android',
     IOS = 'ios',
@@ -57,3 +62,12 @@ export const BUTTON_LOADING_ICON_COLOR = {
     [BUTTON_COMMON_TYPE.CANCEL_WITH_CHILDREN]: '#333',
     [BUTTON_COMMON_TYPE.DELETE_WITH_CHILDREN]: '#fff',
 };
+
+export enum UserRole {
+    Admin,
+    QC,
+    Employee,
+    Manager,
+    MaterialSupply,
+    MoldSupply,
+}

@@ -1,12 +1,15 @@
-import PencilLineIcon from '@/assets/icons/pencil-line.svg';
 import AppButton from '@/components/common/AppButton';
 import FlexBox from '@/components/common/FlexBox';
 import TextWrap from '@/components/common/TextWrap';
 import CommonModal, { CommonModalProps } from '@/components/modals/CommonModal';
 import { BUTTON_COMMON_TYPE, SCREEN_KEY } from '@/constants/common';
+import { useProductionPlanContext } from '@/providers/ProductionPlanProvider';
 import { useThemeContext } from '@/providers/ThemeProvider';
+import { CommonRepository } from '@/repositories/CommonRepository';
 import { IThemeVariables } from '@/shared/theme/themes';
+import { toast } from '@/utils/ToastMessage';
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { StyleSheet } from 'react-native';
 
 interface IConfirmScanCodeModalProps {
@@ -16,11 +19,27 @@ interface IConfirmScanCodeModalProps {
 
 const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalProps) => {
     const { themeVariables } = useThemeContext();
+    const { updateProductionPlan } = useProductionPlanContext();
     const styles = styling(themeVariables);
+    const [isLoadingConfirm, setIsLoadingConfirm] = useState<boolean>(false);
 
-    const handleConfirmCode = () => {
-        router.push(SCREEN_KEY.product);
-        modalProps.onClose();
+    const handleConfirmCode = async () => {
+        try {
+            setIsLoadingConfirm(true);
+            const response = await CommonRepository.getMostRecentProductionPlan('A3');
+            if (response.data) {
+                console.log('response.data:', response.data)
+                updateProductionPlan(response.data);
+                router.push(`${SCREEN_KEY.product}`);
+                modalProps.onClose();
+            } else {
+                toast.error('Mã máy không hợp lệ, vui lòng thử lại');
+            }
+        } catch (error) {
+            toast.error('Mã máy không hợp lệ, vui lòng thử lại');
+        } finally {
+            setIsLoadingConfirm(false);
+        }
     };
 
     return (
@@ -35,7 +54,7 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
                     <TextWrap color={themeVariables.colors.primary}> {scanResult} </TextWrap>
                 </TextWrap>
 
-                <FlexBox justifyContent="space-between" gap={16} style={{marginTop: 16}}>
+                <FlexBox justifyContent="space-between" gap={16} style={{ marginTop: 16 }}>
                     <AppButton
                         viewStyle={styles.button}
                         variant={BUTTON_COMMON_TYPE.CANCEL}
@@ -46,6 +65,8 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
                         viewStyle={styles.button}
                         label="Xác nhận"
                         onPress={handleConfirmCode}
+                        isLoading={isLoadingConfirm}
+                        disabled={isLoadingConfirm}
                     />
                 </FlexBox>
             </FlexBox>

@@ -14,6 +14,7 @@ import { MenuProvider } from 'react-native-popup-menu';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { AuthContextProvider } from '@/providers/UserProvider';
+import { ProductionPlanContextProvider } from '@/providers/ProductionPlanProvider';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -59,6 +60,7 @@ export default function RootLayout() {
     return (
         <ThemeContexProvider>
             <AuthContextProvider>
+                <ProductionPlanContextProvider>
                 <SafeAreaProvider>
                     <MenuProvider>
                         <GestureHandlerRootView style={{ flex: 1 }}>
@@ -73,6 +75,7 @@ export default function RootLayout() {
                         <Toast config={toastConfig} />
                     </MenuProvider>
                 </SafeAreaProvider>
+                </ProductionPlanContextProvider>
             </AuthContextProvider>
         </ThemeContexProvider>
     );

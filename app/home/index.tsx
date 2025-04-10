@@ -12,6 +12,7 @@ import FlexBox from '@/components/common/FlexBox';
 import TextWrapper from '@/components/common/TextWrap';
 import ConfirmScanCodeModal from '@/components/home/ConfirmScanCodeModal';
 import { BUTTON_COMMON_TYPE } from '@/constants/common';
+import { useAuthContext } from '@/providers/UserProvider';
 import { AntDesign } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import { BarcodeScanningResult, CameraType, CameraView, useCameraPermissions } from 'expo-camera';
@@ -19,6 +20,7 @@ import { useEffect, useState } from 'react';
 const HomeScreen = () => {
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
+    const { logout } = useAuthContext();
 
     const [permission, requestPermission] = useCameraPermissions();
     const [showCamera, setShowCamera] = useState(false);
@@ -44,8 +46,8 @@ const HomeScreen = () => {
         setFacing((current) => (current === 'back' ? 'front' : 'back'));
     }
 
-     // Play beep sound
-     const playBeep = async () => {
+    // Play beep sound
+    const playBeep = async () => {
         try {
             const { sound } = await Audio.Sound.createAsync(require('../../assets/beep.mp3'));
             await sound.playAsync();
@@ -54,10 +56,13 @@ const HomeScreen = () => {
         }
     };
 
+    const handleLogout = () => {
+        logout();
+    };
 
     const handleBarCodeScan = (result: BarcodeScanningResult) => {
         if (result.data) {
-            playBeep()
+            playBeep();
             setShowCamera(false);
             setScanResult(result.data);
             setShowConfirmResultCode(true);
@@ -145,6 +150,13 @@ const HomeScreen = () => {
                                 onPress={handleScanScreen}
                                 viewStyle={{ width: 250, marginTop: 20 }}
                                 variant={BUTTON_COMMON_TYPE.PRIMARY_OUTLINE}
+                            />
+
+                            <AppButton
+                                label="Đăng xuất"
+                                onPress={handleLogout}
+                                viewStyle={{ width: 250, marginTop: 0 }}
+                                variant={BUTTON_COMMON_TYPE.CANCEL}
                             />
 
                             {!permission && (
@@ -239,20 +251,20 @@ export const styling = (themeVariables: IThemeVariables) =>
             height: '100%',
             alignItems: 'center',
             justifyContent: 'space-around',
-          },
-          maskInner: {
+        },
+        maskInner: {
             width: 250,
             backgroundColor: 'transparent',
             borderColor: 'white',
             borderWidth: 1,
-          },
-          maskFrame: {
+        },
+        maskFrame: {
             backgroundColor: 'rgba(1, 1, 1, 0.628)',
-          },
-          maskRow: {
+        },
+        maskRow: {
             width: '100%',
-          },
-          maskCenter: { flexDirection: 'row' },
+        },
+        maskCenter: { flexDirection: 'row' },
     });
 
 export default HomeScreen;

@@ -11,25 +11,46 @@ import {
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import AppButton from '@/components/common/AppButton';
 import FlexBox from '@/components/common/FlexBox';
 import TextWrap from '@/components/common/TextWrap';
 import ConfirmModal from '@/components/ConfirmModal';
+import AddEvaluationItemModal from '@/components/product/AddEvaluationItemModal';
+import EvaluationItem from '@/components/product/EvaluationItem';
 import { BUTTON_COMMON_TYPE, SCREEN_KEY } from '@/constants/common';
+import { ICheckItem, useProductionPlanContext } from '@/providers/ProductionPlanProvider';
 import { AntDesign } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
+import Moment from 'moment';
 import { useState } from 'react';
-import EvaluationItem from '@/components/product/EvaluationItem';
-import AppButton from '@/components/common/AppButton';
-import AddEvaluationItemModal from '@/components/product/AddEvaluationItemModal';
+import { CommonRepository } from '@/repositories/CommonRepository';
+import { toast } from '@/utils/ToastMessage';
 
 const ProductScreen = () => {
     const dimensions = Dimensions.get('window');
     const { themeVariables, theme } = useThemeContext();
+    const { productionPlan } = useProductionPlanContext();
     const styles = styling(themeVariables);
 
     const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
     const [showAddEvaluationItemModal, setShowAddEvaluationItemModal] = useState<boolean>(false);
+
+
+    const [checkItems, setCheckItems] = useState<ICheckItem[]>([
+        {
+            categoryCode: 'CAT001',
+            name: 'Check Item 1',
+            note: '',
+            status: '',
+            reportFileUri: '',
+        },
+    ]);
+
+    const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false);
+
+    const checkedItems =
+        checkItems?.length > 0 ? checkItems.filter((item) => item.status).length : 0;
 
     const backHomeScreen = () => {
         router.replace(SCREEN_KEY.home);
@@ -41,7 +62,60 @@ const ProductScreen = () => {
         );
     };
 
-    const handleAddEvaluation = (evaluationItem: string) => {};
+    const handleAddEvaluation = (evaluationItem: string) => {
+        const checkItemsTmp = [...checkItems];
+        checkItemsTmp.push({
+            categoryCode: `CATADD-${new Date().getTime()}`,
+            name: evaluationItem,
+            note: '',
+            status: '',
+            reportFileUri: '',
+        });
+        setCheckItems([...checkItemsTmp]);
+        setShowAddEvaluationItemModal(false);
+    };
+
+    const handleUpdateCheckItem = (index: number, updatedItem: ICheckItem) => {
+        const checkItemsTmp = [...checkItems];
+        checkItemsTmp[index] = { ...updatedItem };
+        setCheckItems([...checkItemsTmp]);
+    };
+
+    const handleSubmit = async () => {
+        try {
+            setLoadingSubmit(true);
+            const formdata = new FormData();
+            formdata.append('ConfirmationTime', `${new Date().toISOString()}`);
+            const testResult = checkItems.map((item) => {
+                return {
+                    categoryCode: item.categoryCode,
+                    name: item.name,
+                    note: item.note,
+                    status: item.status,
+                };
+            });
+            formdata.append('TestResult', JSON.stringify(testResult));
+            formdata.append('ProductionPlanId', productionPlan?.id);
+            checkItems.forEach((item) => {
+                if (item.reportFileUri) {
+                    formdata.append(item.categoryCode, {
+                        name: item.reportFileUri.split('/').pop(),
+                        type: 'image/jpeg',
+                        uri: item.reportFileUri,
+                    });
+                }
+            });
+            const response = await CommonRepository.submitQcTestResult(formdata);
+            console.log('response: ', JSON.stringify(response.error));
+            if (response.data) {
+                toast.success('Gửi các đánh giá thành công');
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoadingSubmit(false);
+        }
+    };
 
     return (
         <KeyboardAvoidingView behavior={isIOS ? 'padding' : 'height'}>
@@ -76,8 +150,11 @@ const ProductScreen = () => {
                         alignItems="flex-start"
                     >
                         <TextWrap style={styles.header} color={themeVariables.colors.textDefault}>
-                            Mã máy ép:{' '}
-                            <TextWrap color={themeVariables.colors.primary}>XXXXX</TextWrap>
+                            Mã máy ép:
+                            <TextWrap color={themeVariables.colors.primary}>
+                                {' '}
+                                {productionPlan?.machineCode}
+                            </TextWrap>
                         </TextWrap>
                         <FlexBox
                             gap={5}
@@ -89,8 +166,36 @@ const ProductScreen = () => {
                                 style={styles.description}
                                 color={themeVariables.colors.textDefault}
                             >
-                                Tên máy:{' '}
-                                <TextWrap color={themeVariables.colors.primary}>máy XXX</TextWrap>
+                                Tên sản phẩm:{' '}
+                                <TextWrap color={themeVariables.colors.primary}>
+                                    {' '}
+                                    {productionPlan?.productName}
+                                </TextWrap>
+                            </TextWrap>
+                            <TextWrap
+                                style={styles.description}
+                                color={themeVariables.colors.textDefault}
+                            >
+                                CTSX:{' '}
+                                <TextWrap color={themeVariables.colors.primary}>
+                                    {' '}
+                                    {productionPlan?.productCode}
+                                </TextWrap>
+                            </TextWrap>
+                            <TextWrap
+                                style={styles.description}
+                                color={themeVariables.colors.textDefault}
+                            >
+                                Khuôn:{' '}
+                                <TextWrap color={themeVariables.colors.primary}>
+                                    {' '}
+                                    {productionPlan?.moldCode}
+                                </TextWrap>{' '}
+                                NVL:{' '}
+                                <TextWrap color={themeVariables.colors.primary}>
+                                    {' '}
+                                    {productionPlan?.materialCode}
+                                </TextWrap>
                             </TextWrap>
                             <TextWrap
                                 style={styles.description}
@@ -98,7 +203,9 @@ const ProductScreen = () => {
                             >
                                 Bắt đầu phiên:{' '}
                                 <TextWrap color={themeVariables.colors.primary}>
-                                    10:00 09/03/2025
+                                    {Moment(productionPlan?.productionStartTime || '').format(
+                                        'MM/DD/YYYY HH:mm'
+                                    )}
                                 </TextWrap>
                             </TextWrap>
                             <TextWrap
@@ -107,7 +214,9 @@ const ProductScreen = () => {
                             >
                                 kết thúc phiên:{' '}
                                 <TextWrap color={themeVariables.colors.primary}>
-                                    16:00 09/03/2025
+                                    {Moment(productionPlan?.productionEndTime || '').format(
+                                        'MM/DD/YYYY HH:mm'
+                                    )}
                                 </TextWrap>
                             </TextWrap>
                             <FlexBox
@@ -138,12 +247,7 @@ const ProductScreen = () => {
                             </FlexBox>
                         </FlexBox>
                     </FlexBox>
-                    <FlexBox
-                        gap={15}
-                        direction="column"
-                        justifyContent="flex-start"
-                        alignItems="flex-start"
-                    >
+                    <FlexBox direction="column" justifyContent="flex-start" alignItems="flex-start">
                         <FlexBox
                             justifyContent="space-between"
                             alignItems="flex-end"
@@ -153,13 +257,27 @@ const ProductScreen = () => {
                                 style={styles.title}
                                 color={themeVariables.colors.textDefault}
                             >
-                                Các mục đánh giá (3/15)
+                                Các mục đánh giá ({checkedItems}/{checkItems.length})
                             </TextWrap>
+                        </FlexBox>
+                        <FlexBox
+                            justifyContent="space-between"
+                            alignItems="flex-end"
+                            width={'100%'}
+                        >
                             <AppButton
                                 label="Thêm mục"
                                 onPress={() => setShowAddEvaluationItemModal(true)}
                                 viewStyle={{}}
-                                variant={BUTTON_COMMON_TYPE.PRIMARY_OUTLINE}
+                                variant={BUTTON_COMMON_TYPE.CANCEL}
+                            />
+                            <AppButton
+                                label="Gửi đánh giá"
+                                onPress={handleSubmit}
+                                viewStyle={{}}
+                                isLoading={loadingSubmit}
+                                disabled={loadingSubmit || !checkedItems}
+                                variant={BUTTON_COMMON_TYPE.PRIMARY}
                             />
                         </FlexBox>
                         <ScrollView
@@ -172,8 +290,13 @@ const ProductScreen = () => {
                             keyboardDismissMode="interactive"
                             scrollEventThrottle={20}
                         >
-                            {new Array(20).fill(0).map((_, index: number) => (
-                                <EvaluationItem key={`evaluation-item-${index}`} />
+                            {checkItems.map((item, index: number) => (
+                                <EvaluationItem
+                                    key={`evaluation-item-${index}`}
+                                    item={item}
+                                    index={index}
+                                    onUpdateCheckItem={handleUpdateCheckItem}
+                                />
                             ))}
                         </ScrollView>
                     </FlexBox>
@@ -227,10 +350,9 @@ export const styling = (themeVariables: IThemeVariables) =>
             fontWeight: '600',
         },
         description: {
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: '400',
             lineHeight: 20,
-            textAlign: 'center',
         },
         closeButton: {
             position: 'absolute',

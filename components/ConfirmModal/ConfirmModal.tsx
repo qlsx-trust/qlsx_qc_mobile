@@ -55,7 +55,7 @@ export const styling = (themeVariables: IThemeVariables) =>
             fontWeight: '600',
         },
         description: {
-            fontSize: 20,
+            fontSize: 16,
             fontWeight: '400',
             textAlign: 'center',
         },

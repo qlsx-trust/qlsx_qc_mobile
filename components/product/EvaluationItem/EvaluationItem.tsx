@@ -4,28 +4,42 @@ import ConfirmModal from '@/components/ConfirmModal';
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { IThemeVariables } from '@/shared/theme/themes';
 import Checkbox from 'expo-checkbox';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, TouchableOpacity } from 'react-native';
 import EvaluationFromModal from '../EvaluationFromModal';
+import { ICheckItem } from '@/providers/ProductionPlanProvider';
 
-interface Props {}
-const EvaluationItem = ({}: Props) => {
+interface Props {
+    item: ICheckItem;
+    index: number;
+    onUpdateCheckItem: Function;
+}
+const EvaluationItem = ({ item, index, onUpdateCheckItem }: Props) => {
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
 
     const [showConfirmOKModal, setShowConfirmOKModal] = useState<boolean>(false);
     const [showConfirmNGModal, setShowConfirmNGModal] = useState<boolean>(false);
-    const [confirmItem, setConfirmItem] = useState<'ok' | 'ng' | null>(null);
+    const [evaluationItem, setEvaluationItem] = useState<ICheckItem>(item);
+
+    useEffect(() => {
+        setEvaluationItem(item);
+    }, [item]);
 
     const handleConfirmOk = async () => {
-        setConfirmItem('ok');
+        onUpdateCheckItem(index, {
+            ...item,
+            note: '',
+            status: 'ok',
+            reportFileUri: ''
+        } as ICheckItem);
         setShowConfirmOKModal(false);
     };
 
     const getColorText = () => {
-        return confirmItem == 'ok'
+        return evaluationItem.status == 'ok'
             ? themeVariables.colors.primary
-            : confirmItem == 'ng'
+            : evaluationItem.status == 'ng'
               ? themeVariables.colors.danger
               : themeVariables.colors.textDefault;
     };
@@ -44,12 +58,12 @@ const EvaluationItem = ({}: Props) => {
                     alignItems="flex-start"
                     justifyContent="flex-start"
                     gap={5}
-                    width={'80%'}
+                    width={'70%'}
                     style={{ paddingBottom: 10, paddingTop: 10 }}
                 >
                     <Checkbox
                         style={styles.checkbox}
-                        value={confirmItem != null}
+                        value={!!evaluationItem.status}
                         disabled
                         color={getColorText()}
                     />
@@ -59,8 +73,7 @@ const EvaluationItem = ({}: Props) => {
                         numberOfLines={2}
                         textAlign="left"
                     >
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Lorem ipsum dolor
-                        sit amet consectetur adipisicing elit.
+                        {evaluationItem.name}
                     </TextWrap>
                 </FlexBox>
 
@@ -69,7 +82,7 @@ const EvaluationItem = ({}: Props) => {
                     gap={10}
                     justifyContent="flex-start"
                     alignItems="flex-start"
-                    width={'20%'}
+                    width={'30%'}
                 >
                     <TouchableOpacity
                         style={{
@@ -78,7 +91,7 @@ const EvaluationItem = ({}: Props) => {
                             minWidth: 40,
                             width: '48%',
                             borderRightColor: themeVariables.colors.borderColor,
-                            opacity: confirmItem == 'ng' ? 0.4 : 1,
+                            opacity: evaluationItem.status == 'ng' ? 0.4 : 1,
                         }}
                         onPress={() => setShowConfirmOKModal(true)}
                     >
@@ -95,7 +108,7 @@ const EvaluationItem = ({}: Props) => {
                         style={{
                             minWidth: 40,
                             width: '48%',
-                            opacity: confirmItem == 'ok' ? 0.4 : 1,
+                            opacity: evaluationItem.status == 'ok' ? 0.4 : 1,
                         }}
                     >
                         <TextWrap
@@ -121,8 +134,15 @@ const EvaluationItem = ({}: Props) => {
             )}
             {showConfirmNGModal && (
                 <EvaluationFromModal
-                    onConfirmFeedback={() => {
-                        setConfirmItem('ng');
+                    evaluationItem={evaluationItem}
+                    onConfirmFeedback={(data: any) => {
+                        onUpdateCheckItem(index, {
+                            ...item,
+                            note: data.feedback,
+                            status: 'ng',
+                            reportFile: null,
+                            reportFileUri: data.imageUrl
+                        } as ICheckItem);
                         setShowConfirmNGModal(false);
                     }}
                     modalProps={{
@@ -141,6 +161,7 @@ export const styling = (themeVariables: IThemeVariables) =>
             width: '100%',
             borderTopWidth: 1,
             borderTopColor: themeVariables.colors.borderColor,
+            padding: 4,
         },
         title: {
             fontSize: 18,
@@ -157,7 +178,7 @@ export const styling = (themeVariables: IThemeVariables) =>
             lineHeight: 20,
         },
         checkbox: {
-            margin: 8,
+            marginRight: 4,
         },
     });
 

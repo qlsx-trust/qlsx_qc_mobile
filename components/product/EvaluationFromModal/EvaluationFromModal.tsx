@@ -24,20 +24,26 @@ import {
     TouchableOpacity,
 } from 'react-native';
 import ImageSelection from '../ImageSelection';
+import { ICheckItem } from '@/providers/ProductionPlanProvider';
 
 interface IEvaluationFromModalProps {
+    evaluationItem: ICheckItem;
     modalProps: CommonModalProps;
-    onConfirmFeedback: () => void;
+    onConfirmFeedback: (data: any) => void;
 }
 
-const EvaluationFromModal = ({ modalProps, onConfirmFeedback }: IEvaluationFromModalProps) => {
+const EvaluationFromModal = ({
+    evaluationItem,
+    modalProps,
+    onConfirmFeedback,
+}: IEvaluationFromModalProps) => {
     const dimensions = Dimensions.get('window');
 
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
 
-    const [imageUrl, setImageUrl] = useState<string>('');
-    const [feedback, setFeedback] = useState<string>('');
+    const [imageUrl, setImageUrl] = useState<string>(evaluationItem.reportFileUri);
+    const [feedback, setFeedback] = useState<string>(evaluationItem.note);
     const [showCamera, setShowCamera] = useState<boolean>(false);
 
     const handlePermissionCamera = async () => {
@@ -61,7 +67,10 @@ const EvaluationFromModal = ({ modalProps, onConfirmFeedback }: IEvaluationFromM
     };
 
     const handleSubmitFeedback = () => {
-        onConfirmFeedback();
+        onConfirmFeedback({
+            feedback,
+            imageUrl
+        });
     };
 
     return (
