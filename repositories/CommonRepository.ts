@@ -1,5 +1,6 @@
 import Config from '@/constants/config';
 import createRepository from './CreateRepository';
+import { ProductCheckItem } from '@/providers/ProductionPlanProvider';
 
 export const CommonRepository = createRepository({
     login(fetch, payload: any) {
@@ -19,6 +20,12 @@ export const CommonRepository = createRepository({
         return fetch<any>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/qc-test-result`, {
             method: 'POST',
             data: payload,
+        });
+    },
+
+    getCheckItemProduct(fetch, productCode: string) {
+        return fetch<ProductCheckItem>(`${Config.EXPO_PUBLIC_BACKEND_URL}/code/${productCode}`, {
+            method: 'GET',
         });
     }
 

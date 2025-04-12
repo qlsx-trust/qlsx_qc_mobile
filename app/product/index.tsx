@@ -23,9 +23,10 @@ import { AntDesign } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import Moment from 'moment';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CommonRepository } from '@/repositories/CommonRepository';
 import { toast } from '@/utils/ToastMessage';
+import Config from '@/constants/config';
 
 const ProductScreen = () => {
     const dimensions = Dimensions.get('window');
@@ -35,19 +36,44 @@ const ProductScreen = () => {
 
     const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
     const [showAddEvaluationItemModal, setShowAddEvaluationItemModal] = useState<boolean>(false);
-
-
-    const [checkItems, setCheckItems] = useState<ICheckItem[]>([
-        {
-            categoryCode: 'CAT001',
-            name: 'Check Item 1',
-            note: '',
-            status: '',
-            reportFileUri: '',
-        },
-    ]);
+    const [pdfPreview, setPdfPreview] = useState<string>('');
+    const [checkItems, setCheckItems] = useState<ICheckItem[]>([]);
 
     const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false);
+
+    useEffect(() => {
+        getProductEvaluation();
+    }, [productionPlan]);
+
+    const getProductEvaluation = async () => {
+        if (!productionPlan?.productCode) return;
+        try {
+            const response = await CommonRepository.getCheckItemProduct(
+                productionPlan?.productCode
+            );
+            if (response.data) {
+                const productEvaluation = response.data;
+                setPdfPreview(
+                    productEvaluation?.productDocuments?.length
+                        ? productEvaluation?.productDocuments[0].documentUrl
+                        : ''
+                );
+
+                if (productEvaluation?.checkItems?.length) {
+                    const checkItemFormatted = productEvaluation.checkItems.map((item) => {
+                        return {
+                            categoryCode: item.categoryCode,
+                            name: item.name,
+                            note: '',
+                            status: '',
+                            reportFileUri: '',
+                        };
+                    });
+                    setCheckItems(checkItemFormatted);
+                }
+            }
+        } catch (error) {}
+    };
 
     const checkedItems =
         checkItems?.length > 0 ? checkItems.filter((item) => item.status).length : 0;
@@ -57,9 +83,7 @@ const ProductScreen = () => {
     };
 
     const handlePreviewEvaluationForm = async () => {
-        await WebBrowser.openBrowserAsync(
-            'https://www.antennahouse.com/hubfs/xsl-fo-sample/pdf/basic-link-1.pdf'
-        );
+        await WebBrowser.openBrowserAsync(`${Config.EXPO_PUBLIC_BACKEND_URL}${pdfPreview}`);
     };
 
     const handleAddEvaluation = (evaluationItem: string) => {
@@ -106,7 +130,6 @@ const ProductScreen = () => {
                 }
             });
             const response = await CommonRepository.submitQcTestResult(formdata);
-            console.log('response: ', JSON.stringify(response.error));
             if (response.data) {
                 toast.success('Gửi các đánh giá thành công');
             }
@@ -219,32 +242,34 @@ const ProductScreen = () => {
                                     )}
                                 </TextWrap>
                             </TextWrap>
-                            <FlexBox
-                                direction="row"
-                                gap={5}
-                                justifyContent="flex-start"
-                                alignItems="center"
-                            >
-                                <TextWrap
-                                    style={styles.description}
-                                    color={themeVariables.colors.textDefault}
+                            {pdfPreview && (
+                                <FlexBox
+                                    direction="row"
+                                    gap={5}
+                                    justifyContent="flex-start"
+                                    alignItems="center"
                                 >
-                                    Mẫu tham khảo các mục đánh giá :
-                                </TextWrap>
-                                <TouchableOpacity onPress={handlePreviewEvaluationForm}>
                                     <TextWrap
-                                        style={{ ...styles.description }}
-                                        color={themeVariables.colors.primary}
+                                        style={styles.description}
+                                        color={themeVariables.colors.textDefault}
                                     >
-                                        <AntDesign
-                                            name="pdffile1"
-                                            size={18}
-                                            color={themeVariables.colors.primary}
-                                        />{' '}
-                                        chi tiết
+                                        Mẫu tham khảo các mục đánh giá :
                                     </TextWrap>
-                                </TouchableOpacity>
-                            </FlexBox>
+                                    <TouchableOpacity onPress={handlePreviewEvaluationForm}>
+                                        <TextWrap
+                                            style={{ ...styles.description }}
+                                            color={themeVariables.colors.primary}
+                                        >
+                                            <AntDesign
+                                                name="pdffile1"
+                                                size={18}
+                                                color={themeVariables.colors.primary}
+                                            />{' '}
+                                            chi tiết
+                                        </TextWrap>
+                                    </TouchableOpacity>
+                                </FlexBox>
+                            )}
                         </FlexBox>
                     </FlexBox>
                     <FlexBox direction="column" justifyContent="flex-start" alignItems="flex-start">

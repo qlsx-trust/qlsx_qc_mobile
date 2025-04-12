@@ -16,6 +16,23 @@ export interface ICheckItem {
     reportFileUri: string;
 }
 
+export interface ProductCheckItem {
+    id: string;
+    avatarUrl: string;
+    productCode: string;
+    productName: string;
+    productDocuments: {
+        documentName: string;
+        documentUrl: string;
+    }[];
+    checkItems: {
+        name: string;
+        note: string;
+        categoryCode: string;
+    }[];
+    description: string;
+}
+
 export interface IProductionPlan {
     id: string;
     machineCode: string;
