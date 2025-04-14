@@ -15,7 +15,7 @@
       "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_ENV": "staging",
-        "EXPO_PUBLIC_BACKEND_URL": "http://192.168.1.14:5000"
+        "EXPO_PUBLIC_BACKEND_URL": "http://103.57.221.203:5001"
       }
     },
     "production": {
@@ -23,7 +23,7 @@
       "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_ENV": "production",
-        "EXPO_PUBLIC_BACKEND_URL": "http://192.168.1.14:5000"
+        "EXPO_PUBLIC_BACKEND_URL": "http://103.57.221.203:5001"
       }
     }
   },

@@ -9,12 +9,12 @@ let Config = {
 // STAGING
 if (Updates.channel === 'staging') {
     Config.EXPO_PUBLIC_ENV = 'staging';
-    Config.EXPO_PUBLIC_BACKEND_URL = 'http://192.168.1.14:5000';
+    Config.EXPO_PUBLIC_BACKEND_URL = 'http://103.57.221.203:5001';
 }
 
 if (Updates.channel === 'main') {
     Config.EXPO_PUBLIC_ENV = 'production';
-    Config.EXPO_PUBLIC_BACKEND_URL = 'http://192.168.1.14:5000';
+    Config.EXPO_PUBLIC_BACKEND_URL = 'http://103.57.221.203:5001';
 }
 
 export default Config;
