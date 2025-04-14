@@ -26,14 +26,14 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
     const handleConfirmCode = async () => {
         try {
             setIsLoadingConfirm(true);
-            const response = await CommonRepository.getMostRecentProductionPlan('A3');
+            const response = await CommonRepository.getMostRecentProductionPlan('A2');
             if (response.data) {
                 console.log('response.data:', response.data)
                 updateProductionPlan(response.data);
                 router.push(`${SCREEN_KEY.product}`);
                 modalProps.onClose();
             } else {
-                toast.error('Mã máy không hợp lệ, vui lòng thử lại');
+                toast.error('Không phải phiên máy chạy, vui lòng thử lại');
             }
         } catch (error) {
             toast.error('Mã máy không hợp lệ, vui lòng thử lại');

@@ -42,7 +42,6 @@ const IntroScreen: React.FC<IntroScreenProps> = () => {
                 userName: username,
                 passWord: password,
             };
-
             const response = await CommonRepository.login(payload);
             if (response.error) {
                 toast.error('Đăng nhập thất bại! Tài khoản hoặc mật khẩu không chính xác');

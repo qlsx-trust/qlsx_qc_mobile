@@ -18,15 +18,15 @@ import ConfirmModal from '@/components/ConfirmModal';
 import AddEvaluationItemModal from '@/components/product/AddEvaluationItemModal';
 import EvaluationItem from '@/components/product/EvaluationItem';
 import { BUTTON_COMMON_TYPE, SCREEN_KEY } from '@/constants/common';
+import Config from '@/constants/config';
 import { ICheckItem, useProductionPlanContext } from '@/providers/ProductionPlanProvider';
+import { CommonRepository } from '@/repositories/CommonRepository';
+import { toast } from '@/utils/ToastMessage';
 import { AntDesign } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import Moment from 'moment';
 import { useEffect, useState } from 'react';
-import { CommonRepository } from '@/repositories/CommonRepository';
-import { toast } from '@/utils/ToastMessage';
-import Config from '@/constants/config';
 
 const ProductScreen = () => {
     const dimensions = Dimensions.get('window');
@@ -36,7 +36,12 @@ const ProductScreen = () => {
 
     const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
     const [showAddEvaluationItemModal, setShowAddEvaluationItemModal] = useState<boolean>(false);
-    const [pdfPreview, setPdfPreview] = useState<string>('');
+    const [pdfPreviews, setPdfPreviews] = useState<
+        {
+            documentName: string;
+            documentUrl: string;
+        }[]
+    >([]);
     const [checkItems, setCheckItems] = useState<ICheckItem[]>([]);
 
     const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false);
@@ -53,11 +58,7 @@ const ProductScreen = () => {
             );
             if (response.data) {
                 const productEvaluation = response.data;
-                setPdfPreview(
-                    productEvaluation?.productDocuments?.length
-                        ? productEvaluation?.productDocuments[0].documentUrl
-                        : ''
-                );
+                setPdfPreviews(productEvaluation?.productDocuments);
 
                 if (productEvaluation?.checkItems?.length) {
                     const checkItemFormatted = productEvaluation.checkItems.map((item) => {
@@ -82,8 +83,8 @@ const ProductScreen = () => {
         router.replace(SCREEN_KEY.home);
     };
 
-    const handlePreviewEvaluationForm = async () => {
-        await WebBrowser.openBrowserAsync(`${Config.EXPO_PUBLIC_BACKEND_URL}${pdfPreview}`);
+    const handlePreviewEvaluationForm = async (pdfPreviewUrl: string) => {
+        await WebBrowser.openBrowserAsync(`${Config.EXPO_PUBLIC_BACKEND_URL}${pdfPreviewUrl}`);
     };
 
     const handleAddEvaluation = (evaluationItem: string) => {
@@ -242,12 +243,12 @@ const ProductScreen = () => {
                                     )}
                                 </TextWrap>
                             </TextWrap>
-                            {pdfPreview && (
+                            {pdfPreviews?.length && (
                                 <FlexBox
-                                    direction="row"
+                                    direction="column"
                                     gap={5}
                                     justifyContent="flex-start"
-                                    alignItems="center"
+                                    alignItems="flex-start"
                                 >
                                     <TextWrap
                                         style={styles.description}
@@ -255,19 +256,34 @@ const ProductScreen = () => {
                                     >
                                         Mẫu tham khảo các mục đánh giá :
                                     </TextWrap>
-                                    <TouchableOpacity onPress={handlePreviewEvaluationForm}>
-                                        <TextWrap
-                                            style={{ ...styles.description }}
-                                            color={themeVariables.colors.primary}
-                                        >
-                                            <AntDesign
-                                                name="pdffile1"
-                                                size={18}
-                                                color={themeVariables.colors.primary}
-                                            />{' '}
-                                            chi tiết
-                                        </TextWrap>
-                                    </TouchableOpacity>
+                                    <FlexBox
+                                        direction="row"
+                                        gap={5}
+                                        justifyContent="flex-start"
+                                        alignItems="center"
+                                        style={{flexWrap: 'wrap'}}
+                                    >
+                                        {pdfPreviews.map((pdf, index) => (
+                                            <TouchableOpacity
+                                                key={`pdf-prewview-${index}`}
+                                                onPress={() =>
+                                                    handlePreviewEvaluationForm(pdf.documentUrl)
+                                                }
+                                            >
+                                                <TextWrap
+                                                    style={{ ...styles.description }}
+                                                    color={themeVariables.colors.primary}
+                                                >
+                                                    <AntDesign
+                                                        name="pdffile1"
+                                                        size={18}
+                                                        color={themeVariables.colors.primary}
+                                                    />{' '}
+                                                    {pdf.documentName}
+                                                </TextWrap>
+                                            </TouchableOpacity>
+                                        ))}
+                                    </FlexBox>
                                 </FlexBox>
                             )}
                         </FlexBox>

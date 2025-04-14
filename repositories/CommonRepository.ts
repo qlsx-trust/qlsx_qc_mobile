@@ -24,7 +24,7 @@ export const CommonRepository = createRepository({
     },
 
     getCheckItemProduct(fetch, productCode: string) {
-        return fetch<ProductCheckItem>(`${Config.EXPO_PUBLIC_BACKEND_URL}/code/${productCode}`, {
+        return fetch<ProductCheckItem>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/product-management/code/${productCode}`, {
             method: 'GET',
         });
     }
