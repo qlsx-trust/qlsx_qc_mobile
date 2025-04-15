@@ -26,7 +26,7 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
     const handleConfirmCode = async () => {
         try {
             setIsLoadingConfirm(true);
-            const response = await CommonRepository.getMostRecentProductionPlan('A2');
+            const response = await CommonRepository.getMostRecentProductionPlan(scanResult);
             if (response.data) {
                 console.log('response.data:', response.data)
                 updateProductionPlan(response.data);
