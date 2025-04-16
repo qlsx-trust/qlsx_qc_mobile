@@ -2,8 +2,8 @@ import * as Updates from 'expo-updates';
 
 // LOCAL
 let Config = {
-    EXPO_PUBLIC_ENV: process.env.EXPO_PUBLIC_ENV,
-    EXPO_PUBLIC_BACKEND_URL: process.env.EXPO_PUBLIC_BACKEND_URL,
+    EXPO_PUBLIC_ENV: "production",
+    EXPO_PUBLIC_BACKEND_URL: "http://103.57.221.203:5001",
 };
 
 // STAGING

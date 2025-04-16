@@ -161,6 +161,7 @@ export const styling = (themeVariables: IThemeVariables) =>
             justifyContent: 'center',
             position: 'relative',
             backgroundColor: themeVariables.colors.bgDefault,
+            paddingHorizontal: 10,
         },
 
         noteTitle: {
