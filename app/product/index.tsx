@@ -251,12 +251,12 @@ const ProductScreen = () => {
                                     justifyContent="flex-start"
                                     alignItems="flex-start"
                                 >
-                                    {/* <TextWrap
+                                    <TextWrap
                                         style={styles.description}
                                         color={themeVariables.colors.textDefault}
                                     >
                                         Mẫu tham khảo các mục đánh giá :
-                                    </TextWrap> */}
+                                    </TextWrap>
                                     <FlexBox
                                         direction="row"
                                         gap={5}
