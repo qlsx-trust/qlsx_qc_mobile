@@ -7,6 +7,7 @@ import {
     ScrollView,
     StyleSheet,
     TouchableOpacity,
+    Text
 } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -174,7 +175,7 @@ const ProductScreen = () => {
                         alignItems="flex-start"
                     >
                         <TextWrap style={styles.header} color={themeVariables.colors.textDefault}>
-                            Mã máy ép:
+                            <TextWrap>Mã máy ép:</TextWrap>
                             <TextWrap color={themeVariables.colors.primary}>
                                 {' '}
                                 {productionPlan?.machineCode}
@@ -190,7 +191,7 @@ const ProductScreen = () => {
                                 style={styles.description}
                                 color={themeVariables.colors.textDefault}
                             >
-                                Tên sản phẩm:{' '}
+                                <TextWrap> Tên sản phẩm: </TextWrap>
                                 <TextWrap color={themeVariables.colors.primary}>
                                     {' '}
                                     {productionPlan?.productName}
@@ -200,7 +201,7 @@ const ProductScreen = () => {
                                 style={styles.description}
                                 color={themeVariables.colors.textDefault}
                             >
-                                CTSX:{' '}
+                                <TextWrap>CTSX: </TextWrap>
                                 <TextWrap color={themeVariables.colors.primary}>
                                     {' '}
                                     {productionPlan?.productCode}
@@ -210,12 +211,12 @@ const ProductScreen = () => {
                                 style={styles.description}
                                 color={themeVariables.colors.textDefault}
                             >
-                                Khuôn:{' '}
+                                <TextWrap>Khuôn: </TextWrap>
                                 <TextWrap color={themeVariables.colors.primary}>
                                     {' '}
                                     {productionPlan?.moldCode}
-                                </TextWrap>{' '}
-                                NVL:{' '}
+                                </TextWrap>
+                                <TextWrap> NVL: </TextWrap>
                                 <TextWrap color={themeVariables.colors.primary}>
                                     {' '}
                                     {productionPlan?.materialCode}
@@ -225,7 +226,7 @@ const ProductScreen = () => {
                                 style={styles.description}
                                 color={themeVariables.colors.textDefault}
                             >
-                                Bắt đầu phiên:{' '}
+                                <TextWrap>Bắt đầu phiên: </TextWrap>
                                 <TextWrap color={themeVariables.colors.primary}>
                                     {Moment(productionPlan?.productionStartTime || '').format(
                                         'MM/DD/YYYY HH:mm'
@@ -236,32 +237,32 @@ const ProductScreen = () => {
                                 style={styles.description}
                                 color={themeVariables.colors.textDefault}
                             >
-                                kết thúc phiên:{' '}
+                                <TextWrap>kết thúc phiên: </TextWrap>
                                 <TextWrap color={themeVariables.colors.primary}>
                                     {Moment(productionPlan?.productionEndTime || '').format(
                                         'MM/DD/YYYY HH:mm'
                                     )}
                                 </TextWrap>
                             </TextWrap>
-                            {pdfPreviews?.length && (
+                            {pdfPreviews?.length ? (
                                 <FlexBox
                                     direction="column"
                                     gap={5}
                                     justifyContent="flex-start"
                                     alignItems="flex-start"
                                 >
-                                    <TextWrap
+                                    {/* <TextWrap
                                         style={styles.description}
                                         color={themeVariables.colors.textDefault}
                                     >
                                         Mẫu tham khảo các mục đánh giá :
-                                    </TextWrap>
+                                    </TextWrap> */}
                                     <FlexBox
                                         direction="row"
                                         gap={5}
                                         justifyContent="flex-start"
                                         alignItems="center"
-                                        style={{flexWrap: 'wrap'}}
+                                        style={{ flexWrap: 'wrap' }}
                                     >
                                         {pdfPreviews.map((pdf, index) => (
                                             <TouchableOpacity
@@ -285,6 +286,8 @@ const ProductScreen = () => {
                                         ))}
                                     </FlexBox>
                                 </FlexBox>
+                            ) : (
+                                <Text></Text>
                             )}
                         </FlexBox>
                     </FlexBox>
