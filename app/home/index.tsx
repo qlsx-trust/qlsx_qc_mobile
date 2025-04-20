@@ -66,7 +66,7 @@ const HomeScreen = () => {
 
     const handleBarCodeScan = (result: BarcodeScanningResult) => {
         if (result.data) {
-            playBeep();
+            // playBeep();
             setShowCamera(false);
             setScanResult(result.data);
             setShowConfirmResultCode(true);
