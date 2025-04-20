@@ -86,11 +86,10 @@ const HomeScreen = () => {
                 >
                     {showCamera ? (
                         <>
-                            <View style={[styles.cameraContainer]}>
-                                <View style={styles.closeBox}>
+                            <View style={[styles.cameraWrapper,]}>
+                                <FlexBox direction='row' alignItems='center' gap={20} style={styles.closeBox}>
                                     <TouchableOpacity
                                         onPress={toggleCameraFacing}
-                                        style={styles.faceButton}
                                     >
                                         <Feather
                                             name="rotate-ccw"
@@ -100,7 +99,6 @@ const HomeScreen = () => {
                                     </TouchableOpacity>
                                     <TouchableOpacity
                                         onPress={() => setShowCamera(false)}
-                                        style={styles.closeButton}
                                     >
                                         <AntDesign
                                             name="close"
@@ -108,7 +106,7 @@ const HomeScreen = () => {
                                             color={themeVariables.colors.textOnImageStrong}
                                         />
                                     </TouchableOpacity>
-                                </View>
+                                </FlexBox>
                                 <CameraView
                                     barcodeScannerSettings={{
                                         barcodeTypes: ['qr'],
@@ -116,7 +114,7 @@ const HomeScreen = () => {
                                     onBarcodeScanned={isReady ? handleBarCodeScan : undefined}
                                     onCameraReady={onCameraReady}
 
-                                    style={[styles.camera, styles.main]}
+                                    style={[styles.cameraContainer]}
                                     facing={facing}
                                     ratio={'1:1'}
                                     mute={true}
@@ -191,7 +189,7 @@ const HomeScreen = () => {
                     />
                 )}
             </SafeAreaView>
-        </KeyboardAvoidingView>
+         </KeyboardAvoidingView>
     );
 };
 
@@ -218,21 +216,14 @@ export const styling = (themeVariables: IThemeVariables) =>
         },
         closeBox: {
             height: 100,
-            backgroundColor: themeVariables.colors.black50,
-        },
-        closeButton: {
             position: 'absolute',
-            top: 120,
+            display: 'flex',
+            alignItems: 'center',
+            top: 20,
             right: 20,
             zIndex: 110,
         },
 
-        faceButton: {
-            position: 'absolute',
-            top: 120,
-            right: 80,
-            zIndex: 110,
-        },
 
         flashButton: {
             position: 'absolute',
@@ -244,7 +235,20 @@ export const styling = (themeVariables: IThemeVariables) =>
             flex: 1,
             zIndex: 100,
             position: 'absolute',
-            bottom: 0,
+            // top: 0,
+            left: 0,
+            top: '50%',
+            transform: [{translateY: '-50%'}],
+            width: Dimensions.get('window').width,
+            height: Dimensions.get('window').height * 1,
+            backgroundColor: themeVariables.colors.black50,
+        },
+
+        cameraWrapper: {
+            flex: 1,
+            zIndex: 90,
+            position: 'absolute',
+            top: 0,
             left: 0,
             width: Dimensions.get('window').width,
             height: Dimensions.get('window').height,
