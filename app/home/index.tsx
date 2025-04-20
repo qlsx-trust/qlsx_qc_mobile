@@ -21,7 +21,7 @@ const HomeScreen = () => {
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
     const { logout } = useAuthContext();
-
+    const [isReady, setIsReady] = useState(false);
     const [permission, requestPermission] = useCameraPermissions();
     const [showCamera, setShowCamera] = useState(false);
     const [facing, setFacing] = useState<CameraType>('back');
@@ -59,6 +59,10 @@ const HomeScreen = () => {
     const handleLogout = () => {
         logout();
     };
+
+    const onCameraReady = () => {
+        setIsReady(true);
+      };
 
     const handleBarCodeScan = (result: BarcodeScanningResult) => {
         if (result.data) {
@@ -109,10 +113,13 @@ const HomeScreen = () => {
                                     barcodeScannerSettings={{
                                         barcodeTypes: ['qr'],
                                     }}
-                                    onBarcodeScanned={handleBarCodeScan}
+                                    onBarcodeScanned={isReady ? handleBarCodeScan : undefined}
+                                    onCameraReady={onCameraReady}
+
                                     style={[styles.camera, styles.main]}
                                     facing={facing}
                                     ratio={'1:1'}
+                                    mute={true}
                                 >
                                     <View style={styles.maskOutter}>
                                         <View
