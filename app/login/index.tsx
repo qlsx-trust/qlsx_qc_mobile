@@ -33,11 +33,20 @@ const IntroScreen: React.FC<IntroScreenProps> = () => {
     const [password, setPassword] = useState('');
     const [loadingSubmit, setLoadingSubmit] = useState(false);
 
+    const  resolveAfterSeconds = (time: number) => {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve("resolved");
+          }, time);
+        });
+      }
+
     const handleLogin = async () => {
         if (!username || !password || loadingSubmit) return;
         try {
             Keyboard.dismiss();
             setLoadingSubmit(true);
+            await resolveAfterSeconds(1000);
             const payload = {
                 userName: username,
                 passWord: password,
@@ -69,7 +78,7 @@ const IntroScreen: React.FC<IntroScreenProps> = () => {
 
     return (
         <AppSafeAreaBottom style={styles.container}>
-            <KeyboardAvoidingView behavior={isIOS ? 'padding' : 'height'}>
+            {/* <KeyboardAvoidingView behavior={isIOS ? 'padding' : 'height'}> */}
                 <View style={styles.container}>
                     <TextWrapper h1>Đăng nhập</TextWrapper>
                     <FlexBox
@@ -89,9 +98,6 @@ const IntroScreen: React.FC<IntroScreenProps> = () => {
                             onChangeText={setUsername}
                             placeholderTextColor={themeVariables.colors.bgGrey}
                             placeholder="Tài khoản"
-                            onBlur={Keyboard.dismiss}
-                            onEndEditing={Keyboard.dismiss}
-                            onSubmitEditing={Keyboard.dismiss}
                         />
                     </FlexBox>
                     <FlexBox
@@ -117,9 +123,6 @@ const IntroScreen: React.FC<IntroScreenProps> = () => {
                                 onChangeText={setPassword}
                                 placeholderTextColor={themeVariables.colors.bgGrey}
                                 placeholder="Mật khẩu"
-                                onBlur={Keyboard.dismiss}
-                                onEndEditing={Keyboard.dismiss}
-                                onSubmitEditing={Keyboard.dismiss}
                             />
                             <TouchableOpacity
                                 style={{
@@ -148,7 +151,7 @@ const IntroScreen: React.FC<IntroScreenProps> = () => {
                         />
                     </FlexBox>
                 </View>
-            </KeyboardAvoidingView>
+            {/* </KeyboardAvoidingView> */}
         </AppSafeAreaBottom>
     );
 };
