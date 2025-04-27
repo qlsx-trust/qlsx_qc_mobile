@@ -28,7 +28,6 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
             setIsLoadingConfirm(true);
             const response = await CommonRepository.getMostRecentProductionPlan(scanResult);
             if (response.data) {
-                console.log('response.data:', response.data)
                 updateProductionPlan(response.data);
                 router.push(`${SCREEN_KEY.product}`);
                 modalProps.onClose();

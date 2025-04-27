@@ -51,6 +51,8 @@ const ProductScreen = () => {
         getProductEvaluation();
     }, [productionPlan]);
 
+    const enableSubmitEvaluation = checkItems?.length && checkItems?.every(item => item.status)
+
     const getProductEvaluation = async () => {
         if (!productionPlan?.productCode) return;
         try {
@@ -255,7 +257,7 @@ const ProductScreen = () => {
                                         style={styles.description}
                                         color={themeVariables.colors.textDefault}
                                     >
-                                        Mẫu tham khảo các mục đánh giá :
+                                        Mẫu tham khảo các mục đánh giá:
                                     </TextWrap>
                                     <FlexBox
                                         direction="row"
@@ -320,7 +322,7 @@ const ProductScreen = () => {
                                 onPress={handleSubmit}
                                 viewStyle={{}}
                                 isLoading={loadingSubmit}
-                                disabled={loadingSubmit || !checkedItems}
+                                disabled={loadingSubmit || !checkedItems || !enableSubmitEvaluation}
                                 variant={BUTTON_COMMON_TYPE.PRIMARY}
                             />
                         </FlexBox>
