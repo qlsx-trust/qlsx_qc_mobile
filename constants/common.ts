@@ -3,7 +3,7 @@ export const KEY_THEME_APP = 'Theme-app';
 export const KEY_AUTH_TOKEN = 'Basic-TK';
 export const KEY_CAMERA_FLASH_MODE = 'Camera-flash-mode';
 export const KEY_REQUEST_CAMERA_PERMISSION = 'request-camera-permission';
-
+export const PATH_SERVER_MEDIA = '/uploads/products/';
 
 export const ZOOM_SELECTS = [1, 1.5, 2];
 
@@ -33,6 +33,8 @@ export const SCREEN_KEY = {
     login: 'login',
     home: 'home',
     product: 'product',
+    manageProduct: 'manage-product',
+    createProduct: 'create-product',
 };
 
 export const SCREEN_STACK_DESCRIPTION = {
@@ -70,4 +72,12 @@ export enum UserRole {
     Manager,
     MaterialSupply,
     MoldSupply,
+    QCManager,
 }
+
+
+export const PAGE_SIZE = {
+    DEFAULT: 15,
+    MESSAGE_DEFAULT: 20,
+    LOAD_DEFAULT: 20,
+};

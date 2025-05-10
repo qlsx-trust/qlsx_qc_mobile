@@ -11,16 +11,17 @@ import AppButton from '@/components/common/AppButton';
 import FlexBox from '@/components/common/FlexBox';
 import TextWrapper from '@/components/common/TextWrap';
 import ConfirmScanCodeModal from '@/components/home/ConfirmScanCodeModal';
-import { BUTTON_COMMON_TYPE } from '@/constants/common';
+import { BUTTON_COMMON_TYPE, SCREEN_KEY, UserRole } from '@/constants/common';
 import { useAuthContext } from '@/providers/UserProvider';
 import { AntDesign } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import { BarcodeScanningResult, CameraType, CameraView, useCameraPermissions } from 'expo-camera';
 import { useEffect, useState } from 'react';
+import { router } from 'expo-router';
 const HomeScreen = () => {
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
-    const { logout } = useAuthContext();
+    const { logout, user } = useAuthContext();
     const [isReady, setIsReady] = useState(false);
     const [permission, requestPermission] = useCameraPermissions();
     const [showCamera, setShowCamera] = useState(false);
@@ -31,6 +32,8 @@ const HomeScreen = () => {
 
     const [scanResult, setScanResult] = useState<string>('');
     const [showConfirmResultCode, setShowConfirmResultCode] = useState<boolean>(false);
+
+    const managerQc = user?.role == UserRole.QCManager;
 
     useEffect(() => {
         if (!permission) {
@@ -62,7 +65,7 @@ const HomeScreen = () => {
 
     const onCameraReady = () => {
         setIsReady(true);
-      };
+    };
 
     const handleBarCodeScan = (result: BarcodeScanningResult) => {
         if (result.data) {
@@ -73,33 +76,39 @@ const HomeScreen = () => {
         }
     };
 
+    const handleManageProduct = () => {
+        router.push(SCREEN_KEY.manageProduct)
+    }
+
     return (
-        <KeyboardAvoidingView behavior={isIOS ? 'padding' : 'height'}>
+        // <KeyboardAvoidingView behavior={isIOS ? 'padding' : 'height'}>
             <SafeAreaView style={styles.container}>
                 <FlexBox
                     gap={20}
                     height={'100%'}
                     width={'100%'}
                     direction="column"
-                    justifyContent="center"
+                    justifyContent="flex-start"
                     alignItems="center"
+                    style={{ paddingVertical: 50 }}
                 >
                     {showCamera ? (
                         <>
-                            <View style={[styles.cameraWrapper,]}>
-                                <FlexBox direction='row' alignItems='center' gap={20} style={styles.closeBox}>
-                                    <TouchableOpacity
-                                        onPress={toggleCameraFacing}
-                                    >
+                            <View style={[styles.cameraWrapper]}>
+                                <FlexBox
+                                    direction="row"
+                                    alignItems="center"
+                                    gap={20}
+                                    style={styles.closeBox}
+                                >
+                                    <TouchableOpacity onPress={toggleCameraFacing}>
                                         <Feather
                                             name="rotate-ccw"
                                             size={30}
                                             color={themeVariables.colors.textOnImageStrong}
                                         />
                                     </TouchableOpacity>
-                                    <TouchableOpacity
-                                        onPress={() => setShowCamera(false)}
-                                    >
+                                    <TouchableOpacity onPress={() => setShowCamera(false)}>
                                         <AntDesign
                                             name="close"
                                             size={30}
@@ -113,7 +122,6 @@ const HomeScreen = () => {
                                     }}
                                     onBarcodeScanned={isReady ? handleBarCodeScan : undefined}
                                     onCameraReady={onCameraReady}
-
                                     style={[styles.cameraContainer]}
                                     facing={facing}
                                     ratio={'1:1'}
@@ -149,18 +157,52 @@ const HomeScreen = () => {
                         </>
                     ) : (
                         <>
-                            <ScanQRCodeIcon width={300} height={300} />
+                            <ScanQRCodeIcon width={100} height={100} />
+                            <FlexBox direction="column" justifyContent="center" alignItems="center">
+                                <TextWrapper fontSize={25}>
+                                    {managerQc ? 'Quản lý QC' : 'Nhân viên QC'}
+                                </TextWrapper>
+                                <TextWrapper fontSize={30} color={themeVariables.colors.primary}>
+                                    {user?.userName}
+                                </TextWrapper>
+                            </FlexBox>
+
                             <AppButton
-                                label="Quét mã QR"
+                                label="Quét mã công tác sản xuất"
                                 onPress={handleScanScreen}
-                                viewStyle={{ width: 250, marginTop: 20 }}
+                                viewStyle={{ width: '80%', marginTop: 20 }}
+                                labelStyle={{ fontSize: 18 }}
                                 variant={BUTTON_COMMON_TYPE.PRIMARY_OUTLINE}
                             />
+                            {managerQc && (
+                                <>
+                                    <AppButton
+                                        label="Quản lý sản phẩm"
+                                        onPress={handleManageProduct}
+                                        viewStyle={{ width: '80%', marginTop: 10 }}
+                                        labelStyle={{ fontSize: 18 }}
+                                        variant={BUTTON_COMMON_TYPE.PRIMARY_OUTLINE}
+                                    />
+
+                                    <AppButton
+                                        label="Phân công QC"
+                                        onPress={handleScanScreen}
+                                        viewStyle={{ width: '80%', marginTop: 10 }}
+                                        labelStyle={{ fontSize: 18 }}
+                                        variant={BUTTON_COMMON_TYPE.PRIMARY_OUTLINE}
+                                    />
+                                </>
+                            )}
 
                             <AppButton
                                 label="Đăng xuất"
                                 onPress={handleLogout}
-                                viewStyle={{ width: 250, marginTop: 0 }}
+                                viewStyle={{
+                                    width: '80%',
+                                    marginTop: 20,
+                                    position: 'absolute',
+                                    bottom: 0,
+                                }}
                                 variant={BUTTON_COMMON_TYPE.CANCEL}
                             />
 
@@ -189,7 +231,7 @@ const HomeScreen = () => {
                     />
                 )}
             </SafeAreaView>
-         </KeyboardAvoidingView>
+        // </KeyboardAvoidingView>
     );
 };
 
@@ -224,7 +266,6 @@ export const styling = (themeVariables: IThemeVariables) =>
             zIndex: 110,
         },
 
-
         flashButton: {
             position: 'absolute',
             top: 120,
@@ -238,7 +279,7 @@ export const styling = (themeVariables: IThemeVariables) =>
             // top: 0,
             left: 0,
             top: '50%',
-            transform: [{translateY: '-50%'}],
+            transform: [{ translateY: '-50%' }],
             width: Dimensions.get('window').width,
             height: Dimensions.get('window').height * 1,
             backgroundColor: themeVariables.colors.black50,

@@ -17,13 +17,13 @@ const LoadingScreen = () => {
     return (
         <View style={styles.container}>
             <ImageBackground style={styles.backgroundImage} resizeMode="cover" source={Splash}>
-                <SplashImage style={styles.image} width={imageWidth} height="100%" />
+                {/* <SplashImage style={styles.image} width={imageWidth} height="100%" /> */}
                 <View style={styles.wrapContent}>
                     <TextWrap
                         color={themeVariables.colors.textOnImageStrong}
                         style={styles.textHeader}
                     >
-                        Please wait a moment while we are setting things up for you
+                        Vui lòng đợi trong giây lát, Dữ liệu đang được xử lý
                     </TextWrap>
                     <ThreeDotsAnimation />
                 </View>
@@ -61,7 +61,7 @@ export const styling = (themeVariables: IThemeVariables) =>
         },
         wrapContent: {
             position: 'absolute',
-            top: '55%',
+            top: '50%',
         },
 
         textHeader: {

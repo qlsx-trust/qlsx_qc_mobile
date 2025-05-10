@@ -62,6 +62,7 @@ export const AuthContextProvider = ({ children }: UserProviderProps) => {
                 return;
             }
             setSession(authInfo);
+            setUser(authInfo);
         } catch (error) {
             console.log('@@getSessionUserFromStorage Error: ', error);
             setSession(null);
@@ -97,7 +98,7 @@ export const AuthContextProvider = ({ children }: UserProviderProps) => {
             logout,
             setSession,
         }),
-        [user, session, loading, logout]
+        [user, session, loading, setSession, logout, setUser]
     );
 
     return <AuthContext.Provider value={userContextValues}>{children}</AuthContext.Provider>;

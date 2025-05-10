@@ -26,7 +26,7 @@ interface IntroScreenProps {}
 const IntroScreen: React.FC<IntroScreenProps> = () => {
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
-    const { loading, session, setSession } = useAuthContext();
+    const { loading, session, setSession, setUser } = useAuthContext();
 
     const [isPasswordSecure, setIsPasswordSecure] = useState(true);
     const [username, setUsername] = useState('');
@@ -57,12 +57,13 @@ const IntroScreen: React.FC<IntroScreenProps> = () => {
                 return;
             }
             const userData: IUserInfo = response.data;
-            if (![UserRole.QC, UserRole.Admin].includes(userData?.role)) {
+            if (![UserRole.QC, UserRole.Admin, UserRole.QCManager].includes(userData?.role)) {
                 toast.error('Đăng nhập thất bại! Quyền truy cập bị từ chối');
                 return;
             }
 
             setSession(userData);
+            setUser(userData);
             await setSecretStorage(userData);
 
             toast.success('Đăng nhập thành công!');

@@ -3,7 +3,7 @@ import * as Updates from 'expo-updates';
 // LOCAL
 let Config = {
     EXPO_PUBLIC_ENV: "production",
-    EXPO_PUBLIC_BACKEND_URL: "https://moudingco.trustsoft.com.vn",
+    EXPO_PUBLIC_BACKEND_URL: process.env.EXPO_PUBLIC_BACKEND_URL,
 };
 
 // STAGING

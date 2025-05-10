@@ -1,0 +1,23 @@
+export interface IProduct {
+    id: string;
+    avatarUrl: string;
+    productCode: string;
+    productName: string;
+    productDocuments: [];
+    checkItems: IProductCheckItem[];
+    description: string;
+}
+
+export interface IProductCheckItem {
+    categoryCode: string;
+    name: string;
+    note: string;
+    status?: string;
+    reportFileUri?: string;
+    productImagePrototype?: string[];
+}
+
+export interface IProductDocument {
+    documentName: string;
+    documentUrl: string;
+}

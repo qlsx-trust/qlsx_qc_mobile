@@ -1,7 +1,7 @@
 import TextWrap from '@/components/common/TextWrap';
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { StyleSheet } from 'react-native';
-import EmptyImage from '@/assets/images/empty_folder.svg';
+import EmptyImage from '@/assets/empty_folder.svg';
 import FlexBox from '@/components/common/FlexBox';
 
 const EmptyFolder = ({ title, description }: { title: string; description: string }) => {
