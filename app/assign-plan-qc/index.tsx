@@ -1,24 +1,20 @@
-import NoteIcon from '@/assets/note.svg';
 import EmptyFolder from '@/components/common/EmptyList/EmptyFolder';
 import FlatListCustom from '@/components/common/FlatListCustom';
 import FlexBox from '@/components/common/FlexBox';
 import TextWrapper from '@/components/common/TextWrap';
-import CreateProductItem from '@/components/product/CreateProductItem';
+import AssignQCModal from '@/components/product/AssignQCModal';
 import SearchBar from '@/components/SearchBar';
-import { PAGE_SIZE, SCREEN_KEY } from '@/constants/common';
+import { PAGE_SIZE } from '@/constants/common';
 import { PUB_TOPIC } from '@/constants/pubTopic';
 import { IProductionPlan } from '@/providers/ProductionPlanProvider';
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { CommonRepository } from '@/repositories/CommonRepository';
-import { containerStyles, IThemeVariables } from '@/shared/theme/themes';
-import { IProduct } from '@/types/product';
-import { formatFullDateWithLocaleTime } from '@/utils/dateTime';
+import { IThemeVariables } from '@/shared/theme/themes';
 import { AntDesign } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import Moment from 'moment';
 import { useEffect, useState } from 'react';
 import { SafeAreaView, StyleSheet, TouchableOpacity } from 'react-native';
-import Moment from 'moment';
-import AssignQCModal from '@/components/product/AssignQCModal';
 
 const PlanAssignmentScreen = () => {
     const { themeVariables } = useThemeContext();
@@ -35,6 +31,7 @@ const PlanAssignmentScreen = () => {
     const [filterParams, setFilterParams] = useState<{ name: string }>({ name: '' });
     const [selectedProductPlan, setSelectedProductPlan] =useState<IProductionPlan | null>(null);
     const [showAssignQcModal, setShowAssignQcModal] =useState<boolean>(false);
+
     /**
      * get list product
      */
