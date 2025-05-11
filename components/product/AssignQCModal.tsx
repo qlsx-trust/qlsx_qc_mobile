@@ -8,10 +8,11 @@ import { IProductionPlan } from '@/providers/ProductionPlanProvider';
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { CommonRepository } from '@/repositories/CommonRepository';
 import { IThemeVariables } from '@/shared/theme/themes';
+import { IEmployee } from '@/types/employee';
 import { toast } from '@/utils/ToastMessage';
 import { AntDesign, Entypo, Feather } from '@expo/vector-icons';
 import { BarcodeScanningResult, CameraType, CameraView, useCameraPermissions } from 'expo-camera';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
     ActivityIndicator,
     Dimensions,
@@ -27,16 +28,10 @@ import SelectDropdown from 'react-native-select-dropdown';
 interface IAssignQCModalProps {
     modalProps: CommonModalProps;
     productPlan?: IProductionPlan;
+    employees: IEmployee[];
 }
 
-const mockUserData = [
-    { title: 'QC0', value: 'qc' },
-    { title: 'QC01', value: 'qc01' },
-    { title: 'QC02', value: 'qc02' },
-    { title: 'Khác', value: 'other' },
-];
-
-const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
+const AssignQCModal = ({ productPlan, employees, modalProps }: IAssignQCModalProps) => {
     const dimensions = Dimensions.get('window');
 
     const { themeVariables } = useThemeContext();
@@ -50,7 +45,7 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
     const [otherQcCode, setOtherQcCode] = useState<string>('');
 
     const [showOtherUser, setShowOtherUser] = useState<boolean>(false);
-
+    const [errorCheckCode, setErrorCheckCode] = useState<string>('');
     // scan qc code
     const [isReady, setIsReady] = useState(false);
     const [permission, requestPermission] = useCameraPermissions();
@@ -60,15 +55,23 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
     const maskRowHeight = Math.round((Dimensions.get('window').height - 250) / 20);
     const maskColWidth = (width - 250) / 2;
 
+    const selectEmployeeOptions = useMemo(() => {
+        const data = (employees || []).map((employee) => {
+            return {
+                value: `${employee.employeeCode},${employee.fullName}`,
+                title: `${employee.employeeCode},${employee.fullName}`,
+            };
+        });
+
+        data.push({ value: 'other', title: 'Khác' });
+        return data;
+    }, [employees]);
+
     useEffect(() => {
         if (!permission) {
             requestPermission();
         }
     }, [permission]);
-
-    const handleScanScreen = () => {
-        setShowCamera(true);
-    };
 
     function toggleCameraFacing() {
         setFacing((current) => (current === 'back' ? 'front' : 'back'));
@@ -82,6 +85,7 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
         if (result.data) {
             // playBeep();
             setShowCamera(false);
+            setErrorCheckCode('')
             setOtherQcCode(result.data);
         }
     };
@@ -109,11 +113,21 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
         }
     };
 
-    const handleAddQC = async (qcCode: string) => {
+    const handleAddQC = async (qcCode: string, needCheckEmployeeCode?: boolean) => {
         if (!qcCode) return;
         try {
             Keyboard.dismiss();
             setIsLoadingSubmit(true);
+
+            if (needCheckEmployeeCode) {
+                const resCheck = await CommonRepository.checkQCEmployeeCode(qcCode);
+                if (resCheck.error) {
+                    setIsLoadingSubmit(false);
+                    setErrorCheckCode('Mã nhân viên không hợp lệ hoặc không tồn tại');
+                    return;
+                }
+            }
+            setErrorCheckCode('')
             const payload = {
                 productionPlanId: productPlan?.id,
                 qcAssign: qcCode,
@@ -123,7 +137,7 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
                 PubSub.publish(PUB_TOPIC.RECALL_PRODUCTION_PLAN);
                 toast.success('Thêm phân công thành công');
                 setAssignedQc([...assignedQc, qcCode]);
-                setOtherQcCode('')
+                setOtherQcCode('');
             } else {
                 toast.error('Thêm phân công thất bại');
             }
@@ -143,7 +157,7 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
                             <FlexBox
                                 direction="row"
                                 alignItems="flex-start"
-                                justifyContent='flex-start'
+                                justifyContent="flex-start"
                                 gap={20}
                                 style={styles.closeBox}
                             >
@@ -211,7 +225,7 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
                         >
                             <TextWrap style={styles.description}>Chọn nhân viên:</TextWrap>
                             <SelectDropdown
-                                data={mockUserData}
+                                data={selectEmployeeOptions}
                                 disabled={isLoadingSubmit}
                                 onSelect={(selectedItem, index) => {
                                     if (selectedItem.value == 'other') {
@@ -296,7 +310,8 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
                                     placeholderTextColor={themeVariables.colors.bgGrey}
                                     placeholder="Mã nhân viên"
                                 />
-                                <FlexBox justifyContent='space-between' style={{width: '100%'}}>
+                               {errorCheckCode && <TextWrap style={{marginTop: 5}} color={themeVariables.colors.danger}>{errorCheckCode}</TextWrap>}
+                                <FlexBox justifyContent="space-between" style={{ width: '100%' }}>
                                     <AppButton
                                         viewStyle={styles.button}
                                         label="Quét mã"
@@ -308,7 +323,7 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
                                         isLoading={isLoadingSubmit}
                                         viewStyle={styles.button}
                                         label="Thêm"
-                                        onPress={() => handleAddQC(otherQcCode)}
+                                        onPress={() => handleAddQC(otherQcCode, true)}
                                     />
                                 </FlexBox>
                             </FlexBox>

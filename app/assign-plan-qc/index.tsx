@@ -10,6 +10,7 @@ import { IProductionPlan } from '@/providers/ProductionPlanProvider';
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { CommonRepository } from '@/repositories/CommonRepository';
 import { IThemeVariables } from '@/shared/theme/themes';
+import { IEmployee } from '@/types/employee';
 import { AntDesign } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import Moment from 'moment';
@@ -29,8 +30,22 @@ const PlanAssignmentScreen = () => {
     const [totalCount, setTotalCount] = useState<number>(1);
     const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout>();
     const [filterParams, setFilterParams] = useState<{ name: string }>({ name: '' });
-    const [selectedProductPlan, setSelectedProductPlan] =useState<IProductionPlan | null>(null);
-    const [showAssignQcModal, setShowAssignQcModal] =useState<boolean>(false);
+    const [selectedProductPlan, setSelectedProductPlan] = useState<IProductionPlan | null>(null);
+    const [showAssignQcModal, setShowAssignQcModal] = useState<boolean>(false);
+
+    const [employees, setEmployees] = useState<IEmployee[]>([]);
+
+    useEffect(() => {
+        const getQCEmployees = async () => {
+            try {
+                const response = await CommonRepository.getQCEmployees();
+                if (response.data) {
+                    setEmployees(response.data || []);
+                }
+            } catch (error) {}
+        };
+        getQCEmployees();
+    }, []);
 
     /**
      * get list product
@@ -228,7 +243,7 @@ const PlanAssignmentScreen = () => {
                                         }
                                         numberOfLines={1}
                                     >
-                                        Nhân viên giám sát:{' '}
+                                        Giám sát:{' '}
                                         {item?.assignedToQC?.length
                                             ? item?.assignedToQC.join(', ')
                                             : 'Trống'}
@@ -244,14 +259,15 @@ const PlanAssignmentScreen = () => {
             />
 
             {selectedProductPlan && showAssignQcModal && (
-                    <AssignQCModal
-                        productPlan={selectedProductPlan}
-                        modalProps={{
-                            visible: showAssignQcModal,
-                            onClose: () => setShowAssignQcModal(false),
-                        }}
-                    />
-                )}
+                <AssignQCModal
+                    employees={employees}
+                    productPlan={selectedProductPlan}
+                    modalProps={{
+                        visible: showAssignQcModal,
+                        onClose: () => setShowAssignQcModal(false),
+                    }}
+                />
+            )}
         </SafeAreaView>
         // </KeyboardAvoidingView>
     );

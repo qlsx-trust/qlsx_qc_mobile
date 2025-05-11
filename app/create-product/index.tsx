@@ -9,11 +9,12 @@ import { PUB_TOPIC } from '@/constants/pubTopic';
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { CommonRepository } from '@/repositories/CommonRepository';
 import { containerStyles, IThemeVariables } from '@/shared/theme/themes';
+import { IEmployee } from '@/types/employee';
 import { IProductCheckItem } from '@/types/product';
 import { toast } from '@/utils/ToastMessage';
 import { AntDesign } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
     Dimensions,
     SafeAreaView,

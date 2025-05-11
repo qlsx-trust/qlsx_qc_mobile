@@ -11,6 +11,17 @@ export const CommonRepository = createRepository({
         });
     },
 
+    loginCode(fetch, payload: any) {
+        return fetch<any>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/employee/login-qc`, {
+            method: 'POST',
+            data: JSON.stringify(payload),
+            headers: {
+                'Accept': 'text/plain',
+                'Content-Type': 'application/json',
+            }
+        });
+    },
+
     getMostRecentProductionPlan(fetch, machineCode: string) {
         return fetch<any>(
             `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/production-plans/most-recent-production-plan?machineCode=${machineCode}`,
@@ -85,6 +96,19 @@ export const CommonRepository = createRepository({
             data: payload,
         });
     },
+
+    checkQCEmployeeCode(fetch, employeeQRCode: string) {
+        return fetch<any>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/employee/get-employee-by-code?employeeQRCode=${employeeQRCode}`, {
+            method: 'GET',
+        });
+    },
+
+    getQCEmployees(fetch) {
+        return fetch<any>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/employee/list-qc`, {
+            method: 'GET',
+        });
+    },
+
 
     deleteAssignQCProductPlan(fetch, payload: any) {
         return fetch<any>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/production-plan-qcassign`, {

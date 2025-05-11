@@ -22,6 +22,7 @@ export interface IUserInfo {
     token: string;
     refreshToken: string;
     userName: string;
+    fullName: string;
     role: UserRole;
     tokenValidTo: Date;
     refreshTokenValidTo: Date;

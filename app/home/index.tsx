@@ -166,7 +166,7 @@ const HomeScreen = () => {
                                     {managerQc ? 'Quản lý QC' : 'Nhân viên QC'}
                                 </TextWrapper>
                                 <TextWrapper fontSize={30} color={themeVariables.colors.primary}>
-                                    {user?.userName}
+                                    {user?.userName},{user?.fullName}
                                 </TextWrapper>
                             </FlexBox>
 
