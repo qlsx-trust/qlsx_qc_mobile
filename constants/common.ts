@@ -35,6 +35,7 @@ export const SCREEN_KEY = {
     product: 'product',
     manageProduct: 'manage-product',
     createProduct: 'create-product',
+    assignPlanQC: 'assign-plan-qc',
 };
 
 export const SCREEN_STACK_DESCRIPTION = {

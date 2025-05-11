@@ -7,29 +7,34 @@ import CreateProductItem from '@/components/product/CreateProductItem';
 import SearchBar from '@/components/SearchBar';
 import { PAGE_SIZE, SCREEN_KEY } from '@/constants/common';
 import { PUB_TOPIC } from '@/constants/pubTopic';
+import { IProductionPlan } from '@/providers/ProductionPlanProvider';
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { CommonRepository } from '@/repositories/CommonRepository';
 import { containerStyles, IThemeVariables } from '@/shared/theme/themes';
 import { IProduct } from '@/types/product';
+import { formatFullDateWithLocaleTime } from '@/utils/dateTime';
 import { AntDesign } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { SafeAreaView, StyleSheet, TouchableOpacity } from 'react-native';
+import Moment from 'moment';
+import AssignQCModal from '@/components/product/AssignQCModal';
 
-const productionManagementScreen = () => {
+const PlanAssignmentScreen = () => {
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
     // const { logout, user } = useAuthContext();
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isLoadMore, setIsLoadMore] = useState<boolean>(false);
-    const [products, setProducts] = useState<IProduct[]>([]);
+    const [productPlans, setProductPlans] = useState<IProductionPlan[]>([]);
     const [pageNumber, setPageNumber] = useState<number>(1);
     const [retryCall, setRetryCall] = useState<number>(0);
     const [totalCount, setTotalCount] = useState<number>(1);
     const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout>();
     const [filterParams, setFilterParams] = useState<{ name: string }>({ name: '' });
-
+    const [selectedProductPlan, setSelectedProductPlan] =useState<IProductionPlan | null>(null);
+    const [showAssignQcModal, setShowAssignQcModal] =useState<boolean>(false);
     /**
      * get list product
      */
@@ -42,12 +47,12 @@ const productionManagementScreen = () => {
                 Take: PAGE_SIZE.DEFAULT,
                 Keyword: filterParams.name,
             };
-            const res = await CommonRepository.getListProduct(params);
+            const res = await CommonRepository.getListProductionPlan(params);
             if (!res.error) {
                 const data = res.data;
                 if (data?.items) {
-                    const listProduct = firstCall ? data.items : products.concat(data.items);
-                    setProducts(listProduct);
+                    const listProduct = firstCall ? data.items : productPlans.concat(data.items);
+                    setProductPlans(listProduct);
                     setTotalCount(data.count);
                 }
             }
@@ -67,7 +72,7 @@ const productionManagementScreen = () => {
     };
 
     const handleLoadMoreProduct = () => {
-        if (totalCount <= products.length) return;
+        if (totalCount <= productPlans.length) return;
         setPageNumber((pageNumber) => pageNumber + 1);
         setRetryCall(new Date().getTime());
     };
@@ -94,14 +99,24 @@ const productionManagementScreen = () => {
     }, [retryCall]);
 
     useEffect(() => {
-        PubSub.subscribe(PUB_TOPIC.RECALL_PRODUCT, () => {
+        PubSub.subscribe(PUB_TOPIC.RECALL_PRODUCTION_PLAN, () => {
             getListProduct();
         });
     }, []);
 
-    const handleGoDetailProduct = (product: IProduct) => {
-        const productId = product.id;
-        router.push(`${SCREEN_KEY.manageProduct}/${productId}`);
+    const checkTimeBackground = (product: IProductionPlan) => {
+        if (new Date().getTime() < new Date(product.productionEndTime).getTime()) {
+            return 'transparent';
+        }
+
+        if (
+            new Date().getTime() > new Date(product.productionStartTime).getTime() &&
+            new Date().getTime() < new Date(product.productionEndTime).getTime()
+        ) {
+            return '#f5f383';
+        }
+
+        return '#e3e2e2';
     };
 
     return (
@@ -128,7 +143,7 @@ const productionManagementScreen = () => {
                         />
 
                         <TextWrapper fontSize={20} fontWeight="bold">
-                            Danh sách sản phẩm
+                            Danh sách kế hoạch
                         </TextWrapper>
                     </FlexBox>
                 </TouchableOpacity>
@@ -143,20 +158,46 @@ const productionManagementScreen = () => {
                     handleRefreshProduct();
                 }}
                 onLoadMore={handleLoadMoreProduct}
-                listData={products}
-                renderItemComponent={(item: IProduct) => {
+                listData={productPlans}
+                renderItemComponent={(item: IProductionPlan) => {
                     return (
                         <TouchableOpacity
                             key={`product-item-${item.id}`}
-                            onPress={() => handleGoDetailProduct(item)}
+                            onPress={() => {
+                                setSelectedProductPlan(item);
+                                setShowAssignQcModal(true);
+                            }}
                         >
                             <FlexBox
                                 direction="column"
                                 justifyContent="flex-start"
                                 alignItems="flex-start"
-                                style={styles.productCardItem}
+                                style={{
+                                    ...styles.productCardItem,
+                                    backgroundColor: checkTimeBackground(item),
+                                }}
                             >
-                                <TextWrapper fontSize={16}>{item.productName}</TextWrapper>
+                                <TextWrapper fontSize={16}>Mã máy: {item.machineCode}</TextWrapper>
+                                <FlexBox
+                                    style={{ width: '100%' }}
+                                    justifyContent="flex-start"
+                                    gap={10}
+                                >
+                                    <TextWrapper
+                                        fontSize={12}
+                                        color={themeVariables.colors.primary}
+                                        numberOfLines={1}
+                                    >
+                                        {item.productCode}
+                                    </TextWrapper>
+                                    <TextWrapper
+                                        fontSize={12}
+                                        color={themeVariables.colors.subTextDefault}
+                                        numberOfLines={1}
+                                    >
+                                        {item.productName}
+                                    </TextWrapper>
+                                </FlexBox>
                                 <FlexBox
                                     style={{ width: '100%' }}
                                     justifyContent="flex-start"
@@ -165,29 +206,36 @@ const productionManagementScreen = () => {
                                     <TextWrapper
                                         fontSize={12}
                                         color={themeVariables.colors.subTextDefault}
-                                        fontWeight="bold"
                                         numberOfLines={1}
                                     >
-                                        Mã SP: {item.productCode}
+                                        {Moment(item?.productionStartTime || '').format(
+                                            'MM/DD/YYYY HH:mm'
+                                        )}{' '}
+                                        -{' '}
+                                        {Moment(item?.productionEndTime || '').format(
+                                            'MM/DD/YYYY HH:mm'
+                                        )}
                                     </TextWrapper>
-                                    <FlexBox direction="row" gap={10} justifyContent="flex-start">
-                                        {item?.checkItems !== undefined &&
-                                        Number.isInteger(item?.checkItems?.length) ? (
-                                            <FlexBox
-                                                gap={2}
-                                                style={{ minWidth: 100 }}
-                                                justifyContent="flex-start"
-                                            >
-                                                <NoteIcon width={16} height={16} />
-                                                <TextWrapper
-                                                    fontSize={12}
-                                                    color={themeVariables.colors.subTextDefault}
-                                                >
-                                                    {item.checkItems?.length} tiêu chí đánh giá
-                                                </TextWrapper>
-                                            </FlexBox>
-                                        ) : null}
-                                    </FlexBox>
+                                </FlexBox>
+                                <FlexBox
+                                    style={{ width: '100%' }}
+                                    justifyContent="flex-start"
+                                    gap={10}
+                                >
+                                    <TextWrapper
+                                        fontSize={12}
+                                        color={
+                                            item?.assignedToQC?.length
+                                                ? themeVariables.colors.primary
+                                                : themeVariables.colors.danger
+                                        }
+                                        numberOfLines={1}
+                                    >
+                                        Nhân viên giám sát:{' '}
+                                        {item?.assignedToQC?.length
+                                            ? item?.assignedToQC.join(', ')
+                                            : 'Trống'}
+                                    </TextWrapper>
                                 </FlexBox>
                             </FlexBox>
                         </TouchableOpacity>
@@ -197,7 +245,16 @@ const productionManagementScreen = () => {
                     <EmptyFolder title="Không có sản phẩm nào" description="" />
                 )}
             />
-            <CreateProductItem />
+
+            {selectedProductPlan && showAssignQcModal && (
+                    <AssignQCModal
+                        productPlan={selectedProductPlan}
+                        modalProps={{
+                            visible: showAssignQcModal,
+                            onClose: () => setShowAssignQcModal(false),
+                        }}
+                    />
+                )}
         </SafeAreaView>
         // </KeyboardAvoidingView>
     );
@@ -227,7 +284,7 @@ export const styling = (themeVariables: IThemeVariables) =>
         },
         header: {
             width: '100%',
-            paddingHorizontal: containerStyles.paddingHorizontal,
+            paddingHorizontal: 10,
             marginBottom: 10,
         },
         productCardItem: {
@@ -239,4 +296,4 @@ export const styling = (themeVariables: IThemeVariables) =>
         },
     });
 
-export default productionManagementScreen;
+export default PlanAssignmentScreen;

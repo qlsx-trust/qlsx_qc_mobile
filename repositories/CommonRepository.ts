@@ -69,4 +69,27 @@ export const CommonRepository = createRepository({
             data: payload,
         });
     },
+
+    getListProductionPlan(fetch, payload) {
+        return fetch<any>(
+            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/production-plans/search?Keyword=${payload.Keyword}&Skip=${payload.Skip}&Take=${payload.Take}`,
+            {
+                method: 'GET',
+            }
+        );
+    },
+
+    assignQCProductPlan(fetch, payload: any) {
+        return fetch<any>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/production-plan-qcassign`, {
+            method: 'POST',
+            data: payload,
+        });
+    },
+
+    deleteAssignQCProductPlan(fetch, payload: any) {
+        return fetch<any>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/production-plan-qcassign`, {
+            method: 'DELETE',
+            data: payload,
+        });
+    },
 });

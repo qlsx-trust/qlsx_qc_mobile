@@ -281,7 +281,7 @@ const ImageSelection = ({ setShowCamera, setImageUrl }: Props) => {
                                 height={30}
                                 color={themeVariables.colors.textOnImageStrong}
                             />
-                            <Text style={{ color: 'white' }}>Retake</Text>
+                            <Text style={{ color: 'white' }}>Chụp lại</Text>
                         </FlexBox>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={uploadAttachment}>

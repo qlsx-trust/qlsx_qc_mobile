@@ -79,6 +79,9 @@ const HomeScreen = () => {
     const handleManageProduct = () => {
         router.push(SCREEN_KEY.manageProduct)
     }
+    const handlePlanAssignment = () => {
+        router.push(SCREEN_KEY.assignPlanQC)
+    }
 
     return (
         // <KeyboardAvoidingView behavior={isIOS ? 'padding' : 'height'}>
@@ -186,7 +189,7 @@ const HomeScreen = () => {
 
                                     <AppButton
                                         label="Phân công QC"
-                                        onPress={handleScanScreen}
+                                        onPress={handlePlanAssignment}
                                         viewStyle={{ width: '80%', marginTop: 10 }}
                                         labelStyle={{ fontSize: 18 }}
                                         variant={BUTTON_COMMON_TYPE.PRIMARY_OUTLINE}

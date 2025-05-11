@@ -58,6 +58,7 @@ export interface IProductionPlan {
     isReadyMaterial: boolean;
     isReadyMold: boolean;
     isReadyMachine: boolean;
+    assignedToQC: string[]
 }
 
 type StateType = {
