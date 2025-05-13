@@ -67,9 +67,9 @@ const ProductDetailManagementScreen = () => {
             formdata.append('ProductName', productDetail?.productName);
             const checkItems = productCheckItems.map((item) => {
                 const isNewFileUpload =
-                    isBoolean(item.productImagePrototype?.length &&
+                    item.productImagePrototype?.length &&
                     item.productImagePrototype[0] &&
-                    !item.productImagePrototype[0].includes(PATH_SERVER_MEDIA));
+                    !item.productImagePrototype[0].includes(PATH_SERVER_MEDIA);
 
                 return {
                     CategoryCode: item.categoryCode,
@@ -78,6 +78,7 @@ const ProductDetailManagementScreen = () => {
                     ProductImagePrototype: isNewFileUpload ? [] : item.productImagePrototype,
                 };
             });
+
             formdata.append('CheckItems', JSON.stringify(checkItems));
             formdata.append('RemoveDocument', JSON.stringify([]));
 

@@ -125,6 +125,7 @@ const productionManagementScreen = () => {
                             name="arrowleft"
                             size={20}
                             color={themeVariables.colors.bgRevert}
+                            style={{marginRight: 5}}
                         />
 
                         <TextWrapper fontSize={20} fontWeight="bold">

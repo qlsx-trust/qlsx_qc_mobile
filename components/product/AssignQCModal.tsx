@@ -244,7 +244,7 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
                             justifyContent="flex-start"
                             alignItems="flex-start"
                             gap={5}
-                            style={{ marginTop: 20 }}
+                            style={{ marginTop: 20, width: '100%' }}
                         >
                             <TextWrap style={styles.description}>Chọn nhân viên:</TextWrap>
                             <SelectDropdown
