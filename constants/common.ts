@@ -67,12 +67,7 @@ export const BUTTON_LOADING_ICON_COLOR = {
 };
 
 export enum UserRole {
-    Admin,
     QC,
-    Employee,
-    Manager,
-    MaterialSupply,
-    MoldSupply,
     QCManager,
 }
 

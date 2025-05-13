@@ -1,8 +1,7 @@
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { IThemeVariables } from '@/shared/theme/themes';
-import { isIOS } from '@/utils/Mixed';
 import Feather from '@expo/vector-icons/Feather';
-import { Dimensions, KeyboardAvoidingView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -11,13 +10,14 @@ import AppButton from '@/components/common/AppButton';
 import FlexBox from '@/components/common/FlexBox';
 import TextWrapper from '@/components/common/TextWrap';
 import ConfirmScanCodeModal from '@/components/home/ConfirmScanCodeModal';
+import ListProductPlanForQC from '@/components/product/ListProductPlanForQC';
 import { BUTTON_COMMON_TYPE, SCREEN_KEY, UserRole } from '@/constants/common';
 import { useAuthContext } from '@/providers/UserProvider';
 import { AntDesign } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import { BarcodeScanningResult, CameraType, CameraView, useCameraPermissions } from 'expo-camera';
-import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
 const HomeScreen = () => {
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
@@ -82,6 +82,8 @@ const HomeScreen = () => {
     const handlePlanAssignment = () => {
         router.push(SCREEN_KEY.assignPlanQC)
     }
+
+    
 
     return (
         // <KeyboardAvoidingView behavior={isIOS ? 'padding' : 'height'}>
@@ -160,20 +162,24 @@ const HomeScreen = () => {
                         </>
                     ) : (
                         <>
-                            <ScanQRCodeIcon width={100} height={100} />
-                            <FlexBox direction="column" justifyContent="center" alignItems="center">
-                                <TextWrapper fontSize={25}>
-                                    {managerQc ? 'Quản lý QC' : 'Nhân viên QC'}
+                            {managerQc && <ScanQRCodeIcon width={100} height={100} />}
+                            <FlexBox direction="row" justifyContent="center" alignItems="center">
+                                <TextWrapper fontSize={18}>
+                                    {managerQc ? 'Quản lý: ' : 'Nhân viên: '}
                                 </TextWrapper>
-                                <TextWrapper fontSize={30} color={themeVariables.colors.primary}>
+                                <TextWrapper fontSize={24} color={themeVariables.colors.primary}>
                                     {user?.userName},{user?.fullName}
                                 </TextWrapper>
                             </FlexBox>
 
+                             {!managerQc && (
+                                <ListProductPlanForQC />
+                            )}
+
                             <AppButton
                                 label="Quét mã công tác sản xuất"
                                 onPress={handleScanScreen}
-                                viewStyle={{ width: '80%', marginTop: 20 }}
+                                viewStyle={{ width: '80%', marginTop: 10, marginBottom: managerQc ? 0 : 30 }}
                                 labelStyle={{ fontSize: 18 }}
                                 variant={BUTTON_COMMON_TYPE.PRIMARY_OUTLINE}
                             />

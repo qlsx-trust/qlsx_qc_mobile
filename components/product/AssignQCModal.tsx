@@ -58,7 +58,7 @@ const AssignQCModal = ({ productPlan, employees, modalProps }: IAssignQCModalPro
     const selectEmployeeOptions = useMemo(() => {
         const data = (employees || []).map((employee) => {
             return {
-                value: `${employee.employeeCode},${employee.fullName}`,
+                value: `${employee.employeeCode}`,
                 title: `${employee.employeeCode},${employee.fullName}`,
             };
         });
@@ -147,6 +147,12 @@ const AssignQCModal = ({ productPlan, employees, modalProps }: IAssignQCModalPro
             setIsLoadingSubmit(false);
         }
     };
+
+    const getFullNameCodeQc = (qcCode: string) => {
+        const selectedEmployee = (employees || []).find(employee => employee.employeeCode == qcCode);
+        if(!selectedEmployee) return '';
+        return `${selectedEmployee.employeeCode},${selectedEmployee.fullName}`
+    }
 
     return (
         <>
@@ -349,7 +355,7 @@ const AssignQCModal = ({ productPlan, employees, modalProps }: IAssignQCModalPro
                                         alignItems="center"
                                         key={`qc-code-${qcCode}`}
                                     >
-                                        <TextWrap fontSize={16}>{qcCode}</TextWrap>
+                                        <TextWrap fontSize={16}>{getFullNameCodeQc(qcCode)}</TextWrap>
                                         {isLoadingDelete == qcCode ? (
                                             <ActivityIndicator size={16} />
                                         ) : (

@@ -117,7 +117,7 @@ const PlanAssignmentScreen = () => {
     }, []);
 
     const checkTimeBackground = (product: IProductionPlan) => {
-        if (new Date().getTime() < new Date(product.productionEndTime).getTime()) {
+        if (new Date().getTime() < new Date(product.productionStartTime).getTime()) {
             return 'transparent';
         }
 
@@ -152,6 +152,7 @@ const PlanAssignmentScreen = () => {
                             name="arrowleft"
                             size={20}
                             color={themeVariables.colors.bgRevert}
+                            style={{marginRight: 10}}
                         />
 
                         <TextWrapper fontSize={20} fontWeight="bold">
@@ -254,7 +255,7 @@ const PlanAssignmentScreen = () => {
                     );
                 }}
                 renderEmptyComponent={() => (
-                    <EmptyFolder title="Không có sản phẩm nào" description="" />
+                    <EmptyFolder title="Không có CTSX nào" description="" />
                 )}
             />
 
