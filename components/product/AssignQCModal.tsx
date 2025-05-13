@@ -241,8 +241,8 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
                         </FlexBox>
                         <FlexBox
                             direction="column"
-                            justifyContent="flex-start"
-                            alignItems="flex-start"
+                            justifyContent="center"
+                            alignItems="center"
                             gap={5}
                             style={{ marginTop: 20, }}
                         >
