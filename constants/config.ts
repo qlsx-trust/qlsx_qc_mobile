@@ -9,12 +9,12 @@ let Config = {
 // STAGING
 if (Updates.channel === 'staging') {
     Config.EXPO_PUBLIC_ENV = 'staging';
-    Config.EXPO_PUBLIC_BACKEND_URL = 'https://moudingco.trustsoft.com.vn';
+    Config.EXPO_PUBLIC_BACKEND_URL = 'https://iot-local.trustsoft.com.vn';
 }
 
 if (Updates.channel === 'main') {
     Config.EXPO_PUBLIC_ENV = 'production';
-    Config.EXPO_PUBLIC_BACKEND_URL = 'https://moudingco.trustsoft.com.vn';
+    Config.EXPO_PUBLIC_BACKEND_URL = 'https://iot-local.trustsoft.com.vn';
 }
 
 export default Config;
