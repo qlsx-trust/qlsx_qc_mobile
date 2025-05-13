@@ -13,6 +13,7 @@ import { IProduct, IProductCheckItem } from '@/types/product';
 import { toast } from '@/utils/ToastMessage';
 import { AntDesign } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
+import { isBoolean } from 'lodash';
 import { useEffect, useState } from 'react';
 import {
     Dimensions,
@@ -51,7 +52,7 @@ const ProductDetailManagementScreen = () => {
                 const data = res.data;
                 setProductDetail(data);
                 setProductCheckItems(data.checkItems || []);
-            }
+                            }
         } catch (err) {
             console.error(err);
         } finally {
@@ -65,21 +66,25 @@ const ProductDetailManagementScreen = () => {
             formdata.append('ProductCode', productDetail?.productCode);
             formdata.append('ProductName', productDetail?.productName);
             const checkItems = productCheckItems.map((item) => {
+                const isNewFileUpload =
+                    isBoolean(item.productImagePrototype?.length &&
+                    item.productImagePrototype[0] &&
+                    !item.productImagePrototype[0].includes(PATH_SERVER_MEDIA));
+
                 return {
                     CategoryCode: item.categoryCode,
                     Name: item.name,
                     Note: item.note,
-                    ProductImagePrototype: item.productImagePrototype?.length
-                        ? [item.productImagePrototype[0]]
-                        : [],
+                    ProductImagePrototype: isNewFileUpload ? [] : item.productImagePrototype,
                 };
             });
             formdata.append('CheckItems', JSON.stringify(checkItems));
             formdata.append('RemoveDocument', JSON.stringify([]));
+
             productCheckItems.forEach((item) => {
                 if (
                     item.productImagePrototype?.length &&
-                    !item.productImagePrototype[0] &&
+                    item.productImagePrototype[0] &&
                     !item.productImagePrototype[0].includes(PATH_SERVER_MEDIA)
                 ) {
                     formdata.append(`category:${item.categoryCode}`, {
@@ -155,6 +160,7 @@ const ProductDetailManagementScreen = () => {
                             name="arrowleft"
                             size={20}
                             color={themeVariables.colors.bgRevert}
+                            style={{ marginRight: 5 }}
                         />
 
                         <TextWrapper fontSize={16} fontWeight="bold">

@@ -33,20 +33,6 @@ const PlanAssignmentScreen = () => {
     const [selectedProductPlan, setSelectedProductPlan] = useState<IProductionPlan | null>(null);
     const [showAssignQcModal, setShowAssignQcModal] = useState<boolean>(false);
 
-    const [employees, setEmployees] = useState<IEmployee[]>([]);
-
-    useEffect(() => {
-        const getQCEmployees = async () => {
-            try {
-                const response = await CommonRepository.getQCEmployees();
-                if (response.data) {
-                    setEmployees(response.data || []);
-                }
-            } catch (error) {}
-        };
-        getQCEmployees();
-    }, []);
-
     /**
      * get list product
      */
@@ -261,7 +247,6 @@ const PlanAssignmentScreen = () => {
 
             {selectedProductPlan && showAssignQcModal && (
                 <AssignQCModal
-                    employees={employees}
                     productPlan={selectedProductPlan}
                     modalProps={{
                         visible: showAssignQcModal,
@@ -303,6 +288,7 @@ export const styling = (themeVariables: IThemeVariables) =>
         },
         productCardItem: {
             paddingVertical: 15,
+            marginBottom: 1,
             paddingHorizontal: 15,
             borderBottomWidth: 1,
             borderBottomColor: themeVariables.colors.borderLightColor,

@@ -113,6 +113,7 @@ const IntroScreen: React.FC<IntroScreenProps> = () => {
             router.replace(SCREEN_KEY.home);
         } catch (error) {
             console.log('@@Error: ', error);
+            toast.error('Đăng nhập thất bại! Mã nhân viên không chính xác');
         } finally {
             setLoadingSubmit(false);
         }

@@ -33,69 +33,60 @@ const ProductCheckItem = ({ item, index, onUpdateCheckItem, onRemoveCheckItem }:
     };
 
     const urlImage = useMemo(() => {
-        if(!item.productImagePrototype?.length) return '';
+        if (!item.productImagePrototype?.length) return '';
         const url = item.productImagePrototype[0];
-        if(url.includes(PATH_SERVER_MEDIA)) {
-            return `${Config.EXPO_PUBLIC_BACKEND_URL}${url}`
+        if (url.includes(PATH_SERVER_MEDIA)) {
+            return `${Config.EXPO_PUBLIC_BACKEND_URL}${url}`;
         }
 
         return url;
-    }, [item.productImagePrototype])
+    }, [item.productImagePrototype]);
 
     return (
         <FlexBox direction="column" style={styles.wrapItem}>
-            <FlexBox
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-                style={{ width: '100%' }}
-                gap={10}
-            >
-                <TouchableOpacity onPress={handleEdit}>
-                    <FlexBox
-                        direction="row"
-                        alignItems="flex-start"
-                        justifyContent="flex-start"
-                        gap={5}
-                        width={'86%'}
-                        style={{ paddingBottom: 10, paddingTop: 10 }}
-                    >
-                        {urlImage && (
-                            <TouchableOpacity
-                                onPress={(e) => {
-                                    e.preventDefault();
-                                    setShowPreviewImageModal(true);
-                                }}
-                            >
-                                <Image
-                                    source={{ uri: urlImage }}
-                                    style={{ width: 100, height: 100, objectFit: 'cover' }}
-                                />
-                            </TouchableOpacity>
-                        )}
-                        <TextWrap
-                            style={{ ...styles.description }}
-                            numberOfLines={2}
-                            textAlign="left"
-                        >
-                            {evaluationItem.name}
-                        </TextWrap>
+            <TouchableOpacity onPress={handleEdit}>
+                <FlexBox
+                    direction="row"
+                    alignItems="flex-start"
+                    justifyContent="flex-start"
+                    gap={5}
+                    width={'100%'}
+                    style={{ paddingBottom: 10, paddingTop: 10 }}
+                >
+                    {urlImage ? (
                         <TouchableOpacity
-                            style={{ position: 'absolute', right: 0, bottom: 0 }}
                             onPress={(e) => {
                                 e.preventDefault();
-                                onRemoveCheckItem?.(item.categoryCode);
+                                setShowPreviewImageModal(true);
                             }}
                         >
-                            <Feather
-                                name="trash-2"
-                                size={20}
-                                color={themeVariables.colors.danger}
+                            <Image
+                                source={{ uri: urlImage }}
+                                style={{ width: 100, height: 100, objectFit: 'cover' }}
                             />
                         </TouchableOpacity>
-                    </FlexBox>
-                </TouchableOpacity>
-            </FlexBox>
+                    ) : (
+                        <Image
+                            source={{
+                                uri: 'https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg',
+                            }}
+                            style={{ width: 100, height: 100, objectFit: 'cover' }}
+                        />
+                    )}
+                    <TextWrap style={{ ...styles.description }} numberOfLines={2} textAlign="left">
+                        {evaluationItem.name}
+                    </TextWrap>
+                    <TouchableOpacity
+                        style={{ position: 'absolute', right: 0, bottom: 0 }}
+                        onPress={(e) => {
+                            e.preventDefault();
+                            onRemoveCheckItem?.(item.categoryCode);
+                        }}
+                    >
+                        <Feather name="trash-2" size={20} color={themeVariables.colors.danger} />
+                    </TouchableOpacity>
+                </FlexBox>
+            </TouchableOpacity>
             {showCheckItemEdit && (
                 <ManageProductDetailModal
                     checkItem={item}

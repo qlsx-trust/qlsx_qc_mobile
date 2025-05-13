@@ -51,9 +51,7 @@ const productionCreateManagementScreen = () => {
                     CategoryCode: item.categoryCode,
                     Name: item.name,
                     Note: item.note,
-                    ProductImagePrototype: item.productImagePrototype?.length
-                        ? [item.productImagePrototype[0]]
-                        : [],
+                    ProductImagePrototype: []
                 };
             });
             formdata.append('CheckItems', JSON.stringify(checkItems));

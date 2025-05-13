@@ -28,10 +28,9 @@ import SelectDropdown from 'react-native-select-dropdown';
 interface IAssignQCModalProps {
     modalProps: CommonModalProps;
     productPlan?: IProductionPlan;
-    employees: IEmployee[];
 }
 
-const AssignQCModal = ({ productPlan, employees, modalProps }: IAssignQCModalProps) => {
+const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
     const dimensions = Dimensions.get('window');
 
     const { themeVariables } = useThemeContext();
@@ -54,6 +53,21 @@ const AssignQCModal = ({ productPlan, employees, modalProps }: IAssignQCModalPro
 
     const maskRowHeight = Math.round((Dimensions.get('window').height - 250) / 20);
     const maskColWidth = (width - 250) / 2;
+
+    const [employees, setEmployees] = useState<IEmployee[]>([]);
+    const [recallEmployee, setRecallEmployee] = useState<number>(0);
+
+    useEffect(() => {
+        const getQCEmployees = async () => {
+            try {
+                const response = await CommonRepository.getQCEmployees();
+                if (response.data) {
+                    setEmployees(response.data || []);
+                }
+            } catch (error) {}
+        };
+        getQCEmployees();
+    }, [recallEmployee]);
 
     const selectEmployeeOptions = useMemo(() => {
         const data = (employees || []).map((employee) => {
@@ -85,7 +99,7 @@ const AssignQCModal = ({ productPlan, employees, modalProps }: IAssignQCModalPro
         if (result.data) {
             // playBeep();
             setShowCamera(false);
-            setErrorCheckCode('')
+            setErrorCheckCode('');
             setOtherQcCode(result.data);
         }
     };
@@ -127,7 +141,7 @@ const AssignQCModal = ({ productPlan, employees, modalProps }: IAssignQCModalPro
                     return;
                 }
             }
-            setErrorCheckCode('')
+            setErrorCheckCode('');
             const payload = {
                 productionPlanId: productPlan?.id,
                 qcAssign: qcCode,
@@ -135,6 +149,7 @@ const AssignQCModal = ({ productPlan, employees, modalProps }: IAssignQCModalPro
             const res = await CommonRepository.assignQCProductPlan(payload);
             if (!res.error && res.data) {
                 PubSub.publish(PUB_TOPIC.RECALL_PRODUCTION_PLAN);
+                setRecallEmployee(new Date().getTime());
                 toast.success('Thêm phân công thành công');
                 setAssignedQc([...assignedQc, qcCode]);
                 setOtherQcCode('');
@@ -149,10 +164,12 @@ const AssignQCModal = ({ productPlan, employees, modalProps }: IAssignQCModalPro
     };
 
     const getFullNameCodeQc = (qcCode: string) => {
-        const selectedEmployee = (employees || []).find(employee => employee.employeeCode == qcCode);
-        if(!selectedEmployee) return '';
-        return `${selectedEmployee.employeeCode},${selectedEmployee.fullName}`
-    }
+        const selectedEmployee = (employees || []).find(
+            (employee) => employee.employeeCode == qcCode
+        );
+        if (!selectedEmployee) return qcCode;
+        return `${selectedEmployee.employeeCode},${selectedEmployee.fullName}`;
+    };
 
     return (
         <>
@@ -231,6 +248,7 @@ const AssignQCModal = ({ productPlan, employees, modalProps }: IAssignQCModalPro
                         >
                             <TextWrap style={styles.description}>Chọn nhân viên:</TextWrap>
                             <SelectDropdown
+                                key={assignedQc?.length}
                                 data={selectEmployeeOptions}
                                 disabled={isLoadingSubmit}
                                 onSelect={(selectedItem, index) => {
@@ -275,7 +293,7 @@ const AssignQCModal = ({ productPlan, employees, modalProps }: IAssignQCModalPro
                                 renderItem={(item: any, index, isSelected) => {
                                     const isSelectedQc =
                                         isSelected ||
-                                        assignedQc.find((code: string) => code == item.value);
+                                        assignedQc.find((code: string) => code == item.value || code == item.title);
                                     return (
                                         <View
                                             style={{
@@ -316,7 +334,14 @@ const AssignQCModal = ({ productPlan, employees, modalProps }: IAssignQCModalPro
                                     placeholderTextColor={themeVariables.colors.bgGrey}
                                     placeholder="Mã nhân viên"
                                 />
-                               {errorCheckCode && <TextWrap style={{marginTop: 5}} color={themeVariables.colors.danger}>{errorCheckCode}</TextWrap>}
+                                {errorCheckCode && (
+                                    <TextWrap
+                                        style={{ marginTop: 5 }}
+                                        color={themeVariables.colors.danger}
+                                    >
+                                        {errorCheckCode}
+                                    </TextWrap>
+                                )}
                                 <FlexBox justifyContent="space-between" style={{ width: '100%' }}>
                                     <AppButton
                                         viewStyle={styles.button}
@@ -355,7 +380,9 @@ const AssignQCModal = ({ productPlan, employees, modalProps }: IAssignQCModalPro
                                         alignItems="center"
                                         key={`qc-code-${qcCode}`}
                                     >
-                                        <TextWrap fontSize={16}>{getFullNameCodeQc(qcCode)}</TextWrap>
+                                        <TextWrap fontSize={16}>
+                                            {getFullNameCodeQc(qcCode)}
+                                        </TextWrap>
                                         {isLoadingDelete == qcCode ? (
                                             <ActivityIndicator size={16} />
                                         ) : (
