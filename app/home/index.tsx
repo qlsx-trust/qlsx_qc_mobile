@@ -77,169 +77,159 @@ const HomeScreen = () => {
     };
 
     const handleManageProduct = () => {
-        router.push(SCREEN_KEY.manageProduct)
-    }
+        router.push(SCREEN_KEY.manageProduct);
+    };
     const handlePlanAssignment = () => {
-        router.push(SCREEN_KEY.assignPlanQC)
-    }
-
-    
+        router.push(SCREEN_KEY.assignPlanQC);
+    };
 
     return (
         // <KeyboardAvoidingView behavior={isIOS ? 'padding' : 'height'}>
-            <SafeAreaView style={styles.container}>
-                <FlexBox
-                    gap={20}
-                    height={'100%'}
-                    width={'100%'}
-                    direction="column"
-                    justifyContent="flex-start"
-                    alignItems="center"
-                    style={{ paddingVertical: 50 }}
-                >
-                    {showCamera ? (
-                        <>
-                            <View style={[styles.cameraWrapper]}>
-                                <FlexBox
-                                    direction="row"
-                                    alignItems="center"
-                                    gap={20}
-                                    style={styles.closeBox}
-                                >
-                                    <TouchableOpacity onPress={toggleCameraFacing}>
-                                        <Feather
-                                            name="rotate-ccw"
-                                            size={30}
-                                            color={themeVariables.colors.textOnImageStrong}
-                                        />
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => setShowCamera(false)}>
-                                        <AntDesign
-                                            name="close"
-                                            size={30}
-                                            color={themeVariables.colors.textOnImageStrong}
-                                        />
-                                    </TouchableOpacity>
-                                </FlexBox>
-                                <CameraView
-                                    barcodeScannerSettings={{
-                                        barcodeTypes: ['qr'],
-                                    }}
-                                    onBarcodeScanned={isReady ? handleBarCodeScan : undefined}
-                                    onCameraReady={onCameraReady}
-                                    style={[styles.cameraContainer]}
-                                    facing={facing}
-                                    ratio={'1:1'}
-                                    mute={true}
-                                >
-                                    <View style={styles.maskOutter}>
-                                        <View
-                                            style={[
-                                                { flex: maskRowHeight },
-                                                styles.maskRow,
-                                                styles.maskFrame,
-                                            ]}
-                                        />
-                                        <View style={[{ flex: 30 }, styles.maskCenter]}>
-                                            <View
-                                                style={[{ width: maskColWidth }, styles.maskFrame]}
-                                            />
-                                            <View style={styles.maskInner} />
-                                            <View
-                                                style={[{ width: maskColWidth }, styles.maskFrame]}
-                                            />
-                                        </View>
-                                        <View
-                                            style={[
-                                                { flex: maskRowHeight },
-                                                styles.maskRow,
-                                                styles.maskFrame,
-                                            ]}
-                                        />
-                                    </View>
-                                </CameraView>
-                            </View>
-                        </>
-                    ) : (
-                        <>
-                            {managerQc && <ScanQRCodeIcon width={100} height={100} />}
-                            <FlexBox direction="row" justifyContent="center" alignItems="center">
-                                <TextWrapper fontSize={18}>
-                                    {managerQc ? 'Quản lý: ' : 'Nhân viên: '}
-                                </TextWrapper>
-                                <TextWrapper fontSize={24} color={themeVariables.colors.primary}>
-                                    {user?.userName},{user?.fullName}
-                                </TextWrapper>
+        <SafeAreaView style={styles.container}>
+            <FlexBox
+                gap={20}
+                height={'100%'}
+                width={'100%'}
+                direction="column"
+                justifyContent="flex-start"
+                alignItems="center"
+                style={{ paddingVertical: 50 }}
+            >
+                {showCamera && (
+                    <>
+                        <View style={[styles.cameraWrapper]}>
+                            <FlexBox
+                                direction="row"
+                                alignItems="center"
+                                gap={20}
+                                style={styles.closeBox}
+                            >
+                                <TouchableOpacity onPress={toggleCameraFacing}>
+                                    <Feather
+                                        name="rotate-ccw"
+                                        size={30}
+                                        color={themeVariables.colors.textOnImageStrong}
+                                    />
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => setShowCamera(false)}>
+                                    <AntDesign
+                                        name="close"
+                                        size={30}
+                                        color={themeVariables.colors.textOnImageStrong}
+                                    />
+                                </TouchableOpacity>
                             </FlexBox>
-
-                             {!managerQc && (
-                                <ListProductPlanForQC />
-                            )}
-
-                            <AppButton
-                                label="Quét mã công tác sản xuất"
-                                onPress={handleScanScreen}
-                                viewStyle={{ width: '80%', marginTop: 10, marginBottom: managerQc ? 0 : 30 }}
-                                labelStyle={{ fontSize: 18 }}
-                                variant={BUTTON_COMMON_TYPE.PRIMARY_OUTLINE}
-                            />
-                            {managerQc && (
-                                <>
-                                    <AppButton
-                                        label="Quản lý sản phẩm"
-                                        onPress={handleManageProduct}
-                                        viewStyle={{ width: '80%', marginTop: 10 }}
-                                        labelStyle={{ fontSize: 18 }}
-                                        variant={BUTTON_COMMON_TYPE.PRIMARY_OUTLINE}
-                                    />
-
-                                    <AppButton
-                                        label="Phân công QC"
-                                        onPress={handlePlanAssignment}
-                                        viewStyle={{ width: '80%', marginTop: 10 }}
-                                        labelStyle={{ fontSize: 18 }}
-                                        variant={BUTTON_COMMON_TYPE.PRIMARY_OUTLINE}
-                                    />
-                                </>
-                            )}
-
-                            <AppButton
-                                label="Đăng xuất"
-                                onPress={handleLogout}
-                                viewStyle={{
-                                    width: '80%',
-                                    marginTop: 20,
-                                    position: 'absolute',
-                                    bottom: 0,
+                            <CameraView
+                                barcodeScannerSettings={{
+                                    barcodeTypes: ['qr'],
                                 }}
-                                variant={BUTTON_COMMON_TYPE.CANCEL}
-                            />
-
-                            {!permission && (
-                                <>
-                                    <TextWrapper>Không có quyền truy cập Camera</TextWrapper>
-                                    <AppButton
-                                        label="Cấp quyền"
-                                        onPress={requestPermission}
-                                        viewStyle={{ width: 150, height: 30 }}
-                                        variant={BUTTON_COMMON_TYPE.CANCEL}
+                                onBarcodeScanned={isReady ? handleBarCodeScan : undefined}
+                                onCameraReady={onCameraReady}
+                                style={[styles.cameraContainer]}
+                                facing={facing}
+                                ratio={'1:1'}
+                                mute={true}
+                            >
+                                <View style={styles.maskOutter}>
+                                    <View
+                                        style={[
+                                            { flex: maskRowHeight },
+                                            styles.maskRow,
+                                            styles.maskFrame,
+                                        ]}
                                     />
-                                </>
-                            )}
-                        </>
-                    )}
+                                    <View style={[{ flex: 30 }, styles.maskCenter]}>
+                                        <View style={[{ width: maskColWidth }, styles.maskFrame]} />
+                                        <View style={styles.maskInner} />
+                                        <View style={[{ width: maskColWidth }, styles.maskFrame]} />
+                                    </View>
+                                    <View
+                                        style={[
+                                            { flex: maskRowHeight },
+                                            styles.maskRow,
+                                            styles.maskFrame,
+                                        ]}
+                                    />
+                                </View>
+                            </CameraView>
+                        </View>
+                    </>
+                )}
+                
+                {managerQc && <ScanQRCodeIcon width={100} height={100} />}
+                <FlexBox direction="row" justifyContent="center" alignItems="center">
+                    <TextWrapper fontSize={18}>
+                        {managerQc ? 'Quản lý: ' : 'Nhân viên: '}
+                    </TextWrapper>
+                    <TextWrapper fontSize={24} color={themeVariables.colors.primary}>
+                        {user?.userName},{user?.fullName}
+                    </TextWrapper>
                 </FlexBox>
 
-                {scanResult && showConfirmResultCode && (
-                    <ConfirmScanCodeModal
-                        scanResult={scanResult}
-                        modalProps={{
-                            visible: showConfirmResultCode,
-                            onClose: () => setShowConfirmResultCode(false),
-                        }}
-                    />
+                {!managerQc && <ListProductPlanForQC />}
+
+                <AppButton
+                    label="Quét mã công tác sản xuất"
+                    onPress={handleScanScreen}
+                    viewStyle={{ width: '80%', marginTop: 10, marginBottom: managerQc ? 0 : 30 }}
+                    labelStyle={{ fontSize: 18 }}
+                    variant={BUTTON_COMMON_TYPE.PRIMARY_OUTLINE}
+                />
+                {managerQc && (
+                    <>
+                        <AppButton
+                            label="Quản lý sản phẩm"
+                            onPress={handleManageProduct}
+                            viewStyle={{ width: '80%', marginTop: 10 }}
+                            labelStyle={{ fontSize: 18 }}
+                            variant={BUTTON_COMMON_TYPE.PRIMARY_OUTLINE}
+                        />
+
+                        <AppButton
+                            label="Phân công QC"
+                            onPress={handlePlanAssignment}
+                            viewStyle={{ width: '80%', marginTop: 10 }}
+                            labelStyle={{ fontSize: 18 }}
+                            variant={BUTTON_COMMON_TYPE.PRIMARY_OUTLINE}
+                        />
+                    </>
                 )}
-            </SafeAreaView>
+
+                <AppButton
+                    label="Đăng xuất"
+                    onPress={handleLogout}
+                    viewStyle={{
+                        width: '80%',
+                        marginTop: 20,
+                        position: 'absolute',
+                        bottom: 0,
+                    }}
+                    variant={BUTTON_COMMON_TYPE.CANCEL}
+                />
+
+                {!permission && (
+                    <>
+                        <TextWrapper>Không có quyền truy cập Camera</TextWrapper>
+                        <AppButton
+                            label="Cấp quyền"
+                            onPress={requestPermission}
+                            viewStyle={{ width: 150, height: 30 }}
+                            variant={BUTTON_COMMON_TYPE.CANCEL}
+                        />
+                    </>
+                )}
+            </FlexBox>
+
+            {scanResult && showConfirmResultCode && (
+                <ConfirmScanCodeModal
+                    scanResult={scanResult}
+                    modalProps={{
+                        visible: showConfirmResultCode,
+                        onClose: () => setShowConfirmResultCode(false),
+                    }}
+                />
+            )}
+        </SafeAreaView>
         // </KeyboardAvoidingView>
     );
 };

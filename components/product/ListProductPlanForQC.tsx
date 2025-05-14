@@ -242,6 +242,7 @@ export const styling = (themeVariables: IThemeVariables) =>
             paddingVertical: 15,
             borderBottomWidth: 1,
             paddingHorizontal: 10,
+            marginBottom: 1,
             borderBottomColor: themeVariables.colors.borderLightColor,
             gap: 10,
         },
