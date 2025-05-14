@@ -169,7 +169,7 @@ const HomeScreen = () => {
                 {!managerQc && <ListProductPlanForQC />}
 
                 <AppButton
-                    label="Quét mã công tác sản xuất"
+                    label="Quét mã máy ép"
                     onPress={handleScanScreen}
                     viewStyle={{ width: '80%', marginTop: 10, marginBottom: managerQc ? 0 : 30 }}
                     labelStyle={{ fontSize: 18 }}
