@@ -16,7 +16,8 @@
         "deploy:android": "eas submit --platform android",
         "build:ios--staging": "eas build --profile preview --platform ios",
         "build:ios--production": "eas build --profile production --platform ios",
-        "deploy:ios": "eas submit --platform ios"
+        "deploy:ios": "eas submit --platform ios",
+        "auto-update": "eas update --branch main --auto"
     },
     "jest": {
         "preset": "jest-expo"

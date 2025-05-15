@@ -83,6 +83,10 @@ const HomeScreen = () => {
         router.push(SCREEN_KEY.assignPlanQC);
     };
 
+    const handleEmployee = () => {
+        router.push(SCREEN_KEY.employee);
+    };
+
     return (
         // <KeyboardAvoidingView behavior={isIOS ? 'padding' : 'height'}>
         <SafeAreaView style={styles.container}>
@@ -178,6 +182,14 @@ const HomeScreen = () => {
                 {managerQc && (
                     <>
                         <AppButton
+                            label="Phân công nhân viên QC"
+                            onPress={handlePlanAssignment}
+                            viewStyle={{ width: '80%', marginTop: 10 }}
+                            labelStyle={{ fontSize: 18 }}
+                            variant={BUTTON_COMMON_TYPE.PRIMARY_OUTLINE}
+                        />
+
+                        <AppButton
                             label="Quản lý sản phẩm"
                             onPress={handleManageProduct}
                             viewStyle={{ width: '80%', marginTop: 10 }}
@@ -186,8 +198,8 @@ const HomeScreen = () => {
                         />
 
                         <AppButton
-                            label="Phân công QC"
-                            onPress={handlePlanAssignment}
+                            label="Quản lý nhân viên"
+                            onPress={handleEmployee}
                             viewStyle={{ width: '80%', marginTop: 10 }}
                             labelStyle={{ fontSize: 18 }}
                             variant={BUTTON_COMMON_TYPE.PRIMARY_OUTLINE}
