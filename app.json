@@ -76,7 +76,9 @@
       },
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSAppTransportSecurity": { "NSAllowsArbitraryLoads": true }
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
       }
     },
     "android": {
@@ -129,7 +131,9 @@
             "flipper": true
           }
         }
-      ]
+      ],
+      "expo-font",
+      "expo-web-browser"
     ],
     "updates": {
       "enabled": true,
