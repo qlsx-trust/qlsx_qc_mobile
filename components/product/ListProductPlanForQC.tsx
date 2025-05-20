@@ -150,7 +150,7 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
                         <TouchableOpacity
                             onPress={() => handleConfirmCode(item.machineCode)}
                             key={`product-item-${item.id}`}
-                            style={{width: '49.5%'}}
+                           style={{width: '50%'}}
                         >
                             <FlexBox
                                 direction="column"

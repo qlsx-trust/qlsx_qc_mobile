@@ -167,7 +167,7 @@ const PlanAssignmentScreen = () => {
                                 setSelectedProductPlan(item);
                                 setShowAssignQcModal(true);
                             }}
-                            style={{width: '49.5%'}}
+                            style={{width: '50%'}}
                         >
                             <FlexBox
                                 direction="column"

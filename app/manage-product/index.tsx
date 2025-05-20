@@ -151,7 +151,7 @@ const productionManagementScreen = () => {
                         <TouchableOpacity
                             key={`product-item-${item.id}`}
                             onPress={() => handleGoDetailProduct(item)}
-                            style={{width: '49.5%'}}
+                            style={{width: '50%'}}
                         >
                             <FlexBox
                                 direction="column"
@@ -231,7 +231,7 @@ export const styling = (themeVariables: IThemeVariables) =>
         },
         header: {
             width: '100%',
-            paddingHorizontal: containerStyles.paddingHorizontal,
+            paddingHorizontal: containerStyles.paddingHorizontal /2,
             marginBottom: 10,
         },
         productCardItem: {
