@@ -143,6 +143,7 @@ const productionManagementScreen = () => {
                 onRefreshing={() => {
                     handleRefreshProduct();
                 }}
+                numColumns={3}
                 onLoadMore={handleLoadMoreProduct}
                 listData={products}
                 renderItemComponent={(item: IProduct) => {
@@ -150,6 +151,7 @@ const productionManagementScreen = () => {
                         <TouchableOpacity
                             key={`product-item-${item.id}`}
                             onPress={() => handleGoDetailProduct(item)}
+                            style={{width: '33%'}}
                         >
                             <FlexBox
                                 direction="column"
@@ -157,11 +159,11 @@ const productionManagementScreen = () => {
                                 alignItems="flex-start"
                                 style={styles.productCardItem}
                             >
-                                <TextWrapper fontSize={16}>{item.productName}</TextWrapper>
+                                <TextWrapper fontSize={16} numberOfLines={1}>{item.productName}</TextWrapper>
                                 <FlexBox
                                     style={{ width: '100%' }}
                                     justifyContent="flex-start"
-                                    gap={10}
+                                    gap={5}
                                 >
                                     <TextWrapper
                                         fontSize={12}
@@ -182,9 +184,10 @@ const productionManagementScreen = () => {
                                                 <NoteIcon width={16} height={16} />
                                                 <TextWrapper
                                                     fontSize={12}
+                                                    numberOfLines={1}
                                                     color={themeVariables.colors.subTextDefault}
                                                 >
-                                                    {item.checkItems?.length} tiêu chí đánh giá
+                                                    {item.checkItems?.length} tiêu chí
                                                 </TextWrapper>
                                             </FlexBox>
                                         ) : null}
@@ -234,8 +237,10 @@ export const styling = (themeVariables: IThemeVariables) =>
         productCardItem: {
             paddingVertical: 15,
             paddingHorizontal: 15,
-            borderBottomWidth: 1,
-            borderBottomColor: themeVariables.colors.borderLightColor,
+            borderWidth: 0.5,
+            marginBottom: 1,
+            marginRight: 1,
+            borderColor: themeVariables.colors.borderLightColor,
             gap: 10,
         },
     });

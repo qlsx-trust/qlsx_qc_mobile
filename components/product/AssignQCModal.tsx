@@ -9,6 +9,7 @@ import { useThemeContext } from '@/providers/ThemeProvider';
 import { CommonRepository } from '@/repositories/CommonRepository';
 import { IThemeVariables } from '@/shared/theme/themes';
 import { IEmployee } from '@/types/employee';
+import { PromiseAllSettled } from '@/utils/Mixed';
 import { toast } from '@/utils/ToastMessage';
 import { AntDesign, Entypo, Feather } from '@expo/vector-icons';
 import { BarcodeScanningResult, CameraType, CameraView, useCameraPermissions } from 'expo-camera';
@@ -112,14 +113,7 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
                 productionPlanId: productPlan?.id,
                 qcAssign: userCode,
             };
-            const res = await CommonRepository.deleteAssignQCProductPlan(payload);
-            if (!res.error && res.data) {
-                PubSub.publish(PUB_TOPIC.RECALL_PRODUCTION_PLAN);
-                toast.success('Hủy phân công thành công');
-                setAssignedQc(assignedQc.filter((code) => code != userCode));
-            } else {
-                toast.error('Hủy phân công thất bại');
-            }
+            await CommonRepository.deleteAssignQCProductPlan(payload);
         } catch (err) {
             console.error(err);
         } finally {
@@ -141,6 +135,12 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
                     return;
                 }
             }
+
+            if (assignedQc?.length) {
+                const removeAssigedQcpromises = assignedQc.map((qc) => deleteAssignQc(qc));
+                await PromiseAllSettled(removeAssigedQcpromises);
+                setAssignedQc([]);
+            }
             setErrorCheckCode('');
             const payload = {
                 productionPlanId: productPlan?.id,
@@ -150,11 +150,11 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
             if (!res.error && res.data) {
                 PubSub.publish(PUB_TOPIC.RECALL_PRODUCTION_PLAN);
                 setRecallEmployee(new Date().getTime());
-                toast.success('Thêm phân công thành công');
-                setAssignedQc([...assignedQc, qcCode]);
+                toast.success('Phân công thành công');
+                setAssignedQc([qcCode]);
                 setOtherQcCode('');
             } else {
-                toast.error('Thêm phân công thất bại');
+                toast.error('Phân công thất bại');
             }
         } catch (err) {
             console.error(err);
@@ -164,6 +164,7 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
     };
 
     const getFullNameCodeQc = (qcCode: string) => {
+        if (!qcCode) return 'Trống';
         const selectedEmployee = (employees || []).find(
             (employee) => employee.employeeCode == qcCode
         );
@@ -244,9 +245,18 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
                             justifyContent="center"
                             alignItems="center"
                             gap={5}
-                            style={{ marginTop: 20, }}
+                            style={{ marginTop: 20, width: '100%' }}
                         >
-                            <TextWrap style={styles.description}>Chọn nhân viên:</TextWrap>
+                            <TextWrap
+                                style={{
+                                    ...styles.description,
+                                    width: '100%',
+                                    paddingLeft: 10,
+                                    textAlign: 'left',
+                                }}
+                            >
+                                Chọn nhân viên:
+                            </TextWrap>
                             <SelectDropdown
                                 key={assignedQc?.length}
                                 data={selectEmployeeOptions}
@@ -293,7 +303,10 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
                                 renderItem={(item: any, index, isSelected) => {
                                     const isSelectedQc =
                                         isSelected ||
-                                        assignedQc.find((code: string) => code == item.value || code == item.title);
+                                        assignedQc.find(
+                                            (code: string) =>
+                                                code == item.value || code == item.title
+                                        );
                                     return (
                                         <View
                                             style={{
@@ -319,6 +332,7 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
                                 width={'100%'}
                                 justifyContent="flex-start"
                                 alignItems="flex-start"
+                                style={{ paddingHorizontal: 10, marginBottom: 20 }}
                             >
                                 <TextWrap style={styles.description}>Mã nhân viên khác:</TextWrap>
                                 <TextInput
@@ -360,46 +374,25 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
                             </FlexBox>
                         )}
 
-                        <ScrollView>
-                            <FlexBox
-                                direction="column"
-                                justifyContent="flex-start"
-                                alignItems="flex-start"
-                                gap={5}
+                        <FlexBox
+                            direction="row"
+                            justifyContent="flex-start"
+                            alignItems="flex-start"
+                            gap={5}
+                            style={{ width: '100%', paddingHorizontal: 10, marginBottom: 20 }}
+                        >
+                            <TextWrap style={styles.description}>Kết quả phân công:</TextWrap>
+                            <TextWrap
+                                fontSize={18}
+                                color={
+                                    assignedQc?.length
+                                        ? themeVariables.colors.primary
+                                        : themeVariables.colors.danger
+                                }
                             >
-                                {assignedQc?.map((qcCode) => (
-                                    <FlexBox
-                                        style={{
-                                            width: '100%',
-                                            paddingVertical: 5,
-                                            paddingHorizontal: 10,
-                                            borderBottomWidth: 0.5,
-                                            borderColor: themeVariables.colors.borderLightColor,
-                                        }}
-                                        justifyContent="space-between"
-                                        alignItems="center"
-                                        key={`qc-code-${qcCode}`}
-                                    >
-                                        <TextWrap fontSize={16}>
-                                            {getFullNameCodeQc(qcCode)}
-                                        </TextWrap>
-                                        {isLoadingDelete == qcCode ? (
-                                            <ActivityIndicator size={16} />
-                                        ) : (
-                                            <TouchableOpacity
-                                                onPress={() => deleteAssignQc(qcCode)}
-                                            >
-                                                <AntDesign
-                                                    name="close"
-                                                    size={24}
-                                                    color={themeVariables.colors.danger}
-                                                />
-                                            </TouchableOpacity>
-                                        )}
-                                    </FlexBox>
-                                ))}
-                            </FlexBox>
-                        </ScrollView>
+                                {getFullNameCodeQc(assignedQc[0])}
+                            </TextWrap>
+                        </FlexBox>
 
                         <AppButton
                             variant={BUTTON_COMMON_TYPE.CANCEL}

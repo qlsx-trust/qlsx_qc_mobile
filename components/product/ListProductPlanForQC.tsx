@@ -1,16 +1,18 @@
-import { PAGE_SIZE } from '@/constants/common';
-import { IProductionPlan } from '@/providers/ProductionPlanProvider';
+import { PAGE_SIZE, SCREEN_KEY } from '@/constants/common';
+import { IProductionPlan, useProductionPlanContext } from '@/providers/ProductionPlanProvider';
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { CommonRepository } from '@/repositories/CommonRepository';
 import { IThemeVariables } from '@/shared/theme/themes';
 import Moment from 'moment';
 import { useEffect, useState } from 'react';
-import { Dimensions, StyleSheet } from 'react-native';
+import { Dimensions, StyleSheet, TouchableOpacity } from 'react-native';
 import SearchBar from '../SearchBar';
 import EmptyFolder from '../common/EmptyList/EmptyFolder';
 import FlatListCustom from '../common/FlatListCustom';
 import FlexBox from '../common/FlexBox';
 import TextWrapper from '../common/TextWrap';
+import { router } from 'expo-router';
+import { toast } from '@/utils/ToastMessage';
 
 interface IListProductPlanForQCProps {}
 
@@ -19,6 +21,7 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
 
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
+    const { updateProductionPlan } = useProductionPlanContext();
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isLoadMore, setIsLoadMore] = useState<boolean>(false);
@@ -109,6 +112,17 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
         return '#e3e2e2';
     };
 
+    const handleConfirmCode = async (machineCode: string) => {
+        try {
+            const response = await CommonRepository.getMostRecentProductionPlan(machineCode);
+            updateProductionPlan(response.data);
+            router.push(`${SCREEN_KEY.product}`);
+        } catch (error) {
+            toast.error('Mã máy không hợp lệ, vui lòng thử lại');
+        } finally {
+        }
+    };
+
     return (
         <>
             <FlexBox
@@ -130,51 +144,65 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
                 }}
                 onLoadMore={handleLoadMoreProduct}
                 listData={productPlans}
+                numColumns={3}
                 renderItemComponent={(item: IProductionPlan) => {
                     return (
-                        <FlexBox
+                        <TouchableOpacity
+                            onPress={() => handleConfirmCode(item.machineCode)}
                             key={`product-item-${item.id}`}
-                            direction="column"
-                            justifyContent="flex-start"
-                            alignItems="flex-start"
-                            style={{
-                                ...styles.productCardItem,
-                                backgroundColor: checkTimeBackground(item),
-                            }}
+                            style={{width: '33%'}}
                         >
-                            <TextWrapper fontSize={16}>Mã máy: {item.machineCode}</TextWrapper>
-                            <FlexBox style={{ width: '100%' }} justifyContent="flex-start" gap={10}>
-                                <TextWrapper
-                                    fontSize={12}
-                                    color={themeVariables.colors.primary}
-                                    numberOfLines={1}
+                            <FlexBox
+                                direction="column"
+                                justifyContent="flex-start"
+                                alignItems="flex-start"
+                                style={{
+                                    ...styles.productCardItem,
+                                    backgroundColor: checkTimeBackground(item),
+                                }}
+                            >
+                                <TextWrapper fontSize={16}>Mã máy: {item.machineCode}</TextWrapper>
+                                <FlexBox
+                                    style={{ width: '100%' }}
+                                    justifyContent="flex-start"
+                                    gap={10}
                                 >
-                                    {item.productCode}
-                                </TextWrapper>
-                                <TextWrapper
-                                    fontSize={12}
-                                    color={themeVariables.colors.subTextDefault}
-                                    numberOfLines={1}
+                                    <TextWrapper
+                                        fontSize={12}
+                                        color={themeVariables.colors.primary}
+                                        numberOfLines={1}
+                                    >
+                                        {item.productCode}
+                                    </TextWrapper>
+                                    <TextWrapper
+                                        fontSize={12}
+                                        color={themeVariables.colors.subTextDefault}
+                                        numberOfLines={1}
+                                    >
+                                        {item.productName}
+                                    </TextWrapper>
+                                </FlexBox>
+                                <FlexBox
+                                    style={{ width: '100%' }}
+                                    justifyContent="flex-start"
+                                    gap={10}
                                 >
-                                    {item.productName}
-                                </TextWrapper>
+                                    <TextWrapper
+                                        fontSize={12}
+                                        color={themeVariables.colors.subTextDefault}
+                                        numberOfLines={1}
+                                    >
+                                        {Moment(item?.productionStartTime || '').format(
+                                            'MM/DD/YYYY HH:mm'
+                                        )}{' '}
+                                        -{' '}
+                                        {Moment(item?.productionEndTime || '').format(
+                                            'MM/DD/YYYY HH:mm'
+                                        )}
+                                    </TextWrapper>
+                                </FlexBox>
                             </FlexBox>
-                            <FlexBox style={{ width: '100%' }} justifyContent="flex-start" gap={10}>
-                                <TextWrapper
-                                    fontSize={12}
-                                    color={themeVariables.colors.subTextDefault}
-                                    numberOfLines={1}
-                                >
-                                    {Moment(item?.productionStartTime || '').format(
-                                        'MM/DD/YYYY HH:mm'
-                                    )}{' '}
-                                    -{' '}
-                                    {Moment(item?.productionEndTime || '').format(
-                                        'MM/DD/YYYY HH:mm'
-                                    )}
-                                </TextWrapper>
-                            </FlexBox>
-                        </FlexBox>
+                        </TouchableOpacity>
                     );
                 }}
                 renderEmptyComponent={() => (
@@ -240,10 +268,11 @@ export const styling = (themeVariables: IThemeVariables) =>
         },
         productCardItem: {
             paddingVertical: 15,
-            borderBottomWidth: 1,
+            borderWidth: 0.5,
             paddingHorizontal: 10,
             marginBottom: 1,
-            borderBottomColor: themeVariables.colors.borderLightColor,
+            marginRight:1,
+            borderColor: themeVariables.colors.borderLightColor,
             gap: 10,
         },
     });

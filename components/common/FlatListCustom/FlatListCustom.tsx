@@ -13,6 +13,7 @@ interface IFlatListCustomProps {
     renderItemComponent: Function;
     renderEmptyComponent: Function;
     styleMore?: any;
+    numColumns?: number;
 }
 
 const FlatListCustom = ({
@@ -25,6 +26,7 @@ const FlatListCustom = ({
     renderItemComponent,
     renderEmptyComponent,
     styleMore,
+    numColumns = 1,
 }: IFlatListCustomProps) => {
     const dimensions = Dimensions.get('window');
 
@@ -55,6 +57,7 @@ const FlatListCustom = ({
                     </View>
                 );
             }}
+            numColumns={numColumns}
             onEndReachedThreshold={0.3}
             onEndReached={() => {
                 if (isLoading || isLoadMore) {

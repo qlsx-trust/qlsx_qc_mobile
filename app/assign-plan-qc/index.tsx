@@ -156,6 +156,7 @@ const PlanAssignmentScreen = () => {
                 onRefreshing={() => {
                     handleRefreshProduct();
                 }}
+                numColumns={3}
                 onLoadMore={handleLoadMoreProduct}
                 listData={productPlans}
                 renderItemComponent={(item: IProductionPlan) => {
@@ -166,6 +167,7 @@ const PlanAssignmentScreen = () => {
                                 setSelectedProductPlan(item);
                                 setShowAssignQcModal(true);
                             }}
+                            style={{width: '33%'}}
                         >
                             <FlexBox
                                 direction="column"
@@ -289,9 +291,10 @@ export const styling = (themeVariables: IThemeVariables) =>
         productCardItem: {
             paddingVertical: 15,
             marginBottom: 1,
+            marginRight:1,
             paddingHorizontal: 15,
-            borderBottomWidth: 1,
-            borderBottomColor: themeVariables.colors.borderLightColor,
+            borderWidth: 0.5,
+            borderColor: themeVariables.colors.borderLightColor,
             gap: 10,
         },
     });

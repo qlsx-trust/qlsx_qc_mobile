@@ -74,14 +74,12 @@ const ImageSelection = ({ setShowCamera, setImageUrl }: Props) => {
     };
 
     const pickImage = async () => {
-        console.log('go');
         let pickerResult = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
             aspect: [4, 3],
             quality: 1,
         });
-        console.log(pickerResult);
         if (pickerResult.canceled) {
             return;
         }
@@ -199,13 +197,6 @@ const ImageSelection = ({ setShowCamera, setImageUrl }: Props) => {
                         <TouchableOpacity onPress={updateFlashmode} style={styles.flashButton}>
                             <MaterialIcons name={flashMode.icon as any} size={26} color={'#fff'} />
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={changeTypeCamera} style={styles.buttonTakePhoto}>
-                            <CameraRotateIcon
-                                width={35}
-                                height={35}
-                                color={themeVariables.colors.textOnImageStrong}
-                            />
-                        </TouchableOpacity>
                     </>
                 )}
                 <TouchableOpacity onPress={cancelCamera} style={styles.closeButton}>
@@ -291,14 +282,29 @@ const ImageSelection = ({ setShowCamera, setImageUrl }: Props) => {
             ) : (
                 <FlexBox
                     direction="row"
-                    justifyContent="center"
+                    justifyContent="space-between"
                     alignItems="center"
                     style={{ height: 120, paddingHorizontal: 20 }}
                 >
-                    <TouchableOpacity onPress={takePicture} style={{}}>
+                    
+                    <TouchableOpacity onPress={changeTypeCamera} style={styles.buttonTakePhoto}>
+                        <CameraRotateIcon
+                            width={35}
+                            height={35}
+                            color={themeVariables.colors.textOnImageStrong}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={takePicture} style={styles.buttonTakePhoto}>
                         <TakePictureIcon
                             width={80}
                             height={80}
+                            color={themeVariables.colors.textOnImageStrong}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={pickImage} style={styles.buttonTakePhoto}>
+                        <Entypo
+                            name="folder-images"
+                            size={30}
                             color={themeVariables.colors.textOnImageStrong}
                         />
                     </TouchableOpacity>
@@ -335,10 +341,11 @@ export const styling = (themeVariables: IThemeVariables) =>
             fontSize: 18,
         },
         buttonTakePhoto: {
-            position: 'absolute',
-            top: 55,
-            left: 60,
-            zIndex: 110,
+            width: 60,
+            height: 60,
+            padding: 12,
+            justifyContent: 'center',
+            alignItems: 'center',
         },
         closeBox: {
             height: 100,
