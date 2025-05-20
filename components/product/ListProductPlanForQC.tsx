@@ -144,13 +144,13 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
                 }}
                 onLoadMore={handleLoadMoreProduct}
                 listData={productPlans}
-                numColumns={3}
+                numColumns={2}
                 renderItemComponent={(item: IProductionPlan) => {
                     return (
                         <TouchableOpacity
                             onPress={() => handleConfirmCode(item.machineCode)}
                             key={`product-item-${item.id}`}
-                            style={{width: '33%'}}
+                            style={{width: '49.5%'}}
                         >
                             <FlexBox
                                 direction="column"
@@ -170,7 +170,6 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
                                     <TextWrapper
                                         fontSize={12}
                                         color={themeVariables.colors.primary}
-                                        numberOfLines={1}
                                     >
                                         {item.productCode}
                                     </TextWrapper>

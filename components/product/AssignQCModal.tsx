@@ -257,6 +257,7 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
                             >
                                 Chọn nhân viên:
                             </TextWrap>
+                            <FlexBox style={{width: '100%'}} justifyContent='flex-start' alignItems='flex-start'>
                             <SelectDropdown
                                 key={assignedQc?.length}
                                 data={selectEmployeeOptions}
@@ -324,6 +325,7 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
                                 showsVerticalScrollIndicator={false}
                                 dropdownStyle={styles.dropdownMenuStyle}
                             />
+                            </FlexBox>
                         </FlexBox>
 
                         {showOtherUser && (

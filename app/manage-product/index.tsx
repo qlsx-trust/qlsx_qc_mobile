@@ -143,7 +143,7 @@ const productionManagementScreen = () => {
                 onRefreshing={() => {
                     handleRefreshProduct();
                 }}
-                numColumns={3}
+                numColumns={2}
                 onLoadMore={handleLoadMoreProduct}
                 listData={products}
                 renderItemComponent={(item: IProduct) => {
@@ -151,7 +151,7 @@ const productionManagementScreen = () => {
                         <TouchableOpacity
                             key={`product-item-${item.id}`}
                             onPress={() => handleGoDetailProduct(item)}
-                            style={{width: '33%'}}
+                            style={{width: '49.5%'}}
                         >
                             <FlexBox
                                 direction="column"
