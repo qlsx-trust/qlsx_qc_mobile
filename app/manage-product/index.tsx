@@ -11,10 +11,10 @@ import { useThemeContext } from '@/providers/ThemeProvider';
 import { CommonRepository } from '@/repositories/CommonRepository';
 import { containerStyles, IThemeVariables } from '@/shared/theme/themes';
 import { IProduct } from '@/types/product';
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { SafeAreaView, StyleSheet, TouchableOpacity } from 'react-native';
+import { SafeAreaView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 const productionManagementScreen = () => {
     const { themeVariables } = useThemeContext();
@@ -30,6 +30,10 @@ const productionManagementScreen = () => {
     const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout>();
     const [filterParams, setFilterParams] = useState<{ name: string }>({ name: '' });
 
+    const [numOfItemLine, setNumOfItemLine] = useState<number>(2);
+
+    const isGridView = numOfItemLine == 2;
+
     /**
      * get list product
      */
@@ -38,8 +42,8 @@ const productionManagementScreen = () => {
         try {
             firstCall ? setIsLoading(true) : setIsLoadMore(true);
             const params = {
-                Skip: (pageNumber - 1) * PAGE_SIZE.DEFAULT,
-                Take: PAGE_SIZE.DEFAULT,
+                Skip: (pageNumber - 1) * PAGE_SIZE.PRODUCT,
+                Take: PAGE_SIZE.PRODUCT,
                 Keyword: filterParams.name,
             };
             const res = await CommonRepository.getListProduct(params);
@@ -125,7 +129,7 @@ const productionManagementScreen = () => {
                             name="arrowleft"
                             size={20}
                             color={themeVariables.colors.bgRevert}
-                            style={{marginRight: 5}}
+                            style={{ marginRight: 5 }}
                         />
 
                         <TextWrapper fontSize={20} fontWeight="bold">
@@ -134,6 +138,34 @@ const productionManagementScreen = () => {
                     </FlexBox>
                 </TouchableOpacity>
                 <SearchBar handleSearchText={debouncedSearch} placeHolder="Tìm kiếm ..." />
+
+                <FlexBox justifyContent="space-between" style={{ width: '100%' }}>
+                    <View></View>
+                    <FlexBox gap={10}>
+                        <TouchableOpacity onPress={() => setNumOfItemLine(1)}>
+                            <MaterialCommunityIcons
+                                name="table-of-contents"
+                                size={40}
+                                color={
+                                    !isGridView
+                                        ? themeVariables.colors.primary
+                                        : themeVariables.colors.textDefault
+                                }
+                            />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => setNumOfItemLine(2)}>
+                            <MaterialIcons
+                                name="grid-view"
+                                size={30}
+                                color={
+                                    isGridView
+                                        ? themeVariables.colors.primary
+                                        : themeVariables.colors.textDefault
+                                }
+                            />
+                        </TouchableOpacity>
+                    </FlexBox>
+                </FlexBox>
             </FlexBox>
             {/* List of folder */}
             <FlatListCustom
@@ -143,7 +175,8 @@ const productionManagementScreen = () => {
                 onRefreshing={() => {
                     handleRefreshProduct();
                 }}
-                numColumns={2}
+                numColumns={numOfItemLine}
+                key={`view-${numOfItemLine}`}
                 onLoadMore={handleLoadMoreProduct}
                 listData={products}
                 renderItemComponent={(item: IProduct) => {
@@ -151,7 +184,7 @@ const productionManagementScreen = () => {
                         <TouchableOpacity
                             key={`product-item-${item.id}`}
                             onPress={() => handleGoDetailProduct(item)}
-                            style={{width: '50%'}}
+                            style={{ width: numOfItemLine == 1 ? '100%' : '50%' }}
                         >
                             <FlexBox
                                 direction="column"
@@ -159,7 +192,9 @@ const productionManagementScreen = () => {
                                 alignItems="flex-start"
                                 style={styles.productCardItem}
                             >
-                                <TextWrapper fontSize={16} numberOfLines={1}>{item.productName}</TextWrapper>
+                                <TextWrapper fontSize={16} numberOfLines={1}>
+                                    {item.productName}
+                                </TextWrapper>
                                 <FlexBox
                                     style={{ width: '100%' }}
                                     justifyContent="flex-start"
@@ -231,15 +266,15 @@ export const styling = (themeVariables: IThemeVariables) =>
         },
         header: {
             width: '100%',
-            paddingHorizontal: containerStyles.paddingHorizontal /2,
+            paddingHorizontal: containerStyles.paddingHorizontal / 2,
             marginBottom: 10,
         },
         productCardItem: {
             paddingVertical: 15,
             paddingHorizontal: 15,
             borderWidth: 0.5,
-            marginBottom: 1,
-            marginRight: 1,
+            marginBottom: 2,
+            marginRight: 2,
             borderColor: themeVariables.colors.borderLightColor,
             gap: 10,
         },

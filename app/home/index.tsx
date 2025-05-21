@@ -1,7 +1,7 @@
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { IThemeVariables } from '@/shared/theme/themes';
 import Feather from '@expo/vector-icons/Feather';
-import { Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -14,10 +14,11 @@ import ListProductPlanForQC from '@/components/product/ListProductPlanForQC';
 import { BUTTON_COMMON_TYPE, SCREEN_KEY, UserRole } from '@/constants/common';
 import { useAuthContext } from '@/providers/UserProvider';
 import { AntDesign } from '@expo/vector-icons';
-import { Audio } from 'expo-av';
 import { BarcodeScanningResult, CameraType, CameraView, useCameraPermissions } from 'expo-camera';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
+const Logo = require('@/assets/iot-logo.jpeg');
+
 const HomeScreen = () => {
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
@@ -48,17 +49,7 @@ const HomeScreen = () => {
     function toggleCameraFacing() {
         setFacing((current) => (current === 'back' ? 'front' : 'back'));
     }
-
-    // Play beep sound
-    const playBeep = async () => {
-        try {
-            const { sound } = await Audio.Sound.createAsync(require('../../assets/beep.mp3'));
-            await sound.playAsync();
-        } catch (error) {
-            console.log('Error playing sound:', error);
-        }
-    };
-
+    
     const handleLogout = () => {
         logout();
     };
@@ -160,7 +151,7 @@ const HomeScreen = () => {
                     </>
                 )}
                 
-                {managerQc && <ScanQRCodeIcon width={100} height={100} />}
+                {managerQc &&   <Image source={Logo} width={50} height={50}/>}
                 <FlexBox direction="row" justifyContent="center" alignItems="center">
                     <TextWrapper fontSize={18}>
                         {managerQc ? 'Quản lý: ' : 'Nhân viên: '}
@@ -182,25 +173,25 @@ const HomeScreen = () => {
                 {managerQc && (
                     <>
                         <AppButton
-                            label="Phân công nhân viên QC"
+                            label="Phân công CTSX"
                             onPress={handlePlanAssignment}
-                            viewStyle={{ width: '80%', marginTop: 10 }}
+                            viewStyle={{ width: '80%', marginTop: 20 }}
                             labelStyle={{ fontSize: 18 }}
                             variant={BUTTON_COMMON_TYPE.PRIMARY_OUTLINE}
                         />
 
                         <AppButton
-                            label="Quản lý sản phẩm"
+                            label="Thiết lập tiêu chí đánh giá ngoại quan"
                             onPress={handleManageProduct}
-                            viewStyle={{ width: '80%', marginTop: 10 }}
+                            viewStyle={{ width: '80%', marginTop: 20 }}
                             labelStyle={{ fontSize: 18 }}
                             variant={BUTTON_COMMON_TYPE.PRIMARY_OUTLINE}
                         />
 
                         <AppButton
-                            label="Quản lý nhân viên"
+                            label="Quản lý nhân viên QC"
                             onPress={handleEmployee}
-                            viewStyle={{ width: '80%', marginTop: 10 }}
+                            viewStyle={{ width: '80%', marginTop: 20 }}
                             labelStyle={{ fontSize: 18 }}
                             variant={BUTTON_COMMON_TYPE.PRIMARY_OUTLINE}
                         />

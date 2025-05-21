@@ -18,6 +18,7 @@ import { Redirect, router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
     Dimensions,
+    Image,
     Keyboard,
     KeyboardAvoidingView,
     StyleSheet,
@@ -25,6 +26,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+const Logo = require('@/assets/iot-logo.jpeg');
 
 interface IntroScreenProps {}
 const IntroScreen: React.FC<IntroScreenProps> = () => {
@@ -185,23 +187,24 @@ const IntroScreen: React.FC<IntroScreenProps> = () => {
                 </>
             ) : (
                 <View style={styles.container}>
-                    {/* <TextWrapper h1>Đăng nhập</TextWrapper> */}
+                   <Image source={Logo} width={50} height={50}/>
                     <TouchableOpacity onPress={() => setShowCamera(true)}>
-                        <FlexBox gap={10} style={{ marginVertical: 30 }}>
+                        <FlexBox gap={15} style={{ marginVertical: 30 }} direction='column'>
+                            <TextWrap fontSize={24} color={themeVariables.colors.primary}>
+                                Nhấn quét mã đăng nhập
+                            </TextWrap>
                             <AntDesign
                                 name="scan1"
-                                size={24}
+                                size={80}
                                 color={themeVariables.colors.primary}
                             />
-                            <TextWrap fontSize={24} color={themeVariables.colors.primary}>
-                                Quét mã đăng nhập
-                            </TextWrap>
                         </FlexBox>
                     </TouchableOpacity>
 
-                    <View>
-                        <TextWrapper>Hoặc</TextWrapper>
+                    <View style={{marginVertical: 30}}>
+                        <TextWrapper>Hoặc nhập</TextWrapper>
                     </View>
+
                     <FlexBox
                         direction="column"
                         style={{ width: 400 }}
@@ -220,7 +223,7 @@ const IntroScreen: React.FC<IntroScreenProps> = () => {
                             value={username}
                             onChangeText={setUsername}
                             placeholderTextColor={themeVariables.colors.bgGrey}
-                            placeholder="mã nhân viên"
+                            placeholder="Mã nhân viên"
                         />
                     </FlexBox>
                     <FlexBox justifyContent="space-between" gap={16} style={{ marginTop: 30 }}>

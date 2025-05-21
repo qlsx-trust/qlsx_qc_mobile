@@ -75,6 +75,7 @@ export enum UserRole {
 
 export const PAGE_SIZE = {
     DEFAULT: 15,
+    PRODUCT: 30,
     MESSAGE_DEFAULT: 20,
     LOAD_DEFAULT: 20,
 };

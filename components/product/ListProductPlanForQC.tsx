@@ -46,7 +46,7 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
                 Take: PAGE_SIZE.DEFAULT,
                 Keyword: filterParams.name,
             };
-            const res = await CommonRepository.getListProductionPlan(params);
+            const res = await CommonRepository.getListProductionPlanQC(params);
             if (!res.error) {
                 const data = res.data;
                 if (data?.items) {

@@ -13,13 +13,14 @@ import { IThemeVariables } from '@/shared/theme/themes';
 import { IProductCheckItem } from '@/types/product';
 import { getDataStorage, setDataStorage } from '@/utils/KeychainHelper';
 import { toast } from '@/utils/ToastMessage';
-import { FontAwesome6 } from '@expo/vector-icons';
+import { FontAwesome6, Ionicons } from '@expo/vector-icons';
 import { Camera } from 'expo-camera';
 import { useEffect, useState } from 'react';
 import {
     Dimensions,
     Image,
     Keyboard,
+    KeyboardAvoidingView,
     Linking,
     StyleSheet,
     TextInput,
@@ -59,7 +60,7 @@ const ManageProductDetailModal = ({
         }
 
         return source;
-    }
+    };
 
     useEffect(() => {
         if (checkItem) {
@@ -108,7 +109,7 @@ const ManageProductDetailModal = ({
     };
 
     return (
-        <>
+        <KeyboardAvoidingView>
             <CommonModal {...modalProps} previewImage={showCamera}>
                 {showCamera && (
                     <ImageSelection setShowCamera={setShowCamera} setImageUrl={setImageUrl} />
@@ -167,19 +168,31 @@ const ManageProductDetailModal = ({
                     style={{ marginTop: 20, marginBottom: 10 }}
                 >
                     <TextWrap style={styles.description}>Ảnh đính kèm</TextWrap>
-                    <TouchableOpacity style={styles.button} onPress={handlePermissionCamera}>
-                        <FontAwesome6
-                            name="camera"
-                            size={24}
-                            color={themeVariables.colors.primary}
-                        />
-                    </TouchableOpacity>
+                    {imageUrl && (
+                        <TouchableOpacity style={styles.button} onPress={handlePermissionCamera}>
+                            <Ionicons
+                                name="camera-reverse-outline"
+                                size={24}
+                                color={themeVariables.colors.primary}
+                            />
+                        </TouchableOpacity>
+                    )}
                 </FlexBox>
-                {imageUrl && (
+                {imageUrl ? (
                     <Image
                         source={{ uri: convertSourceMediaServer(imageUrl) }}
                         style={{ width: '100%', height: 180, objectFit: 'contain' }}
                     />
+                ) : (
+                    <FlexBox style={{ width: '100%' }}>
+                        <TouchableOpacity style={{width: 100, height: 100}} onPress={handlePermissionCamera}>
+                            <FontAwesome6
+                                name="camera"
+                                size={100}
+                                color={themeVariables.colors.primary}
+                            />
+                        </TouchableOpacity>
+                    </FlexBox>
                 )}
                 <FlexBox justifyContent="space-between" gap={16} style={{ marginTop: 20 }}>
                     <AppButton
@@ -196,7 +209,7 @@ const ManageProductDetailModal = ({
                     />
                 </FlexBox>
             </CommonModal>
-        </>
+        </KeyboardAvoidingView>
     );
 };
 

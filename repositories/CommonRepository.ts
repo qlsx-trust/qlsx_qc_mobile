@@ -16,9 +16,9 @@ export const CommonRepository = createRepository({
             method: 'POST',
             data: JSON.stringify(payload),
             headers: {
-                'Accept': 'text/plain',
+                Accept: 'text/plain',
                 'Content-Type': 'application/json',
-            }
+            },
         });
     },
 
@@ -92,7 +92,7 @@ export const CommonRepository = createRepository({
 
     getListProductionPlan(fetch, payload) {
         return fetch<any>(
-            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/production-plans/search?Keyword=${payload.Keyword}&Skip=${payload.Skip}&Take=${payload.Take}`,
+            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/production-plans/search?Keyword=${payload.Keyword}&Skip=${payload.Skip}&Take=${payload.Take}&ProductionStartTime=${payload.ProductionStartTime}&ProductionEndTime=${payload.ProductionEndTime}`,
             {
                 method: 'GET',
             }
@@ -101,7 +101,7 @@ export const CommonRepository = createRepository({
 
     getListProductionPlanQC(fetch, payload) {
         return fetch<any>(
-            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/production-plans/search?Keyword=${payload.Keyword}&Skip=${payload.Skip}&Take=${payload.Take}&ProductionStartTime=${payload.ProductionStartTime}&ProductionEndTime=${payload.ProductionEndTime}`,
+            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/production-plans/search?Keyword=${payload.Keyword}&Skip=${payload.Skip}&Take=${payload.Take}`,
             {
                 method: 'GET',
             }
@@ -116,9 +116,12 @@ export const CommonRepository = createRepository({
     },
 
     checkQCEmployeeCode(fetch, employeeQRCode: string) {
-        return fetch<any>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/employee/get-employee-by-code?employeeQRCode=${employeeQRCode}`, {
-            method: 'GET',
-        });
+        return fetch<any>(
+            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/employee/get-employee-by-code?employeeQRCode=${employeeQRCode}`,
+            {
+                method: 'GET',
+            }
+        );
     },
 
     getQCEmployees(fetch) {
@@ -126,7 +129,6 @@ export const CommonRepository = createRepository({
             method: 'GET',
         });
     },
-
 
     deleteAssignQCProductPlan(fetch, payload: any) {
         return fetch<any>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/production-plan-qcassign`, {

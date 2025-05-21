@@ -7,7 +7,7 @@ import {
     ScrollView,
     StyleSheet,
     TouchableOpacity,
-    Text
+    Text,
 } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -51,7 +51,7 @@ const ProductScreen = () => {
         getProductEvaluation();
     }, [productionPlan]);
 
-    const enableSubmitEvaluation = checkItems?.length && checkItems?.every(item => item.status)
+    const enableSubmitEvaluation = checkItems?.length && checkItems?.every((item) => item.status);
 
     const getProductEvaluation = async () => {
         if (!productionPlan?.productCode) return;
@@ -110,7 +110,9 @@ const ProductScreen = () => {
     };
 
     const handleDeleteCheckItem = (deletedItem: ICheckItem) => {
-        const checkItemsTmp = [...checkItems].filter(item => item.categoryCode != deletedItem.categoryCode);
+        const checkItemsTmp = [...checkItems].filter(
+            (item) => item.categoryCode != deletedItem.categoryCode
+        );
         setCheckItems([...checkItemsTmp]);
     };
 
@@ -150,233 +152,228 @@ const ProductScreen = () => {
     };
 
     return (
-        <KeyboardAvoidingView behavior={isIOS ? 'padding' : 'height'}>
-            <SafeAreaView style={styles.container}>
+        // <KeyboardAvoidingView behavior={isIOS ? 'padding' : 'height'}>
+        <SafeAreaView style={styles.container}>
+            <FlexBox
+                gap={10}
+                height={'100%'}
+                width={'100%'}
+                direction="column"
+                justifyContent="flex-start"
+                alignItems="flex-start"
+            >
+                <TouchableOpacity
+                    onPress={() => {
+                        if (checkedItems > 0 && checkedItems < checkItems.length) {
+                            setShowConfirmModal(true);
+                        } else {
+                            backHomeScreen();
+                        }
+                    }}
+                    style={styles.closeButton}
+                >
+                    <TextWrap
+                        style={{
+                            ...styles.description,
+                            textDecorationLine: 'underline',
+                            fontSize: 16,
+                        }}
+                        color={themeVariables.colors.danger}
+                    >
+                        Quay lại
+                    </TextWrap>
+                </TouchableOpacity>
                 <FlexBox
-                    gap={10}
-                    height={'100%'}
-                    width={'100%'}
+                    gap={15}
                     direction="column"
                     justifyContent="flex-start"
                     alignItems="flex-start"
                 >
-                    <TouchableOpacity
-                        onPress={() => setShowConfirmModal(true)}
-                        style={styles.closeButton}
-                    >
-                        <TextWrap
-                            style={{
-                                ...styles.description,
-                                textDecorationLine: 'underline',
-                                fontSize: 16,
-                            }}
-                            color={themeVariables.colors.danger}
-                        >
-                            Quay lại
+                    <TextWrap style={styles.header} color={themeVariables.colors.textDefault}>
+                        <TextWrap>Mã máy ép:</TextWrap>
+                        <TextWrap color={themeVariables.colors.primary}>
+                            {' '}
+                            {productionPlan?.machineCode}
                         </TextWrap>
-                    </TouchableOpacity>
+                    </TextWrap>
                     <FlexBox
-                        gap={15}
+                        gap={5}
                         direction="column"
                         justifyContent="flex-start"
                         alignItems="flex-start"
                     >
-                        <TextWrap style={styles.header} color={themeVariables.colors.textDefault}>
-                            <TextWrap>Mã máy ép:</TextWrap>
+                        <TextWrap
+                            style={styles.description}
+                            color={themeVariables.colors.textDefault}
+                        >
+                            <TextWrap>Mã SP: </TextWrap>
                             <TextWrap color={themeVariables.colors.primary}>
                                 {' '}
-                                {productionPlan?.machineCode}
+                                {productionPlan?.productCode}
                             </TextWrap>
                         </TextWrap>
-                        <FlexBox
-                            gap={5}
-                            direction="column"
-                            justifyContent="flex-start"
-                            alignItems="flex-start"
+                        <TextWrap
+                            style={styles.description}
+                            color={themeVariables.colors.textDefault}
                         >
-                            <TextWrap
-                                style={styles.description}
-                                color={themeVariables.colors.textDefault}
-                            >
-                                <TextWrap>Mã SP: </TextWrap>
-                                <TextWrap color={themeVariables.colors.primary}>
-                                    {' '}
-                                    {productionPlan?.productCode}
-                                </TextWrap>
+                            <TextWrap>Tên sản phẩm: </TextWrap>
+                            <TextWrap color={themeVariables.colors.primary}>
+                                {' '}
+                                {productionPlan?.productName}
                             </TextWrap>
-                            <TextWrap
-                                style={styles.description}
-                                color={themeVariables.colors.textDefault}
-                            >
-                                <TextWrap>Tên sản phẩm: </TextWrap>
-                                <TextWrap color={themeVariables.colors.primary}>
-                                    {' '}
-                                    {productionPlan?.productName}
-                                </TextWrap>
+                        </TextWrap>
+
+                        <TextWrap
+                            style={styles.description}
+                            color={themeVariables.colors.textDefault}
+                        >
+                            <TextWrap>Khuôn: </TextWrap>
+                            <TextWrap color={themeVariables.colors.primary}>
+                                {' '}
+                                {productionPlan?.moldCode}
                             </TextWrap>
-                            
-                            <TextWrap
-                                style={styles.description}
-                                color={themeVariables.colors.textDefault}
-                            >
-                                <TextWrap>Khuôn: </TextWrap>
-                                <TextWrap color={themeVariables.colors.primary}>
-                                    {' '}
-                                    {productionPlan?.moldCode}
-                                </TextWrap>
-                                <TextWrap> NVL: </TextWrap>
-                                <TextWrap color={themeVariables.colors.primary}>
-                                    {' '}
-                                    {productionPlan?.materialCode}
-                                </TextWrap>
+                            <TextWrap> NVL: </TextWrap>
+                            <TextWrap color={themeVariables.colors.primary}>
+                                {' '}
+                                {productionPlan?.materialCode}
                             </TextWrap>
-                            <TextWrap
-                                style={styles.description}
-                                color={themeVariables.colors.textDefault}
-                            >
-                                <TextWrap>Bắt đầu phiên: </TextWrap>
-                                <TextWrap color={themeVariables.colors.primary}>
-                                    {Moment(productionPlan?.productionStartTime || '').format(
-                                        'MM/DD/YYYY HH:mm'
-                                    )}
-                                </TextWrap>
+                        </TextWrap>
+                        <TextWrap
+                            style={styles.description}
+                            color={themeVariables.colors.textDefault}
+                        >
+                            <TextWrap>Bắt đầu phiên: </TextWrap>
+                            <TextWrap color={themeVariables.colors.primary}>
+                                {Moment(productionPlan?.productionStartTime || '').format(
+                                    'MM/DD/YYYY HH:mm'
+                                )}
                             </TextWrap>
-                            <TextWrap
-                                style={styles.description}
-                                color={themeVariables.colors.textDefault}
-                            >
-                                <TextWrap>kết thúc phiên: </TextWrap>
-                                <TextWrap color={themeVariables.colors.primary}>
-                                    {Moment(productionPlan?.productionEndTime || '').format(
-                                        'MM/DD/YYYY HH:mm'
-                                    )}
-                                </TextWrap>
+                        </TextWrap>
+                        <TextWrap
+                            style={styles.description}
+                            color={themeVariables.colors.textDefault}
+                        >
+                            <TextWrap>kết thúc phiên: </TextWrap>
+                            <TextWrap color={themeVariables.colors.primary}>
+                                {Moment(productionPlan?.productionEndTime || '').format(
+                                    'MM/DD/YYYY HH:mm'
+                                )}
                             </TextWrap>
-                            {pdfPreviews?.length ? (
+                        </TextWrap>
+                        {pdfPreviews?.length ? (
+                            <FlexBox
+                                direction="column"
+                                gap={5}
+                                justifyContent="flex-start"
+                                alignItems="flex-start"
+                            >
+                                <TextWrap
+                                    style={styles.description}
+                                    color={themeVariables.colors.textDefault}
+                                >
+                                    Mẫu tham khảo các mục đánh giá:
+                                </TextWrap>
                                 <FlexBox
-                                    direction="column"
+                                    direction="row"
                                     gap={5}
                                     justifyContent="flex-start"
-                                    alignItems="flex-start"
+                                    alignItems="center"
+                                    style={{ flexWrap: 'wrap' }}
                                 >
-                                    <TextWrap
-                                        style={styles.description}
-                                        color={themeVariables.colors.textDefault}
-                                    >
-                                        Mẫu tham khảo các mục đánh giá:
-                                    </TextWrap>
-                                    <FlexBox
-                                        direction="row"
-                                        gap={5}
-                                        justifyContent="flex-start"
-                                        alignItems="center"
-                                        style={{ flexWrap: 'wrap' }}
-                                    >
-                                        {pdfPreviews.map((pdf, index) => (
-                                            <TouchableOpacity
-                                                key={`pdf-prewview-${index}`}
-                                                onPress={() =>
-                                                    handlePreviewEvaluationForm(pdf.documentUrl)
-                                                }
+                                    {pdfPreviews.map((pdf, index) => (
+                                        <TouchableOpacity
+                                            key={`pdf-prewview-${index}`}
+                                            onPress={() =>
+                                                handlePreviewEvaluationForm(pdf.documentUrl)
+                                            }
+                                        >
+                                            <TextWrap
+                                                style={{ ...styles.description }}
+                                                color={themeVariables.colors.primary}
                                             >
-                                                <TextWrap
-                                                    style={{ ...styles.description }}
+                                                <AntDesign
+                                                    name="pdffile1"
+                                                    size={18}
                                                     color={themeVariables.colors.primary}
-                                                >
-                                                    <AntDesign
-                                                        name="pdffile1"
-                                                        size={18}
-                                                        color={themeVariables.colors.primary}
-                                                    />{' '}
-                                                    {pdf.documentName}
-                                                </TextWrap>
-                                            </TouchableOpacity>
-                                        ))}
-                                    </FlexBox>
+                                                />{' '}
+                                                {pdf.documentName}
+                                            </TextWrap>
+                                        </TouchableOpacity>
+                                    ))}
                                 </FlexBox>
-                            ) : (
-                                <Text></Text>
-                            )}
-                        </FlexBox>
-                    </FlexBox>
-                    <FlexBox direction="column" justifyContent="flex-start" alignItems="flex-start">
-                        <FlexBox
-                            justifyContent="space-between"
-                            alignItems="flex-end"
-                            width={'100%'}
-                        >
-                            <TextWrap
-                                style={styles.title}
-                                color={themeVariables.colors.textDefault}
-                            >
-                                Các mục đánh giá ({checkedItems}/{checkItems.length})
-                            </TextWrap>
-                        </FlexBox>
-                        <FlexBox
-                            justifyContent="space-between"
-                            alignItems="flex-end"
-                            width={'100%'}
-                        >
-                            <AppButton
-                                label="Thêm mục"
-                                onPress={() => setShowAddEvaluationItemModal(true)}
-                                viewStyle={{}}
-                                variant={BUTTON_COMMON_TYPE.CANCEL}
-                            />
-                            <AppButton
-                                label="Gửi đánh giá"
-                                onPress={handleSubmit}
-                                viewStyle={{}}
-                                isLoading={loadingSubmit}
-                                disabled={loadingSubmit || !checkedItems || !enableSubmitEvaluation}
-                                variant={BUTTON_COMMON_TYPE.PRIMARY}
-                            />
-                        </FlexBox>
-                        <ScrollView
-                            contentContainerStyle={{
-                                paddingBottom: dimensions.height * 0.2,
-                                width: dimensions.width - 2 * containerStyles.paddingHorizontal,
-                            }}
-                            showsVerticalScrollIndicator={false}
-                            keyboardShouldPersistTaps="always"
-                            keyboardDismissMode="interactive"
-                            scrollEventThrottle={20}
-                        >
-                            {checkItems.map((item, index: number) => (
-                                <EvaluationItem
-                                    key={`evaluation-item-${index}`}
-                                    item={item}
-                                    index={index}
-                                    onUpdateCheckItem={handleUpdateCheckItem}
-                                    onDeleteCheckItem={handleDeleteCheckItem}
-                                />
-                            ))}
-                        </ScrollView>
+                            </FlexBox>
+                        ) : (
+                            <Text></Text>
+                        )}
                     </FlexBox>
                 </FlexBox>
-                {showConfirmModal && (
-                    <ConfirmModal
-                        title="Trở lại"
-                        description="Bạn có chắc muốn quay lại? Các thao tác hiện tại sẽ kết thúc."
-                        onConfirm={backHomeScreen}
-                        modalProps={{
-                            visible: showConfirmModal,
-                            onClose: () => setShowConfirmModal(false),
+                <FlexBox direction="column" justifyContent="flex-start" alignItems="flex-start">
+                    <FlexBox justifyContent="space-between" alignItems="flex-end" width={'100%'}>
+                        <TextWrap style={styles.title} color={themeVariables.colors.textDefault}>
+                            Các mục đánh giá ({checkedItems}/{checkItems.length})
+                        </TextWrap>
+                    </FlexBox>
+                    <FlexBox justifyContent="space-between" alignItems="flex-end" width={'100%'}>
+                        <AppButton
+                            label="Thêm mục"
+                            onPress={() => setShowAddEvaluationItemModal(true)}
+                            viewStyle={{}}
+                            variant={BUTTON_COMMON_TYPE.CANCEL}
+                        />
+                        <AppButton
+                            label="Gửi đánh giá"
+                            onPress={handleSubmit}
+                            viewStyle={{}}
+                            isLoading={loadingSubmit}
+                            disabled={loadingSubmit || !checkedItems || !enableSubmitEvaluation}
+                            variant={BUTTON_COMMON_TYPE.PRIMARY}
+                        />
+                    </FlexBox>
+                    <ScrollView
+                        contentContainerStyle={{
+                            paddingBottom: dimensions.height * 0.2,
+                            width: dimensions.width - 2 * containerStyles.paddingHorizontal,
                         }}
-                    />
-                )}
+                        showsVerticalScrollIndicator={false}
+                        keyboardShouldPersistTaps="always"
+                        keyboardDismissMode="interactive"
+                        scrollEventThrottle={20}
+                    >
+                        {checkItems.map((item, index: number) => (
+                            <EvaluationItem
+                                key={`evaluation-item-${index}`}
+                                item={item}
+                                index={index}
+                                onUpdateCheckItem={handleUpdateCheckItem}
+                                onDeleteCheckItem={handleDeleteCheckItem}
+                            />
+                        ))}
+                    </ScrollView>
+                </FlexBox>
+            </FlexBox>
+            {showConfirmModal && (
+                <ConfirmModal
+                    title="Trở lại"
+                    description="Bạn có chắc muốn quay lại? Các thao tác hiện tại sẽ kết thúc."
+                    onConfirm={backHomeScreen}
+                    modalProps={{
+                        visible: showConfirmModal,
+                        onClose: () => setShowConfirmModal(false),
+                    }}
+                />
+            )}
 
-                {showAddEvaluationItemModal && (
-                    <AddEvaluationItemModal
-                        onSuccess={handleAddEvaluation}
-                        modalProps={{
-                            visible: showAddEvaluationItemModal,
-                            onClose: () => setShowAddEvaluationItemModal(false),
-                        }}
-                    />
-                )}
-            </SafeAreaView>
-        </KeyboardAvoidingView>
+            {showAddEvaluationItemModal && (
+                <AddEvaluationItemModal
+                    onSuccess={handleAddEvaluation}
+                    modalProps={{
+                        visible: showAddEvaluationItemModal,
+                        onClose: () => setShowAddEvaluationItemModal(false),
+                    }}
+                />
+            )}
+        </SafeAreaView>
+        // </KeyboardAvoidingView>
     );
 };
 

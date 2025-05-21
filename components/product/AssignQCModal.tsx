@@ -78,7 +78,7 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
             };
         });
 
-        data.push({ value: 'other', title: 'Khác' });
+        data.push({ value: 'other', title: 'Nhân viên khác' });
         return data;
     }, [employees]);
 
@@ -383,7 +383,7 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
                             gap={5}
                             style={{ width: '100%', paddingHorizontal: 10, marginBottom: 20 }}
                         >
-                            <TextWrap style={styles.description}>Kết quả phân công:</TextWrap>
+                            <TextWrap style={styles.description}>Nhân viên được phân công:</TextWrap>
                             <TextWrap
                                 fontSize={18}
                                 color={

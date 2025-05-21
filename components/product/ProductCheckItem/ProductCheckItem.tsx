@@ -4,12 +4,13 @@ import { useThemeContext } from '@/providers/ThemeProvider';
 import { IThemeVariables } from '@/shared/theme/themes';
 import { IProductCheckItem } from '@/types/product';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { Image, KeyboardAvoidingView, StyleSheet, TouchableOpacity } from 'react-native';
 import ManageProductDetailModal from '../ManageProductDetailModal';
 import PreviewImageModal from '@/components/common/PreviewImageModal';
 import { Feather } from '@expo/vector-icons';
 import { PATH_SERVER_MEDIA } from '@/constants/common';
 import Config from '@/constants/config';
+import ConfirmModal from '@/components/ConfirmModal';
 
 interface Props {
     item: IProductCheckItem;
@@ -23,6 +24,7 @@ const ProductCheckItem = ({ item, index, onUpdateCheckItem, onRemoveCheckItem }:
     const [evaluationItem, setEvaluationItem] = useState<IProductCheckItem>(item);
     const [showCheckItemEdit, setShowCheckItemEdit] = useState<boolean>(false);
     const [showPreviewImageModal, setShowPreviewImageModal] = useState<boolean>(false);
+    const [showConfirmDeleteItem, setShowConfirmDeleteItem] = useState<boolean>(false);
 
     useEffect(() => {
         setEvaluationItem(item);
@@ -43,7 +45,7 @@ const ProductCheckItem = ({ item, index, onUpdateCheckItem, onRemoveCheckItem }:
     }, [item.productImagePrototype]);
 
     return (
-        <FlexBox direction="column" style={styles.wrapItem}>
+        <FlexBox direction="column" style={styles.wrapItem} justifyContent='flex-start' alignItems='flex-start'>
             <TouchableOpacity onPress={handleEdit}>
                 <FlexBox
                     direction="row"
@@ -52,7 +54,7 @@ const ProductCheckItem = ({ item, index, onUpdateCheckItem, onRemoveCheckItem }:
                     gap={5}
                     width={'100%'}
                     style={{ paddingBottom: 10, paddingTop: 10 }}
-                >
+                    >
                     {urlImage ? (
                         <TouchableOpacity
                             onPress={(e) => {
@@ -73,20 +75,37 @@ const ProductCheckItem = ({ item, index, onUpdateCheckItem, onRemoveCheckItem }:
                             style={{ width: 100, height: 100, objectFit: 'cover' }}
                         />
                     )}
-                    <TextWrap style={{ ...styles.description }} numberOfLines={2} textAlign="left">
-                        {evaluationItem.name}
-                    </TextWrap>
+                    <FlexBox
+                        direction="column"
+                        justifyContent="flex-start"
+                        alignItems="flex-start"
+                        style={{ width: '80%' }}
+                        gap={5}
+                    >
+                        <TextWrap style={{ ...styles.title }} numberOfLines={1} textAlign="left">
+                            {evaluationItem.name}
+                        </TextWrap>
+                        <TextWrap
+                            style={{ ...styles.description }}
+                            numberOfLines={3}
+                            color={themeVariables.colors.subTextDefault}
+                            textAlign="left"
+                        >
+                            {evaluationItem.note}
+                        </TextWrap>
+                    </FlexBox>
                     <TouchableOpacity
                         style={{ position: 'absolute', right: 0, bottom: 0 }}
                         onPress={(e) => {
                             e.preventDefault();
-                            onRemoveCheckItem?.(item.categoryCode);
+                            setShowConfirmDeleteItem(true);
                         }}
                     >
                         <Feather name="trash-2" size={20} color={themeVariables.colors.danger} />
                     </TouchableOpacity>
                 </FlexBox>
             </TouchableOpacity>
+            
             {showCheckItemEdit && (
                 <ManageProductDetailModal
                     checkItem={item}
@@ -102,6 +121,18 @@ const ProductCheckItem = ({ item, index, onUpdateCheckItem, onRemoveCheckItem }:
                     modalProps={{
                         visible: showCheckItemEdit,
                         onClose: () => setShowCheckItemEdit(false),
+                    }}
+                />
+            )}
+
+            {showConfirmDeleteItem && (
+                <ConfirmModal
+                    title="Xóa tiêu chí đánh giá ngoại quan"
+                    description="Bạn có chắc muốn xóa tiêu chí đánh giá ngoại quan này?"
+                    onConfirm={() => onRemoveCheckItem?.(item.categoryCode)}
+                    modalProps={{
+                        visible: showConfirmDeleteItem,
+                        onClose: () => setShowConfirmDeleteItem(false),
                     }}
                 />
             )}
@@ -130,20 +161,21 @@ export const styling = (themeVariables: IThemeVariables) =>
             padding: 4,
             marginTop: 10,
         },
-        title: {
-            fontSize: 18,
-            fontWeight: '600',
-            lineHeight: 26,
-        },
+
         header: {
             fontSize: 24,
             fontWeight: '600',
         },
-        description: {
+        title: {
             fontSize: 16,
             fontWeight: '400',
             lineHeight: 20,
             width: '100%',
+        },
+        description: {
+            fontSize: 13,
+            width: '100%',
+            color: themeVariables.colors.borderColor,
         },
         checkbox: {
             marginRight: 4,

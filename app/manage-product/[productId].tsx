@@ -10,6 +10,7 @@ import { useThemeContext } from '@/providers/ThemeProvider';
 import { CommonRepository } from '@/repositories/CommonRepository';
 import { containerStyles, IThemeVariables } from '@/shared/theme/themes';
 import { IProduct, IProductCheckItem } from '@/types/product';
+import { isIOS } from '@/utils/Mixed';
 import { toast } from '@/utils/ToastMessage';
 import { AntDesign } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -17,6 +18,7 @@ import { isBoolean } from 'lodash';
 import { useEffect, useState } from 'react';
 import {
     Dimensions,
+    KeyboardAvoidingView,
     SafeAreaView,
     ScrollView,
     StyleSheet,
@@ -52,7 +54,7 @@ const ProductDetailManagementScreen = () => {
                 const data = res.data;
                 setProductDetail(data);
                 setProductCheckItems(data.checkItems || []);
-                            }
+            }
         } catch (err) {
             console.error(err);
         } finally {
@@ -140,127 +142,129 @@ const ProductDetailManagementScreen = () => {
     if (isLoading) return <LoadingScreen />;
 
     return (
-        // <KeyboardAvoidingView behavior={isIOS ? 'padding' : 'height'}>
         <SafeAreaView style={styles.container}>
-            <View
-                style={{
-                    paddingHorizontal: containerStyles.paddingHorizontal,
-                    width: '100%',
-                    height: '100%',
-                    position: 'relative',
-                }}
-            >
-                <TouchableOpacity
-                    onPress={() => {
-                        router.back();
+            <KeyboardAvoidingView>
+                <View
+                    style={{
+                        paddingHorizontal: containerStyles.paddingHorizontal,
+                        width: '100%',
+                        height: '100%',
+                        position: 'relative',
                     }}
-                    style={{ padding: 4 }}
                 >
-                    <FlexBox justifyContent="flex-start">
-                        <AntDesign
-                            name="arrowleft"
-                            size={20}
-                            color={themeVariables.colors.bgRevert}
-                            style={{ marginRight: 5 }}
-                        />
-
-                        <TextWrapper fontSize={16} fontWeight="bold">
-                            {productDetail?.productName}
-                        </TextWrapper>
-                    </FlexBox>
-                </TouchableOpacity>
-
-                <FlexBox
-                    direction="column"
-                    justifyContent="flex-start"
-                    alignItems="flex-start"
-                    style={{ marginTop: 10 }}
-                >
-                    <TextWrapper
-                        fontSize={18}
-                        fontWeight="bold"
-                        color={themeVariables.colors.primary}
+                    <TouchableOpacity
+                        onPress={() => {
+                            router.back();
+                        }}
+                        style={{ padding: 4 }}
                     >
-                        Mã SP: {productDetail?.productCode}
-                    </TextWrapper>
-                    <FlexBox
-                        direction="row"
-                        justifyContent="space-between"
-                        alignItems="flex-start"
-                        style={{ marginTop: 0 }}
-                    >
-                        <TextWrapper
-                            fontSize={16}
-                            color={themeVariables.colors.textDefault}
-                            style={{ marginTop: 10 }}
-                        >
-                            Tiêu chí đánh giá ({productCheckItems.length} tiêu chí)
-                        </TextWrapper>
-                    </FlexBox>
+                        <FlexBox justifyContent="flex-start">
+                            <AntDesign
+                                name="arrowleft"
+                                size={20}
+                                color={themeVariables.colors.bgRevert}
+                                style={{ marginRight: 5 }}
+                            />
+
+                            <TextWrapper fontSize={16} fontWeight="bold">
+                                {productDetail?.productName}
+                            </TextWrapper>
+                        </FlexBox>
+                    </TouchableOpacity>
+
                     <FlexBox
                         direction="column"
                         justifyContent="flex-start"
                         alignItems="flex-start"
-                        style={{ marginTop: 5 }}
+                        style={{ marginTop: 10 }}
                     >
+                        <TextWrapper
+                            fontSize={18}
+                            fontWeight="bold"
+                            color={themeVariables.colors.primary}
+                        >
+                            Mã SP: {productDetail?.productCode}
+                        </TextWrapper>
                         <FlexBox
+                            direction="row"
                             justifyContent="space-between"
-                            alignItems="flex-end"
-                            width={'100%'}
+                            alignItems="flex-start"
+                            style={{ marginTop: 0 }}
+                        >
+                            <TextWrapper
+                                fontSize={16}
+                                color={themeVariables.colors.textDefault}
+                                style={{ marginTop: 10 }}
+                            >
+                                Tiêu chí đánh giá ({productCheckItems.length} tiêu chí)
+                            </TextWrapper>
+                        </FlexBox>
+                        <FlexBox
+                            direction="column"
+                            justifyContent="flex-start"
+                            alignItems="flex-start"
+                            style={{ marginTop: 5 }}
                         >
                             <FlexBox
                                 justifyContent="space-between"
                                 alignItems="flex-end"
                                 width={'100%'}
                             >
-                                <AppButton
-                                    label="Thêm tiêu chí"
-                                    onPress={() => setShowAddEvaluationItemModal(true)}
-                                    viewStyle={{}}
-                                    variant={BUTTON_COMMON_TYPE.CANCEL}
-                                />
-                                <AppButton
-                                    label="Lưu đánh giá"
-                                    onPress={handleSubmit}
-                                    viewStyle={{}}
-                                    isLoading={loadingSubmit}
-                                    disabled={loadingSubmit || !productCheckItems}
-                                    variant={BUTTON_COMMON_TYPE.PRIMARY}
-                                />
+                                <FlexBox
+                                    justifyContent="space-between"
+                                    alignItems="flex-end"
+                                    width={'100%'}
+                                >
+                                    <AppButton
+                                        label="Thêm tiêu chí"
+                                        onPress={() => setShowAddEvaluationItemModal(true)}
+                                        viewStyle={{}}
+                                        variant={BUTTON_COMMON_TYPE.CANCEL}
+                                    />
+                                    <AppButton
+                                        label="Lưu"
+                                        onPress={handleSubmit}
+                                        viewStyle={{}}
+                                        isLoading={loadingSubmit}
+                                        disabled={loadingSubmit || !productCheckItems}
+                                        variant={BUTTON_COMMON_TYPE.PRIMARY}
+                                    />
+                                </FlexBox>
                             </FlexBox>
                         </FlexBox>
+                        <ScrollView
+                            contentContainerStyle={{
+                                paddingBottom: dimensions.height * 0.2,
+                                width: dimensions.width - containerStyles.paddingHorizontal,
+                            }}
+                            showsVerticalScrollIndicator={false}
+                            showsHorizontalScrollIndicator={false}
+                            keyboardShouldPersistTaps="always"
+                            keyboardDismissMode="interactive"
+                            scrollEventThrottle={20}
+                        >
+                            {productCheckItems.map((item, index: number) => (
+                                <ProductCheckItem
+                                    key={`product-item-${index}`}
+                                    item={item}
+                                    index={index}
+                                    onUpdateCheckItem={handleUpdateCheckItem}
+                                    onRemoveCheckItem={handleRemoveCheckItem}
+                                />
+                            ))}
+                        </ScrollView>
                     </FlexBox>
-                    <ScrollView
-                        contentContainerStyle={{
-                            paddingBottom: dimensions.height * 0.2,
-                            width: dimensions.width - 2 * containerStyles.paddingHorizontal,
+                </View>
+                {showAddEvaluationItemModal && (
+                    <ManageProductDetailModal
+                        modalProps={{
+                            visible: showAddEvaluationItemModal,
+                            onClose: () => setShowAddEvaluationItemModal(false),
                         }}
-                        showsVerticalScrollIndicator={false}
-                        keyboardShouldPersistTaps="always"
-                        keyboardDismissMode="interactive"
-                        scrollEventThrottle={20}
-                    >
-                        {productCheckItems.map((item, index: number) => (
-                            <ProductCheckItem
-                                key={`product-item-${index}`}
-                                item={item}
-                                index={index}
-                                onUpdateCheckItem={handleUpdateCheckItem}
-                                onRemoveCheckItem={handleRemoveCheckItem}
-                            />
-                        ))}
-                    </ScrollView>
-                </FlexBox>
-            </View>
-            {showAddEvaluationItemModal && (
-                <ManageProductDetailModal
-                    modalProps={{
-                        visible: showAddEvaluationItemModal,
-                        onClose: () => setShowAddEvaluationItemModal(false),
-                    }}
-                    onAddProductCheckItem={handleAddproductCheckItem}
-                />
-            )}
+                        onAddProductCheckItem={handleAddproductCheckItem}
+                    />
+                )}
+            </KeyboardAvoidingView>
         </SafeAreaView>
     );
 };

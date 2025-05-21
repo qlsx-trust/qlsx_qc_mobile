@@ -3,6 +3,7 @@ import FlatListCustom from '@/components/common/FlatListCustom';
 import FlexBox from '@/components/common/FlexBox';
 import TextWrapper from '@/components/common/TextWrap';
 import AssignQCModal from '@/components/product/AssignQCModal';
+import DateRangePickerModal from '@/components/product/DateRangePickerModal';
 import SearchBar from '@/components/SearchBar';
 import { PAGE_SIZE } from '@/constants/common';
 import { PUB_TOPIC } from '@/constants/pubTopic';
@@ -11,11 +12,13 @@ import { useThemeContext } from '@/providers/ThemeProvider';
 import { CommonRepository } from '@/repositories/CommonRepository';
 import { IThemeVariables } from '@/shared/theme/themes';
 import { IEmployee } from '@/types/employee';
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import moment from 'moment';
 import Moment from 'moment';
 import { useEffect, useState } from 'react';
-import { SafeAreaView, StyleSheet, TouchableOpacity } from 'react-native';
+import { SafeAreaView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import CalendarPicker from 'react-native-calendar-picker';
 
 const PlanAssignmentScreen = () => {
     const { themeVariables } = useThemeContext();
@@ -29,9 +32,23 @@ const PlanAssignmentScreen = () => {
     const [retryCall, setRetryCall] = useState<number>(0);
     const [totalCount, setTotalCount] = useState<number>(1);
     const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout>();
-    const [filterParams, setFilterParams] = useState<{ name: string }>({ name: '' });
+    const [filterParams, setFilterParams] = useState<{
+        name: string;
+        productionStartTime: string;
+        productionEndTime: string;
+    }>({
+        name: '',
+        productionStartTime: moment(new Date()).format('YYYY-MM-DD'),
+        productionEndTime: moment(new Date()).add(1, 'days').format('YYYY-MM-DD'),
+    });
     const [selectedProductPlan, setSelectedProductPlan] = useState<IProductionPlan | null>(null);
     const [showAssignQcModal, setShowAssignQcModal] = useState<boolean>(false);
+
+    const [numOfItemLine, setNumOfItemLine] = useState<number>(2);
+
+    const isGridView = numOfItemLine == 2;
+
+    const [showDateRangeFilter, setShowDateRangeFilter] = useState<boolean>(false);
 
     /**
      * get list product
@@ -44,7 +61,10 @@ const PlanAssignmentScreen = () => {
                 Skip: (pageNumber - 1) * PAGE_SIZE.DEFAULT,
                 Take: PAGE_SIZE.DEFAULT,
                 Keyword: filterParams.name,
+                ProductionStartTime: filterParams.productionStartTime,
+                ProductionEndTime: filterParams.productionEndTime,
             };
+
             const res = await CommonRepository.getListProductionPlan(params);
             if (!res.error) {
                 const data = res.data;
@@ -100,7 +120,7 @@ const PlanAssignmentScreen = () => {
         PubSub.subscribe(PUB_TOPIC.RECALL_PRODUCTION_PLAN, () => {
             getListProduct();
         });
-    }, []);
+    }, [filterParams]);
 
     const checkTimeBackground = (product: IProductionPlan) => {
         if (new Date().getTime() < new Date(product.productionStartTime).getTime()) {
@@ -115,6 +135,15 @@ const PlanAssignmentScreen = () => {
         }
 
         return '#e3e2e2';
+    };
+
+    const handleUpdateDateRangeFilter = (startDate: Date, endDate: Date) => {
+        setFilterParams({
+            ...filterParams,
+            productionStartTime: moment(startDate).format('YYYY-MM-DD'),
+            productionEndTime: moment(endDate).format('YYYY-MM-DD'),
+        });
+        setRetryCall(new Date().getTime());
     };
 
     return (
@@ -138,15 +167,73 @@ const PlanAssignmentScreen = () => {
                             name="arrowleft"
                             size={20}
                             color={themeVariables.colors.bgRevert}
-                            style={{marginRight: 10}}
+                            style={{ marginRight: 10 }}
                         />
 
                         <TextWrapper fontSize={20} fontWeight="bold">
-                            Danh sách kế hoạch
+                            Phân công CTSX
                         </TextWrapper>
                     </FlexBox>
                 </TouchableOpacity>
-                <SearchBar handleSearchText={debouncedSearch} placeHolder="Tìm kiếm ..." />
+                <SearchBar
+                    handleSearchText={debouncedSearch}
+                    placeHolder="Tìm kiếm mã máy, mã sản phẩm, tên sản phẩm ..."
+                />
+                <FlexBox justifyContent="space-between" style={{ width: '100%' }}>
+                    <FlexBox
+                        style={{
+                            width: 'auto',
+                            borderRadius: 10,
+                            padding: 10,
+                            borderWidth: 1,
+                            borderColor: themeVariables.colors.primary,
+                        }}
+                        gap={5}
+                    >
+                        <MaterialCommunityIcons name="calendar-text" size={24} color="black" />
+
+                        <TouchableOpacity onPress={() => setShowDateRangeFilter(true)}>
+                            {filterParams.productionStartTime ? (
+                                <TextWrapper>
+                                    Từ{' '}
+                                    {Moment(filterParams.productionStartTime || '').format(
+                                        'MM/DD/YYYY'
+                                    )}{' '}
+                                    đến{' '}
+                                    {Moment(filterParams.productionEndTime || '').format(
+                                        'MM/DD/YYYY'
+                                    )}
+                                </TextWrapper>
+                            ) : (
+                                <TextWrapper>Chọn thời gian</TextWrapper>
+                            )}
+                        </TouchableOpacity>
+                    </FlexBox>
+                    <FlexBox gap={10}>
+                        <TouchableOpacity onPress={() => setNumOfItemLine(1)}>
+                            <MaterialCommunityIcons
+                                name="table-of-contents"
+                                size={40}
+                                color={
+                                    !isGridView
+                                        ? themeVariables.colors.primary
+                                        : themeVariables.colors.textDefault
+                                }
+                            />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => setNumOfItemLine(2)}>
+                            <MaterialIcons
+                                name="grid-view"
+                                size={30}
+                                color={
+                                    isGridView
+                                        ? themeVariables.colors.primary
+                                        : themeVariables.colors.textDefault
+                                }
+                            />
+                        </TouchableOpacity>
+                    </FlexBox>
+                </FlexBox>
             </FlexBox>
             {/* List of folder */}
             <FlatListCustom
@@ -156,7 +243,8 @@ const PlanAssignmentScreen = () => {
                 onRefreshing={() => {
                     handleRefreshProduct();
                 }}
-                numColumns={2}
+                numColumns={numOfItemLine}
+                key={`view-mode-${numOfItemLine}`}
                 onLoadMore={handleLoadMoreProduct}
                 listData={productPlans}
                 renderItemComponent={(item: IProductionPlan) => {
@@ -167,7 +255,7 @@ const PlanAssignmentScreen = () => {
                                 setSelectedProductPlan(item);
                                 setShowAssignQcModal(true);
                             }}
-                            style={{width: '50%'}}
+                            style={{ width: isGridView ? '50%' : '100%' }}
                         >
                             <FlexBox
                                 direction="column"
@@ -178,7 +266,22 @@ const PlanAssignmentScreen = () => {
                                     backgroundColor: checkTimeBackground(item),
                                 }}
                             >
-                                <TextWrapper fontSize={16}>Mã máy: {item.machineCode}</TextWrapper>
+                                <TextWrapper fontSize={16}>
+                                    {item.machineCode} -{' '}
+                                    <TextWrapper
+                                        fontSize={16}
+                                        color={
+                                            item?.assignedToQC?.length
+                                                ? themeVariables.colors.primary
+                                                : themeVariables.colors.danger
+                                        }
+                                        numberOfLines={1}
+                                    >
+                                        {item?.assignedToQC?.length
+                                            ? item?.assignedToQC.join(', ')
+                                            : 'Trống'}
+                                    </TextWrapper>
+                                </TextWrapper>
                                 <FlexBox
                                     style={{ width: '100%' }}
                                     justifyContent="flex-start"
@@ -217,26 +320,6 @@ const PlanAssignmentScreen = () => {
                                         )}
                                     </TextWrapper>
                                 </FlexBox>
-                                <FlexBox
-                                    style={{ width: '100%' }}
-                                    justifyContent="flex-start"
-                                    gap={10}
-                                >
-                                    <TextWrapper
-                                        fontSize={12}
-                                        color={
-                                            item?.assignedToQC?.length
-                                                ? themeVariables.colors.primary
-                                                : themeVariables.colors.danger
-                                        }
-                                        numberOfLines={1}
-                                    >
-                                        Giám sát:{' '}
-                                        {item?.assignedToQC?.length
-                                            ? item?.assignedToQC.join(', ')
-                                            : 'Trống'}
-                                    </TextWrapper>
-                                </FlexBox>
                             </FlexBox>
                         </TouchableOpacity>
                     );
@@ -255,6 +338,15 @@ const PlanAssignmentScreen = () => {
                     }}
                 />
             )}
+
+            <DateRangePickerModal
+                filterParams={filterParams}
+                modalProps={{
+                    visible: showDateRangeFilter,
+                    onClose: () => setShowDateRangeFilter(false),
+                }}
+                onUpdateDaterange={handleUpdateDateRangeFilter}
+            />
         </SafeAreaView>
         // </KeyboardAvoidingView>
     );
@@ -290,7 +382,7 @@ export const styling = (themeVariables: IThemeVariables) =>
         productCardItem: {
             paddingVertical: 15,
             marginBottom: 1,
-            marginRight:1,
+            marginRight: 1,
             paddingHorizontal: 15,
             borderWidth: 0.5,
             borderColor: themeVariables.colors.borderLightColor,
