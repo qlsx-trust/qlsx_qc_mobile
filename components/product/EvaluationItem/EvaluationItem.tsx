@@ -5,18 +5,22 @@ import { useThemeContext } from '@/providers/ThemeProvider';
 import { IThemeVariables } from '@/shared/theme/themes';
 import Checkbox from 'expo-checkbox';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity } from 'react-native';
 import EvaluationFromModal from '../EvaluationFromModal';
 import { ICheckItem } from '@/providers/ProductionPlanProvider';
+import Config from '@/constants/config';
+import PreviewImageModal from '@/components/common/PreviewImageModal';
 
 interface Props {
     item: ICheckItem;
     index: number;
     onUpdateCheckItem: Function;
+    onDeleteCheckItem: Function;
 }
-const EvaluationItem = ({ item, index, onUpdateCheckItem }: Props) => {
+const EvaluationItem = ({ item, index, onUpdateCheckItem, onDeleteCheckItem }: Props) => {
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
+    const [showPreviewImageModal, setShowPreviewImageModal] = useState<boolean>(false);
 
     const [showConfirmOKModal, setShowConfirmOKModal] = useState<boolean>(false);
     const [showConfirmNGModal, setShowConfirmNGModal] = useState<boolean>(false);
@@ -31,7 +35,7 @@ const EvaluationItem = ({ item, index, onUpdateCheckItem }: Props) => {
             ...item,
             note: '',
             status: 'ok',
-            reportFileUri: ''
+            reportFileUri: '',
         } as ICheckItem);
         setShowConfirmOKModal(false);
     };
@@ -43,6 +47,10 @@ const EvaluationItem = ({ item, index, onUpdateCheckItem }: Props) => {
               ? themeVariables.colors.danger
               : themeVariables.colors.textDefault;
     };
+
+    const productImageModel = item?.productImagePrototype
+        ? `${Config.EXPO_PUBLIC_BACKEND_URL}${item.productImagePrototype[0]}`
+        : null;
 
     return (
         <FlexBox direction="column" style={styles.wrapItem}>
@@ -67,6 +75,27 @@ const EvaluationItem = ({ item, index, onUpdateCheckItem }: Props) => {
                         disabled
                         color={getColorText()}
                     />
+
+                    {productImageModel ? (
+                        <TouchableOpacity
+                            onPress={(e) => {
+                                e.preventDefault();
+                                setShowPreviewImageModal(true);
+                            }}
+                        >
+                            <Image
+                                source={{ uri: productImageModel }}
+                                style={{ width: 70, height: 70, objectFit: 'cover' }}
+                            />
+                        </TouchableOpacity>
+                    ) : (
+                        <Image
+                            source={{
+                                uri: 'https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg',
+                            }}
+                            style={{ width: 70, height: 70, objectFit: 'cover' }}
+                        />
+                    )}
                     <TextWrap
                         style={{ ...styles.description }}
                         color={getColorText()}
@@ -89,7 +118,7 @@ const EvaluationItem = ({ item, index, onUpdateCheckItem }: Props) => {
                             borderRightWidth: 1,
                             paddingRight: 10,
                             minWidth: 40,
-                            width: '48%',
+                            width: '33%',
                             borderRightColor: themeVariables.colors.borderColor,
                             opacity: evaluationItem.status == 'ng' ? 0.4 : 1,
                         }}
@@ -107,8 +136,10 @@ const EvaluationItem = ({ item, index, onUpdateCheckItem }: Props) => {
                         onPress={() => setShowConfirmNGModal(true)}
                         style={{
                             minWidth: 40,
-                            width: '48%',
+                            width: '33%',
                             opacity: evaluationItem.status == 'ok' ? 0.4 : 1,
+                             borderRightColor: themeVariables.colors.borderColor,
+                              borderRightWidth: 1,
                         }}
                     >
                         <TextWrap
@@ -117,6 +148,22 @@ const EvaluationItem = ({ item, index, onUpdateCheckItem }: Props) => {
                             color={themeVariables.colors.danger}
                         >
                             NG
+                        </TextWrap>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={{
+                            borderRightWidth: 1,
+                            paddingRight: 10,
+                            minWidth: 40,
+                            width: '33%',
+                        }}
+                        onPress={() => onDeleteCheckItem(item)}
+                    >
+                        <TextWrap
+                            fontSize={18}
+                            textAlign="center"
+                        >
+                            Xóa
                         </TextWrap>
                     </TouchableOpacity>
                 </FlexBox>
@@ -141,13 +188,25 @@ const EvaluationItem = ({ item, index, onUpdateCheckItem }: Props) => {
                             note: data.feedback,
                             status: 'ng',
                             reportFile: null,
-                            reportFileUri: data.imageUrl
+                            reportFileUri: data.imageUrl,
                         } as ICheckItem);
                         setShowConfirmNGModal(false);
                     }}
                     modalProps={{
                         visible: showConfirmNGModal,
                         onClose: () => setShowConfirmNGModal(false),
+                    }}
+                />
+            )}
+            
+            {productImageModel && showPreviewImageModal && (
+                <PreviewImageModal
+                    source={productImageModel}
+                    modalProps={{
+                        visible: showPreviewImageModal,
+                        onClose: () => {
+                            setShowPreviewImageModal(false);
+                        },
                     }}
                 />
             )}

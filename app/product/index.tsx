@@ -62,12 +62,12 @@ const ProductScreen = () => {
             if (response.data) {
                 const productEvaluation = response.data;
                 setPdfPreviews(productEvaluation?.productDocuments);
-
                 if (productEvaluation?.checkItems?.length) {
                     const checkItemFormatted = productEvaluation.checkItems.map((item) => {
                         return {
                             categoryCode: item.categoryCode,
                             name: item.name,
+                            productImagePrototype: item?.productImagePrototype,
                             note: '',
                             status: '',
                             reportFileUri: '',
@@ -106,6 +106,11 @@ const ProductScreen = () => {
     const handleUpdateCheckItem = (index: number, updatedItem: ICheckItem) => {
         const checkItemsTmp = [...checkItems];
         checkItemsTmp[index] = { ...updatedItem };
+        setCheckItems([...checkItemsTmp]);
+    };
+
+    const handleDeleteCheckItem = (deletedItem: ICheckItem) => {
+        const checkItemsTmp = [...checkItems].filter(item => item.categoryCode != deletedItem.categoryCode);
         setCheckItems([...checkItemsTmp]);
     };
 
@@ -343,6 +348,7 @@ const ProductScreen = () => {
                                     item={item}
                                     index={index}
                                     onUpdateCheckItem={handleUpdateCheckItem}
+                                    onDeleteCheckItem={handleDeleteCheckItem}
                                 />
                             ))}
                         </ScrollView>

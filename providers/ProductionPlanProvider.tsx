@@ -14,6 +14,7 @@ export interface ICheckItem {
     note: string;
     status: string;
     reportFileUri: string;
+    productImagePrototype?: string[]
 }
 
 export interface ProductCheckItem {
@@ -29,6 +30,7 @@ export interface ProductCheckItem {
         name: string;
         note: string;
         categoryCode: string;
+        productImagePrototype?: string[]
     }[];
     description: string;
 }
