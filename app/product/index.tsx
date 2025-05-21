@@ -193,22 +193,23 @@ const ProductScreen = () => {
                                 style={styles.description}
                                 color={themeVariables.colors.textDefault}
                             >
-                                <TextWrap> Tên sản phẩm: </TextWrap>
+                                <TextWrap>Mã SP: </TextWrap>
                                 <TextWrap color={themeVariables.colors.primary}>
                                     {' '}
-                                    {productionPlan?.productName}
+                                    {productionPlan?.productCode}
                                 </TextWrap>
                             </TextWrap>
                             <TextWrap
                                 style={styles.description}
                                 color={themeVariables.colors.textDefault}
                             >
-                                <TextWrap>CTSX: </TextWrap>
+                                <TextWrap>Tên sản phẩm: </TextWrap>
                                 <TextWrap color={themeVariables.colors.primary}>
                                     {' '}
-                                    {productionPlan?.productCode}
+                                    {productionPlan?.productName}
                                 </TextWrap>
                             </TextWrap>
+                            
                             <TextWrap
                                 style={styles.description}
                                 color={themeVariables.colors.textDefault}

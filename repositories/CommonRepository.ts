@@ -31,6 +31,15 @@ export const CommonRepository = createRepository({
         );
     },
 
+    getMostRecentProductionPlanById(fetch, planId: string) {
+        return fetch<any>(
+            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/production-plans/${planId}/details`,
+            {
+                method: 'GET',
+            }
+        );
+    },
+
     submitQcTestResult(fetch, payload: any) {
         return fetch<any>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/qc-test-result`, {
             method: 'POST',

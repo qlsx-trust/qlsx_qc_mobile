@@ -112,9 +112,9 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
         return '#e3e2e2';
     };
 
-    const handleConfirmCode = async (machineCode: string) => {
+    const handleConfirmCode = async (planId: string) => {
         try {
-            const response = await CommonRepository.getMostRecentProductionPlan(machineCode);
+            const response = await CommonRepository.getMostRecentProductionPlanById(planId);
             updateProductionPlan(response.data);
             router.push(`${SCREEN_KEY.product}`);
         } catch (error) {
@@ -148,7 +148,7 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
                 renderItemComponent={(item: IProductionPlan) => {
                     return (
                         <TouchableOpacity
-                            onPress={() => handleConfirmCode(item.machineCode)}
+                            onPress={() => handleConfirmCode(item.id)}
                             key={`product-item-${item.id}`}
                            style={{width: '50%'}}
                         >

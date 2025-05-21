@@ -3,13 +3,13 @@ import FlexBox from '@/components/common/FlexBox';
 import TextWrap from '@/components/common/TextWrap';
 import CommonModal, { CommonModalProps } from '@/components/modals/CommonModal';
 import { BUTTON_COMMON_TYPE, SCREEN_KEY } from '@/constants/common';
-import { useProductionPlanContext } from '@/providers/ProductionPlanProvider';
+import { IProductionPlan, useProductionPlanContext } from '@/providers/ProductionPlanProvider';
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { CommonRepository } from '@/repositories/CommonRepository';
 import { IThemeVariables } from '@/shared/theme/themes';
 import { toast } from '@/utils/ToastMessage';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 
 interface IConfirmScanCodeModalProps {
@@ -22,11 +22,28 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
     const { updateProductionPlan } = useProductionPlanContext();
     const styles = styling(themeVariables);
     const [isLoadingConfirm, setIsLoadingConfirm] = useState<boolean>(false);
+    const [productPlan, setProductPlan] = useState<IProductionPlan | null>(null)
+
+    useEffect(() => {
+        if(scanResult) getCTSXById()
+    }, [scanResult])
+
+    const getCTSXById = async () => {
+         try {
+            const response = await CommonRepository.getMostRecentProductionPlanById(scanResult);
+            if (response.data) {
+                setProductPlan(response.data)
+            }
+          
+        } catch (error) {
+        } finally {
+        }
+    }
 
     const handleConfirmCode = async () => {
         try {
             setIsLoadingConfirm(true);
-            const response = await CommonRepository.getMostRecentProductionPlan(scanResult);
+            const response = await CommonRepository.getMostRecentProductionPlanById(scanResult);
             if (response.data) {
                 updateProductionPlan(response.data);
                 router.push(`${SCREEN_KEY.product}`);
@@ -49,9 +66,15 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
                 </TextWrap>
 
                 <TextWrap style={styles.title} color={themeVariables.colors.textDefault}>
-                    Mã máy ép:{' '}
-                    <TextWrap color={themeVariables.colors.primary}> {scanResult} </TextWrap>
-                </TextWrap>
+                    Kết quả quét mã:{' '}
+                    {
+                        productPlan ? (
+                            <TextWrap color={themeVariables.colors.primary}> {productPlan?.machineCode} - {productPlan?.productCode} </TextWrap>
+                        ) : (
+                            <TextWrap color={themeVariables.colors.primary}> {scanResult} </TextWrap>
+                        )
+                    }
+               </TextWrap>
 
                 <FlexBox justifyContent="space-between" gap={16} style={{ marginTop: 16 }}>
                     <AppButton
