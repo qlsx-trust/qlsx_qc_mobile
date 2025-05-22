@@ -49,7 +49,7 @@ const HomeScreen = () => {
     function toggleCameraFacing() {
         setFacing((current) => (current === 'back' ? 'front' : 'back'));
     }
-    
+
     const handleLogout = () => {
         logout();
     };
@@ -150,9 +150,14 @@ const HomeScreen = () => {
                         </View>
                     </>
                 )}
-                
-                {managerQc &&   <Image source={Logo} width={50} height={50}/>}
-                <FlexBox direction="row" justifyContent="center" alignItems="center">
+
+                {managerQc && <Image source={Logo} width={50} height={50} />}
+                <FlexBox
+                    direction="row"
+                    justifyContent="center"
+                    alignItems="center"
+                    style={{ width: '100%' }}
+                >
                     <TextWrapper fontSize={18}>
                         {managerQc ? 'Quản lý: ' : 'Nhân viên: '}
                     </TextWrapper>

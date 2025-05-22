@@ -5,7 +5,7 @@ import { CommonRepository } from '@/repositories/CommonRepository';
 import { IThemeVariables } from '@/shared/theme/themes';
 import Moment from 'moment';
 import { useEffect, useState } from 'react';
-import { Dimensions, StyleSheet, TouchableOpacity } from 'react-native';
+import { Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
 import SearchBar from '../SearchBar';
 import EmptyFolder from '../common/EmptyList/EmptyFolder';
 import FlatListCustom from '../common/FlatListCustom';
@@ -13,6 +13,9 @@ import FlexBox from '../common/FlexBox';
 import TextWrapper from '../common/TextWrap';
 import { router } from 'expo-router';
 import { toast } from '@/utils/ToastMessage';
+import { AntDesign, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import moment from 'moment';
+import DateRangePickerModal from './DateRangePickerModal';
 
 interface IListProductPlanForQCProps {}
 
@@ -31,8 +34,18 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
     const [totalCount, setTotalCount] = useState<number>(1);
     const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout>();
     const [filterParams, setFilterParams] = useState<{
-        name: string;
-    }>({ name: '' });
+            name: string;
+            productionStartTime: string;
+            productionEndTime: string;
+        }>({
+            name: '',
+            productionStartTime: moment(new Date()).format('YYYY-MM-DD'),
+            productionEndTime: moment(new Date()).add(1, 'days').format('YYYY-MM-DD'),
+        });
+    const [showDateRangeFilter, setShowDateRangeFilter] = useState<boolean>(false);
+
+    const [numOfItemLine, setNumOfItemLine] = useState<number>(2);
+    const isGridView = numOfItemLine == 2;
 
     /**
      * get list product
@@ -45,7 +58,10 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
                 Skip: (pageNumber - 1) * PAGE_SIZE.DEFAULT,
                 Take: PAGE_SIZE.DEFAULT,
                 Keyword: filterParams.name,
+                ProductionStartTime: filterParams.productionStartTime,
+                ProductionEndTime: filterParams.productionEndTime,
             };
+
             const res = await CommonRepository.getListProductionPlanQC(params);
             if (!res.error) {
                 const data = res.data;
@@ -112,6 +128,15 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
         return '#e3e2e2';
     };
 
+    const handleUpdateDateRangeFilter = (startDate: Date, endDate: Date) => {
+        setFilterParams({
+            ...filterParams,
+            productionStartTime: moment(startDate).format('YYYY-MM-DD'),
+            productionEndTime: moment(endDate).format('YYYY-MM-DD'),
+        });
+        setRetryCall(new Date().getTime());
+    };
+
     const handleConfirmCode = async (planId: string) => {
         try {
             const response = await CommonRepository.getMostRecentProductionPlanById(planId);
@@ -132,7 +157,62 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
                 gap={15}
                 style={styles.header}
             >
-                <SearchBar handleSearchText={debouncedSearch} placeHolder="Tìm kiếm ..." />
+                <SearchBar handleSearchText={debouncedSearch}  placeHolder="Tìm kiếm mã máy, mã sản phẩm, tên sản phẩm ..." />
+                <FlexBox justifyContent="space-between" style={{ width: '100%' }}>
+                    <FlexBox
+                        style={{
+                            width: 'auto',
+                            borderRadius: 10,
+                            padding: 10,
+                            borderWidth: 1,
+                            borderColor: themeVariables.colors.primary,
+                        }}
+                        gap={5}
+                    >
+                        <MaterialCommunityIcons name="calendar-text" size={24} color="black" />
+
+                        <TouchableOpacity onPress={() => setShowDateRangeFilter(true)}>
+                            {filterParams.productionStartTime ? (
+                                <TextWrapper>
+                                    Từ{' '}
+                                    {Moment(filterParams.productionStartTime || '').format(
+                                        'MM/DD/YYYY'
+                                    )}{' '}
+                                    đến{' '}
+                                    {Moment(filterParams.productionEndTime || '').format(
+                                        'MM/DD/YYYY'
+                                    )}
+                                </TextWrapper>
+                            ) : (
+                                <TextWrapper>Chọn thời gian</TextWrapper>
+                            )}
+                        </TouchableOpacity>
+                    </FlexBox>
+                    <FlexBox gap={10}>
+                        <TouchableOpacity onPress={() => setNumOfItemLine(1)}>
+                            <MaterialCommunityIcons
+                                name="table-of-contents"
+                                size={40}
+                                color={
+                                    !isGridView
+                                        ? themeVariables.colors.primary
+                                        : themeVariables.colors.textDefault
+                                }
+                            />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => setNumOfItemLine(2)}>
+                            <MaterialIcons
+                                name="grid-view"
+                                size={30}
+                                color={
+                                    isGridView
+                                        ? themeVariables.colors.primary
+                                        : themeVariables.colors.textDefault
+                                }
+                            />
+                        </TouchableOpacity>
+                    </FlexBox>
+                </FlexBox>
             </FlexBox>
             {/* List of folder */}
             <FlatListCustom
@@ -144,13 +224,14 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
                 }}
                 onLoadMore={handleLoadMoreProduct}
                 listData={productPlans}
-                numColumns={2}
+                numColumns={numOfItemLine}
+                key={`grid-view-${numOfItemLine}`}
                 renderItemComponent={(item: IProductionPlan) => {
                     return (
                         <TouchableOpacity
                             onPress={() => handleConfirmCode(item.id)}
                             key={`product-item-${item.id}`}
-                           style={{width: '50%'}}
+                           style={{width: isGridView ? '50%' : '100%'}}
                         >
                             <FlexBox
                                 direction="column"
@@ -207,6 +288,14 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
                 renderEmptyComponent={() => (
                     <EmptyFolder title="Không có CTSX nào" description="" />
                 )}
+            />
+            <DateRangePickerModal
+                filterParams={filterParams}
+                modalProps={{
+                    visible: showDateRangeFilter,
+                    onClose: () => setShowDateRangeFilter(false),
+                }}
+                onUpdateDaterange={handleUpdateDateRangeFilter}
             />
         </>
     );

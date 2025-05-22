@@ -31,7 +31,6 @@ const productionManagementScreen = () => {
     const [filterParams, setFilterParams] = useState<{ name: string }>({ name: '' });
 
     const [numOfItemLine, setNumOfItemLine] = useState<number>(2);
-
     const isGridView = numOfItemLine == 2;
 
     /**
