@@ -270,6 +270,7 @@ const ProductScreen = () => {
                     style={{
                         width: '100%',
                         paddingBottom: 20,
+                        flexWrap: 'wrap',
                         borderBottomWidth: 1,
                         borderBottomColor: themeVariables.colors.borderColor,
                     }}
@@ -300,6 +301,7 @@ const ProductScreen = () => {
                     <FlexBox style={{ width: '100%' }}>
                         <FlexBox direction="column" style={{ width: '100%' }}>
                             <CheckListItem
+                                layout={layout}
                                 checkItems={checkItems}
                                 sessionCheckItem={checkItems[stepItem]}
                                 index={stepItem}

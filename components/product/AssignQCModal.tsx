@@ -408,7 +408,7 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
                             justifyContent="flex-start"
                             alignItems="flex-start"
                             gap={5}
-                            style={{ width: '100%', paddingHorizontal: 10, marginBottom: 20 }}
+                            style={{ width: '100%', paddingHorizontal: 10, marginBottom: 20, flexWrap: 'wrap' }}
                         >
                             <TextWrap style={styles.description}>
                                 Nhân viên được phân công:

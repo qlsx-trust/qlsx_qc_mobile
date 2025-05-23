@@ -23,6 +23,13 @@ const DateRangePickerModal = ({
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
 
+       // State to store layout dimensions
+    const [layout, setLayout] = useState({ width: 0, height: 0 });
+    const onLayout = (event: any) => {
+        const { width, height } = event.nativeEvent.layout;
+        setLayout({ width, height });
+    };
+
     const [startDate, setStarttDate] = useState<Date>(
         filterParams?.productionStartTime
             ? new Date(
@@ -46,7 +53,7 @@ const DateRangePickerModal = ({
 
     return (
         <>
-            <CommonModal {...modalProps}>
+            <CommonModal {...modalProps} onLayoutProps={onLayout}>
                 <CalendarPicker
                     startFromMonday={true}
                     allowRangeSelection={true}
@@ -55,7 +62,7 @@ const DateRangePickerModal = ({
                     todayBackgroundColor="#f2e6ff"
                     selectedDayColor="#7300e6"
                     selectedDayTextColor="#FFFFFF"
-                    width={600}
+                    width={(layout.width * 4) / 5 - 20 }
                     height={500}
                     onDateChange={(date, type) => onDateChange(date, type)}
                 />

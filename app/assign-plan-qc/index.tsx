@@ -24,7 +24,12 @@ const PlanAssignmentScreen = () => {
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
     // const { logout, user } = useAuthContext();
-
+// State to store layout dimensions
+    const [layout, setLayout] = useState({ width: 0, height: 0 });
+    const onLayout = (event: any) => {
+        const { width, height } = event.nativeEvent.layout;
+        setLayout({ width, height });
+    };
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isLoadMore, setIsLoadMore] = useState<boolean>(false);
     const [productPlans, setProductPlans] = useState<IProductionPlan[]>([]);
@@ -43,7 +48,6 @@ const PlanAssignmentScreen = () => {
     });
     const [selectedProductPlan, setSelectedProductPlan] = useState<IProductionPlan | null>(null);
     const [showAssignQcModal, setShowAssignQcModal] = useState<boolean>(false);
-
     const [numOfItemLine, setNumOfItemLine] = useState<number>(2);
 
     const isGridView = numOfItemLine == 2;
@@ -148,7 +152,7 @@ const PlanAssignmentScreen = () => {
 
     return (
         // <KeyboardAvoidingView behavior={isIOS ? 'padding' : 'height'}>
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} onLayout={onLayout}>
             <FlexBox
                 direction="column"
                 justifyContent="flex-start"

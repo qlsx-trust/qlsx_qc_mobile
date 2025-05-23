@@ -14,14 +14,7 @@ import axios, { HttpStatusCode } from 'axios';
 import { BarcodeScanningResult, CameraType, CameraView, useCameraPermissions } from 'expo-camera';
 import { Redirect, router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import {
-    Image,
-    Keyboard,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    View
-} from 'react-native';
+import { Image, Keyboard, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 const Logo = require('@/assets/iot-logo.jpeg');
 
 interface IntroScreenProps {}
@@ -203,26 +196,9 @@ const IntroScreen: React.FC<IntroScreenProps> = () => {
             ) : (
                 <View style={styles.container}>
                     <Image source={Logo} width={50} height={50} />
-                    <TouchableOpacity onPress={() => setShowCamera(true)}>
-                        <FlexBox gap={15} style={{ marginVertical: 30 }} direction="column">
-                            <TextWrap fontSize={24} color={themeVariables.colors.primary}>
-                                Nhấn quét mã đăng nhập
-                            </TextWrap>
-                            <AntDesign
-                                name="scan1"
-                                size={80}
-                                color={themeVariables.colors.primary}
-                            />
-                        </FlexBox>
-                    </TouchableOpacity>
-
-                    <View style={{ marginVertical: 30 }}>
-                        <TextWrapper>Hoặc nhập</TextWrapper>
-                    </View>
-
                     <FlexBox
                         direction="column"
-                        style={{ width: 400 }}
+                        style={{ width: 400, marginVertical: 30  }}
                         gap={10}
                         justifyContent="flex-start"
                         alignItems="flex-start"
@@ -241,7 +217,7 @@ const IntroScreen: React.FC<IntroScreenProps> = () => {
                             placeholder="Mã nhân viên"
                         />
                     </FlexBox>
-                    <FlexBox justifyContent="space-between" gap={16} style={{ marginTop: 30 }}>
+                    <FlexBox justifyContent="space-between" gap={16} style={{ }}>
                         <AppButton
                             disabled={!username || loadingSubmit}
                             isLoading={loadingSubmit}
@@ -250,6 +226,21 @@ const IntroScreen: React.FC<IntroScreenProps> = () => {
                             onPress={() => handleLogin(username)}
                         />
                     </FlexBox>
+                    <View style={{ marginVertical: 20 }}>
+                        <TextWrapper>Hoặc chọn</TextWrapper>
+                    </View>
+                    <TouchableOpacity onPress={() => setShowCamera(true)}>
+                        <FlexBox gap={20} style={{ }} direction="column">
+                            <TextWrap fontSize={24} color={themeVariables.colors.primary}>
+                                Nhấn quét mã đăng nhập
+                            </TextWrap>
+                            <AntDesign
+                                name="scan1"
+                                size={80}
+                                color={themeVariables.colors.primary}
+                            />
+                        </FlexBox>
+                    </TouchableOpacity>
                 </View>
             )}
         </AppSafeAreaBottom>

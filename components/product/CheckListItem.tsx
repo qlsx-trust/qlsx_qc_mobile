@@ -12,6 +12,7 @@ import AppButton from '../common/AppButton';
 import EvaluationFromModal from './EvaluationFromModal';
 
 interface Props {
+    layout: any;
     sessionCheckItem: ICheckItem;
     checkItems: ICheckItem[];
     index: number;
@@ -19,6 +20,7 @@ interface Props {
     setStepItem: Function;
 }
 const CheckListItem = ({
+    layout,
     checkItems,
     sessionCheckItem,
     index,
@@ -27,6 +29,8 @@ const CheckListItem = ({
 }: Props) => {
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
+
+    const isMobilePhoneScreen = layout.width < 500
 
     const [showPreviewImageModal, setShowPreviewImageModal] = useState<boolean>(false);
     const [previewImageUrl, setPreviewImageUrl] = useState<string>('');
@@ -39,6 +43,7 @@ const CheckListItem = ({
 
     const isOK = sessionCheckItem.status == 'ok';
     const isNG = sessionCheckItem.status == 'ng';
+
 
     const handleConfirmOk = async () => {
         if (sessionCheckItem.status == 'ok') return;
@@ -76,7 +81,7 @@ const CheckListItem = ({
                     gap={20}
                     justifyContent="space-between"
                     alignItems="flex-start"
-                    style={{ width: '100%' }}
+                    style={{ width: '100%', flexWrap: 'wrap' }}
                 >
                     <FlexBox
                         direction="row"
@@ -157,7 +162,7 @@ const CheckListItem = ({
                         </TouchableOpacity>
                     </FlexBox>
                 </FlexBox>
-                <View style={{ marginTop: 40, marginBottom: 20 }}>
+                <View style={{ marginTop: 40, marginBottom: isMobilePhoneScreen ? 0 : 20 }}>
                     {productImageModel ? (
                         <TouchableOpacity
                             onPress={(e) => {
@@ -168,7 +173,11 @@ const CheckListItem = ({
                         >
                             <Image
                                 source={{ uri: productImageModel }}
-                                style={{ width: 350, height: 350, objectFit: 'cover' }}
+                                style={{
+                                    width: isMobilePhoneScreen ? 300 : 400,
+                                    height: isMobilePhoneScreen ? 300 : 400,
+                                    objectFit: 'cover',
+                                }}
                             />
                         </TouchableOpacity>
                     ) : (
@@ -176,11 +185,15 @@ const CheckListItem = ({
                             source={{
                                 uri: 'https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg',
                             }}
-                            style={{ width: 350, height: 350, objectFit: 'cover' }}
+                            style={{
+                                width: isMobilePhoneScreen ? 300 : 400,
+                                height: isMobilePhoneScreen ? 300 : 400,
+                                objectFit: 'cover',
+                            }}
                         />
                     )}
                 </View>
-                <FlexBox gap={30} style={{ marginTop: 40 }}>
+                <FlexBox gap={30} style={{ marginTop: isMobilePhoneScreen ? 10 : 30 }}>
                     <AppButton
                         label="< Quay lại"
                         disabled={index == 0}
