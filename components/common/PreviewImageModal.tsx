@@ -1,6 +1,6 @@
 import CommonModal, { CommonModalProps } from '@/components/modals/CommonModal';
 import React, { useRef, useState } from 'react';
-import { Animated, Dimensions, StyleSheet, View, Image } from 'react-native';
+import { Animated, StyleSheet, View, Image } from 'react-native';
 import RotatingIcon from '../AnimationIcon/RotatingIcon';
 import { Feather } from '@expo/vector-icons';
 import { toast } from '@/utils/ToastMessage';
@@ -13,52 +13,59 @@ interface IPreviewImageModalProps {
 const PreviewImageModal = ({ modalProps, source }: IPreviewImageModalProps) => {
     const [loading, setLoading] = useState(false);
     const translateY = useRef(new Animated.Value(0)).current;
+    const [layout, setLayout] = useState({ width: 0, height: 0 });
+    const onLayout = (event: any) => {
+        const { width, height } = event.nativeEvent.layout;
+        setLayout({ width, height });
+    };
 
     return (
-        <CommonModal {...modalProps} previewImage={true} closeOnClickOutside={true}>
-            <View style={{}}>
-                {loading && (
-                    <Animated.View
-                        style={[
-                            styles.main,
-                            {
-                                transform: [
-                                    {
-                                        translateY: translateY.interpolate({
-                                            inputRange: [0, 1],
-                                            outputRange: [300, 0], // Adjust the starting and ending position
-                                        }),
-                                    },
-                                ],
-                            },
-                        ]}
-                    >
-                        <RotatingIcon>
-                            <Feather
-                                name="loader"
-                                size={46}
-                                color="white"
-                                style={{ transform: [{ rotateY: '180deg' }] }}
-                            />
-                        </RotatingIcon>
-                    </Animated.View>
-                )}
-                <Image
-                    source={{ uri: source }}
-                    style={styles.imagePreview}
-                    
-                    onError={() => {
-                        modalProps.onClose();
-                        toast.error('An error has occurred, please try again later');
-                    }}
-                    onLoadStart={() => {
-                        setLoading(true);
-                    }}
-                    onLoadEnd={() => {
-                        setLoading(false);
-                    }}
-                />
-            </View>
+        <CommonModal
+            {...modalProps}
+            previewImage={true}
+            closeOnClickOutside={true}
+            onLayoutProps={onLayout}
+        >
+            {loading && (
+                <Animated.View
+                    style={[
+                        styles.main,
+                        {
+                            transform: [
+                                {
+                                    translateY: translateY.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [300, 0], // Adjust the starting and ending position
+                                    }),
+                                },
+                            ],
+                        },
+                    ]}
+                >
+                    <RotatingIcon>
+                        <Feather
+                            name="loader"
+                            size={46}
+                            color="white"
+                            style={{ transform: [{ rotateY: '180deg' }] }}
+                        />
+                    </RotatingIcon>
+                </Animated.View>
+            )}
+            <Image
+                source={{ uri: source }}
+                style={[styles.imagePreview, { width: layout.width }]}
+                onError={() => {
+                    modalProps.onClose();
+                    toast.error('An error has occurred, please try again later');
+                }}
+                onLoadStart={() => {
+                    setLoading(true);
+                }}
+                onLoadEnd={() => {
+                    setLoading(false);
+                }}
+            />
         </CommonModal>
     );
 };
@@ -67,9 +74,8 @@ const styles = StyleSheet.create({
     imagePreview: {
         flex: 1,
         maxHeight: 600,
-        width: Dimensions.get('window').width,
         height: 'auto',
-        objectFit: 'contain'
+        objectFit: 'contain',
     },
     closeButton: {
         position: 'absolute',

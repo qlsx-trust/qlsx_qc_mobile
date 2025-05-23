@@ -1,7 +1,6 @@
 import AppButton from '@/components/common/AppButton';
 import FlexBox from '@/components/common/FlexBox';
-import TextWrap from '@/components/common/TextWrap';
-import TextWrapper from '@/components/common/TextWrap';
+import { default as TextWrap, default as TextWrapper } from '@/components/common/TextWrap';
 import ManageProductDetailModal from '@/components/product/ManageProductDetailModal';
 import ProductCheckItem from '@/components/product/ProductCheckItem';
 import { BUTTON_COMMON_TYPE } from '@/constants/common';
@@ -9,25 +8,29 @@ import { PUB_TOPIC } from '@/constants/pubTopic';
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { CommonRepository } from '@/repositories/CommonRepository';
 import { containerStyles, IThemeVariables } from '@/shared/theme/themes';
-import { IEmployee } from '@/types/employee';
 import { IProductCheckItem } from '@/types/product';
 import { toast } from '@/utils/ToastMessage';
 import { AntDesign } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
-    Dimensions,
     SafeAreaView,
     ScrollView,
     StyleSheet,
     TextInput,
-    TouchableOpacity,
+    TouchableOpacity
 } from 'react-native';
 
 const productionCreateManagementScreen = () => {
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
-    const dimensions = Dimensions.get('window');
+
+    // State to store layout dimensions
+    const [layout, setLayout] = useState({ width: 0, height: 0 });
+    const onLayout = (event: any) => {
+        const { width, height } = event.nativeEvent.layout;
+        setLayout({ width, height });
+    };
 
     const [productCode, setProductCode] = useState<string>('');
     const [productName, setProductName] = useState<string>('');
@@ -51,7 +54,7 @@ const productionCreateManagementScreen = () => {
                     CategoryCode: item.categoryCode,
                     Name: item.name,
                     Note: item.note,
-                    ProductImagePrototype: []
+                    ProductImagePrototype: [],
                 };
             });
             formdata.append('CheckItems', JSON.stringify(checkItems));
@@ -105,7 +108,7 @@ const productionCreateManagementScreen = () => {
 
     return (
         // <KeyboardAvoidingView behavior={isIOS ? 'padding' : 'height'}>
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} onLayout={onLayout}>
             <FlexBox
                 direction="column"
                 justifyContent="flex-start"
@@ -220,8 +223,8 @@ const productionCreateManagementScreen = () => {
                 </FlexBox>
                 <ScrollView
                     contentContainerStyle={{
-                        paddingBottom: dimensions.height * 0.2,
-                        width: dimensions.width - 2 * containerStyles.paddingHorizontal,
+                        paddingBottom: layout.height * 0.2,
+                        width: layout.width - 2 * containerStyles.paddingHorizontal,
                     }}
                     showsVerticalScrollIndicator={false}
                     keyboardShouldPersistTaps="always"

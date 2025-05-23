@@ -17,7 +17,6 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { isBoolean } from 'lodash';
 import { useEffect, useState } from 'react';
 import {
-    Dimensions,
     KeyboardAvoidingView,
     SafeAreaView,
     ScrollView,
@@ -29,7 +28,12 @@ import {
 const ProductDetailManagementScreen = () => {
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
-    const dimensions = Dimensions.get('window');
+    // State to store layout dimensions
+    const [layout, setLayout] = useState({ width: 0, height: 0 });
+    const onLayout = (event: any) => {
+        const { width, height } = event.nativeEvent.layout;
+        setLayout({ width, height });
+    };
 
     const { productId } = useLocalSearchParams<{
         productId: string;
@@ -142,7 +146,7 @@ const ProductDetailManagementScreen = () => {
     if (isLoading) return <LoadingScreen />;
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} onLayout={onLayout}>
             <KeyboardAvoidingView>
                 <View
                     style={{
@@ -234,8 +238,8 @@ const ProductDetailManagementScreen = () => {
                         </FlexBox>
                         <ScrollView
                             contentContainerStyle={{
-                                paddingBottom: dimensions.height * 0.2,
-                                width: dimensions.width - containerStyles.paddingHorizontal,
+                                paddingBottom: layout.height * 0.2,
+                                width: layout.width - containerStyles.paddingHorizontal,
                             }}
                             showsVerticalScrollIndicator={false}
                             showsHorizontalScrollIndicator={false}

@@ -2,8 +2,7 @@ import AppButton from '@/components/common/AppButton';
 import EmptyFolder from '@/components/common/EmptyList/EmptyFolder';
 import FlatListCustom from '@/components/common/FlatListCustom';
 import FlexBox from '@/components/common/FlexBox';
-import TextWrap from '@/components/common/TextWrap';
-import TextWrapper from '@/components/common/TextWrap';
+import { default as TextWrap, default as TextWrapper } from '@/components/common/TextWrap';
 import { BUTTON_COMMON_TYPE } from '@/constants/common';
 import Config from '@/constants/config';
 import { useThemeContext } from '@/providers/ThemeProvider';
@@ -17,20 +16,23 @@ import { BarcodeScanningResult, CameraType, CameraView, useCameraPermissions } f
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-    Dimensions,
     Keyboard,
     SafeAreaView,
     StyleSheet,
     TextInput,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 
 const ManageEmployeeScreen = () => {
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
-    const dimensions = Dimensions.get('window');
-    const { width } = Dimensions.get('window');
+    // State to store layout dimensions
+    const [layout, setLayout] = useState({ width: 0, height: 0 });
+    const onLayout = (event: any) => {
+        const { width, height } = event.nativeEvent.layout;
+        setLayout({ width, height });
+    };
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [employees, setEmployees] = useState<IEmployee[]>([]);
@@ -45,8 +47,8 @@ const ManageEmployeeScreen = () => {
     const [facing, setFacing] = useState<CameraType>('back');
     const [errorCheckCode, setErrorCheckCode] = useState<string>('');
 
-    const maskRowHeight = Math.round((Dimensions.get('window').height - 250) / 20);
-    const maskColWidth = (width - 250) / 2;
+    const maskRowHeight = Math.round((layout.height - 250) / 20);
+    const maskColWidth = (layout.width - 250) / 2;
 
     useEffect(() => {
         if (!permission) {
@@ -119,7 +121,7 @@ const ManageEmployeeScreen = () => {
                 return;
             }
             toast.success('Thêm nhân viên thành công');
-            setEmployeeQcCode('')
+            setEmployeeQcCode('');
             setRecallEmployee(new Date().getTime());
         } catch (err) {
             console.error(err);
@@ -130,10 +132,18 @@ const ManageEmployeeScreen = () => {
 
     return (
         // <KeyboardAvoidingView behavior={isIOS ? 'padding' : 'height'}>
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} onLayout={onLayout}>
             {showCamera && (
                 <>
-                    <View style={[styles.cameraWrapper]}>
+                    <View
+                        style={[
+                            styles.cameraWrapper,
+                            {
+                                width: layout.width,
+                                height: layout.height,
+                            },
+                        ]}
+                    >
                         <FlexBox
                             direction="row"
                             alignItems="flex-start"
@@ -162,7 +172,13 @@ const ManageEmployeeScreen = () => {
                             }}
                             onBarcodeScanned={isReady ? handleBarCodeScan : undefined}
                             onCameraReady={onCameraReady}
-                            style={[styles.cameraContainer]}
+                            style={[
+                                styles.cameraContainer,
+                                {
+                                    width: layout.width,
+                                    height: layout.height * 1,
+                                },
+                            ]}
                             facing={facing}
                             ratio={'1:1'}
                             mute={true}
@@ -212,7 +228,7 @@ const ManageEmployeeScreen = () => {
                                 name="arrowleft"
                                 size={20}
                                 color={themeVariables.colors.bgRevert}
-                                style={{marginRight: 5}}
+                                style={{ marginRight: 5 }}
                             />
 
                             <TextWrapper fontSize={20} fontWeight="bold">
@@ -269,13 +285,13 @@ const ManageEmployeeScreen = () => {
                 justifyContent="flex-start"
                 alignItems="flex-start"
                 gap={10}
-                style={{ paddingHorizontal: 20,  width: '100%', maxHeight: Dimensions.get('window').height - 300 }}
+                style={{ paddingHorizontal: 20, width: '100%', maxHeight: layout.height - 300 }}
             >
                 <TextWrap style={styles.title}>Danh sách nhân viên:</TextWrap>
                 <FlatListCustom
                     isLoading={isLoading}
                     isLoadMore={false}
-                    styleMore={{ width: '100%', marginBottom: 50, }}
+                    styleMore={{ width: '100%', marginBottom: 50 }}
                     onRefreshing={() => {
                         setRecallEmployee(new Date().getTime());
                     }}
@@ -389,8 +405,6 @@ export const styling = (themeVariables: IThemeVariables) =>
             position: 'absolute',
             top: 0,
             left: 0,
-            width: Dimensions.get('window').width,
-            height: Dimensions.get('window').height,
             backgroundColor: themeVariables.colors.black50,
         },
         maskOutter: {
@@ -410,8 +424,6 @@ export const styling = (themeVariables: IThemeVariables) =>
             left: 0,
             top: '50%',
             transform: [{ translateY: '-50%' }],
-            width: Dimensions.get('window').width,
-            height: Dimensions.get('window').height * 1,
             backgroundColor: themeVariables.colors.black50,
         },
         maskInner: {

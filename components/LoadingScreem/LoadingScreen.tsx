@@ -3,20 +3,34 @@ import ThreeDotsAnimation from '@/components/AnimationIcon/ThreeDotsPulse';
 import TextWrap from '@/components/common/TextWrap';
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { IThemeVariables } from '@/shared/theme/themes';
-import React from 'react';
-import { Dimensions, ImageBackground, StyleSheet, View } from 'react-native';
+import React, { useState } from 'react';
+import { ImageBackground, StyleSheet, View } from 'react-native';
 const Splash = require('@/assets/splash.png');
 
 const LoadingScreen = () => {
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
 
-    const dimensions = Dimensions.get('window');
-    const imageWidth = dimensions.width;
+    // State to store layout dimensions
+    const [layout, setLayout] = useState({ width: 0, height: 0 });
+    const onLayout = (event: any) => {
+        const { width, height } = event.nativeEvent.layout;
+        setLayout({ width, height });
+    };
 
     return (
-        <View style={styles.container}>
-            <ImageBackground style={styles.backgroundImage} resizeMode="cover" source={Splash}>
+        <View style={[styles.container, { height: layout.height }]} onLayout={onLayout}>
+            <ImageBackground
+                style={[
+                    styles.backgroundImage,
+                    {
+                        width: layout.width,
+                        height: layout.height,
+                    },
+                ]}
+                resizeMode="cover"
+                source={Splash}
+            >
                 {/* <SplashImage style={styles.image} width={imageWidth} height="100%" /> */}
                 <View style={styles.wrapContent}>
                     <TextWrap
@@ -42,15 +56,12 @@ export const styling = (themeVariables: IThemeVariables) =>
             flex: 1,
             alignItems: 'center',
             justifyContent: 'center',
-            height: Dimensions.get('window').height,
         },
         backgroundImage: {
             flex: 1,
             alignItems: 'center',
             justifyContent: 'center',
             position: 'absolute',
-            width: Dimensions.get('window').width,
-            height: Dimensions.get('window').height,
             top: 0,
             left: 0,
             backgroundColor: themeVariables.colors.textDefault,

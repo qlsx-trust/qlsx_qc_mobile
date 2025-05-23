@@ -39,7 +39,7 @@ export const palette = {
 
     iconDisabled: '#A0A0AB',
 
-    overlayModal: 'rgba(0,0,0,0.2)',
+    overlayModal: 'rgba(0, 0, 0, 0.28)',
     BackgroundInputArea: 'rgba(255, 255, 255, 0.20)',
     outLineDefault: 'rgba(24, 24, 27, 0.10)',
     outlineStrong: 'rgba(24, 24, 27, 0.18)',

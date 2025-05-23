@@ -6,25 +6,21 @@ import { SCREEN_KEY, UserRole } from '@/constants/common';
 import Config from '@/constants/config';
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { IUserInfo, useAuthContext } from '@/providers/UserProvider';
-import { CommonRepository } from '@/repositories/CommonRepository';
 import { IThemeVariables } from '@/shared/theme/themes';
 import { setSecretStorage } from '@/utils/KeychainHelper';
-import { isIOS } from '@/utils/Mixed';
 import { toast } from '@/utils/ToastMessage';
-import { AntDesign, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { AntDesign, Feather } from '@expo/vector-icons';
 import axios, { HttpStatusCode } from 'axios';
 import { BarcodeScanningResult, CameraType, CameraView, useCameraPermissions } from 'expo-camera';
 import { Redirect, router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-    Dimensions,
     Image,
     Keyboard,
-    KeyboardAvoidingView,
     StyleSheet,
     TextInput,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 const Logo = require('@/assets/iot-logo.jpeg');
 
@@ -42,10 +38,15 @@ const IntroScreen: React.FC<IntroScreenProps> = () => {
     const [permission, requestPermission] = useCameraPermissions();
     const [showCamera, setShowCamera] = useState(false);
     const [facing, setFacing] = useState<CameraType>('back');
-    const { width } = Dimensions.get('window');
+    // State to store layout dimensions
+    const [layout, setLayout] = useState({ width: 0, height: 0 });
+    const onLayout = (event: any) => {
+        const { width, height } = event.nativeEvent.layout;
+        setLayout({ width, height });
+    };
 
-    const maskRowHeight = Math.round((Dimensions.get('window').height - 250) / 20);
-    const maskColWidth = (width - 250) / 2;
+    const maskRowHeight = Math.round((layout.height - 250) / 20);
+    const maskColWidth = (layout.width - 250) / 2;
 
     useEffect(() => {
         if (!permission) {
@@ -124,10 +125,18 @@ const IntroScreen: React.FC<IntroScreenProps> = () => {
     if (!loading && session) return <Redirect href={SCREEN_KEY.home} />;
 
     return (
-        <AppSafeAreaBottom style={styles.container}>
+        <AppSafeAreaBottom style={styles.container} onLayout={onLayout}>
             {showCamera ? (
                 <>
-                    <View style={[styles.cameraWrapper]}>
+                    <View
+                        style={[
+                            styles.cameraWrapper,
+                            {
+                                width: layout.width,
+                                height: layout.height,
+                            },
+                        ]}
+                    >
                         <FlexBox
                             direction="row"
                             alignItems="flex-start"
@@ -156,7 +165,13 @@ const IntroScreen: React.FC<IntroScreenProps> = () => {
                             }}
                             onBarcodeScanned={isReady ? handleBarCodeScan : undefined}
                             onCameraReady={onCameraReady}
-                            style={[styles.cameraContainer]}
+                            style={[
+                                styles.cameraContainer,
+                                {
+                                    width: layout.width,
+                                    height: layout.height * 1,
+                                },
+                            ]}
                             facing={facing}
                             ratio={'1:1'}
                             mute={true}
@@ -187,9 +202,9 @@ const IntroScreen: React.FC<IntroScreenProps> = () => {
                 </>
             ) : (
                 <View style={styles.container}>
-                   <Image source={Logo} width={50} height={50}/>
+                    <Image source={Logo} width={50} height={50} />
                     <TouchableOpacity onPress={() => setShowCamera(true)}>
-                        <FlexBox gap={15} style={{ marginVertical: 30 }} direction='column'>
+                        <FlexBox gap={15} style={{ marginVertical: 30 }} direction="column">
                             <TextWrap fontSize={24} color={themeVariables.colors.primary}>
                                 Nhấn quét mã đăng nhập
                             </TextWrap>
@@ -201,7 +216,7 @@ const IntroScreen: React.FC<IntroScreenProps> = () => {
                         </FlexBox>
                     </TouchableOpacity>
 
-                    <View style={{marginVertical: 30}}>
+                    <View style={{ marginVertical: 30 }}>
                         <TextWrapper>Hoặc nhập</TextWrapper>
                     </View>
 
@@ -271,8 +286,6 @@ export const styling = (themeVariables: IThemeVariables) =>
             position: 'absolute',
             top: 0,
             left: 0,
-            width: Dimensions.get('window').width,
-            height: Dimensions.get('window').height,
             backgroundColor: themeVariables.colors.black50,
         },
         maskOutter: {
@@ -292,8 +305,6 @@ export const styling = (themeVariables: IThemeVariables) =>
             left: 0,
             top: '50%',
             transform: [{ translateY: '-50%' }],
-            width: Dimensions.get('window').width,
-            height: Dimensions.get('window').height * 1,
             backgroundColor: themeVariables.colors.black50,
         },
         maskInner: {

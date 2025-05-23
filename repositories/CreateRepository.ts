@@ -60,7 +60,7 @@ export const fetcher = async <ResponseData = any>(
     const authInfo: IUserInfo = await getSecretStorage();
 
     const authToken = authInfo?.token;
-
+    
     return axiosInstance
         .request<ResponseData>({
             ...config,

@@ -16,14 +16,12 @@ import { BarcodeScanningResult, CameraType, CameraView, useCameraPermissions } f
 import { useEffect, useMemo, useState } from 'react';
 import {
     ActivityIndicator,
-    Dimensions,
     Keyboard,
     StyleSheet,
     TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
 import SelectDropdown from 'react-native-select-dropdown';
 
 interface IAssignQCModalProps {
@@ -32,11 +30,14 @@ interface IAssignQCModalProps {
 }
 
 const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
-    const dimensions = Dimensions.get('window');
-
+    // State to store layout dimensions
+    const [layout, setLayout] = useState({ width: 0, height: 0 });
+    const onLayout = (event: any) => {
+        const { width, height } = event.nativeEvent.layout;
+        setLayout({ width, height });
+    };
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
-    const { width } = Dimensions.get('window');
 
     const [isLoadingSubmit, setIsLoadingSubmit] = useState<boolean>(false);
     const [isLoadingDelete, setIsLoadingDelete] = useState<string>('');
@@ -52,8 +53,8 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
     const [showCamera, setShowCamera] = useState(false);
     const [facing, setFacing] = useState<CameraType>('back');
 
-    const maskRowHeight = Math.round((Dimensions.get('window').height - 250) / 20);
-    const maskColWidth = (width - 250) / 2;
+    const maskRowHeight = Math.round((layout.height - 250) / 20);
+    const maskColWidth = (layout.width - 250) / 2;
 
     const [employees, setEmployees] = useState<IEmployee[]>([]);
     const [recallEmployee, setRecallEmployee] = useState<number>(0);
@@ -135,11 +136,16 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
                     return;
                 }
             }
-
+            let isDeletedSuccess = false;
             if (assignedQc?.length) {
-                const removeAssigedQcpromises = assignedQc.map((qc) => deleteAssignQc(qc));
-                await PromiseAllSettled(removeAssigedQcpromises);
-                setAssignedQc([]);
+                const qcAssignedCodes = employees.filter((employee) =>
+                    assignedQc.find((qc) => qc.includes(employee.employeeCode))
+                );
+                const removeAssigedQcpromises = qcAssignedCodes.map((qc) =>
+                    deleteAssignQc(qc.employeeCode)
+                );
+                const res = await PromiseAllSettled(removeAssigedQcpromises);
+                if (res?.length) isDeletedSuccess = true;
             }
             setErrorCheckCode('');
             const payload = {
@@ -147,7 +153,7 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
                 qcAssign: qcCode,
             };
             const res = await CommonRepository.assignQCProductPlan(payload);
-            if (!res.error && res.data) {
+            if (!res.error) {
                 PubSub.publish(PUB_TOPIC.RECALL_PRODUCTION_PLAN);
                 setRecallEmployee(new Date().getTime());
                 toast.success('Phân công thành công');
@@ -155,6 +161,7 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
                 setOtherQcCode('');
             } else {
                 toast.error('Phân công thất bại');
+                if (isDeletedSuccess) setAssignedQc([]);
             }
         } catch (err) {
             console.error(err);
@@ -174,10 +181,18 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
 
     return (
         <>
-            <CommonModal {...modalProps}>
+            <CommonModal {...modalProps} onLayoutProps={onLayout}>
                 {showCamera ? (
                     <>
-                        <View style={[styles.cameraWrapper]}>
+                        <View
+                            style={[
+                                styles.cameraWrapper,
+                                {
+                                    width: layout.width,
+                                    height: layout.height,
+                                },
+                            ]}
+                        >
                             <FlexBox
                                 direction="row"
                                 alignItems="flex-start"
@@ -206,7 +221,13 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
                                 }}
                                 onBarcodeScanned={isReady ? handleBarCodeScan : undefined}
                                 onCameraReady={onCameraReady}
-                                style={[styles.cameraContainer]}
+                                style={[
+                                    styles.cameraContainer,
+                                    {
+                                        width: layout.width,
+                                        height: layout.height * 1,
+                                    },
+                                ]}
                                 facing={facing}
                                 ratio={'1:1'}
                                 mute={true}
@@ -257,74 +278,80 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
                             >
                                 Chọn nhân viên:
                             </TextWrap>
-                            <FlexBox style={{width: '100%'}} justifyContent='flex-start' alignItems='flex-start'>
-                            <SelectDropdown
-                                key={assignedQc?.length}
-                                data={selectEmployeeOptions}
-                                disabled={isLoadingSubmit}
-                                onSelect={(selectedItem, index) => {
-                                    if (selectedItem.value == 'other') {
-                                        setShowOtherUser(true);
-                                        setOtherQcCode('');
-                                    } else {
-                                        setShowOtherUser(false);
-                                        // handle add QC
-                                        handleAddQC(selectedItem.value);
-                                    }
-                                }}
-                                renderButton={(selectedItem, isOpened) => {
-                                    return (
-                                        <View style={styles.dropdownButtonStyle}>
-                                            <TextWrap style={styles.dropdownButtonTxtStyle}>
-                                                {(selectedItem && selectedItem.title) ||
-                                                    'Chọn nhân viên'}
-                                            </TextWrap>
-                                            {isLoadingSubmit ? (
-                                                <ActivityIndicator />
-                                            ) : (
-                                                <>
-                                                    {isOpened ? (
-                                                        <Entypo
-                                                            name="chevron-small-up"
-                                                            size={24}
-                                                            color="black"
-                                                        />
-                                                    ) : (
-                                                        <Entypo
-                                                            name="chevron-small-down"
-                                                            size={24}
-                                                            color="black"
-                                                        />
-                                                    )}
-                                                </>
-                                            )}
-                                        </View>
-                                    );
-                                }}
-                                renderItem={(item: any, index, isSelected) => {
-                                    const isSelectedQc =
-                                        isSelected ||
-                                        assignedQc.find(
-                                            (code: string) =>
-                                                code == item.value || code == item.title
+                            <FlexBox
+                                style={{ width: '100%' }}
+                                justifyContent="flex-start"
+                                alignItems="flex-start"
+                            >
+                                <SelectDropdown
+                                    key={assignedQc?.length}
+                                    data={selectEmployeeOptions}
+                                    disabled={isLoadingSubmit}
+                                    onSelect={(selectedItem, index) => {
+                                        if (selectedItem.value == 'other') {
+                                            setShowOtherUser(true);
+                                            setOtherQcCode('');
+                                        } else {
+                                            setShowOtherUser(false);
+                                            // handle add QC
+                                            handleAddQC(selectedItem.value);
+                                        }
+                                    }}
+                                    renderButton={(selectedItem, isOpened) => {
+                                        return (
+                                            <View style={styles.dropdownButtonStyle}>
+                                                <TextWrap style={styles.dropdownButtonTxtStyle}>
+                                                    {(selectedItem && selectedItem.title) ||
+                                                        'Chọn nhân viên'}
+                                                </TextWrap>
+                                                {isLoadingSubmit ? (
+                                                    <ActivityIndicator />
+                                                ) : (
+                                                    <>
+                                                        {isOpened ? (
+                                                            <Entypo
+                                                                name="chevron-small-up"
+                                                                size={24}
+                                                                color="black"
+                                                            />
+                                                        ) : (
+                                                            <Entypo
+                                                                name="chevron-small-down"
+                                                                size={24}
+                                                                color="black"
+                                                            />
+                                                        )}
+                                                    </>
+                                                )}
+                                            </View>
                                         );
-                                    return (
-                                        <View
-                                            style={{
-                                                ...styles.dropdownItemStyle,
-                                                ...(isSelectedQc && { backgroundColor: '#D2D9DF' }),
-                                                pointerEvents: isSelectedQc ? 'none' : 'auto',
-                                            }}
-                                        >
-                                            <TextWrap style={styles.dropdownItemTxtStyle}>
-                                                {item.title}
-                                            </TextWrap>
-                                        </View>
-                                    );
-                                }}
-                                showsVerticalScrollIndicator={false}
-                                dropdownStyle={styles.dropdownMenuStyle}
-                            />
+                                    }}
+                                    renderItem={(item: any, index, isSelected) => {
+                                        const isSelectedQc =
+                                            isSelected ||
+                                            assignedQc.find(
+                                                (code: string) =>
+                                                    code == item.value || code == item.title
+                                            );
+                                        return (
+                                            <View
+                                                style={{
+                                                    ...styles.dropdownItemStyle,
+                                                    ...(isSelectedQc && {
+                                                        backgroundColor: '#D2D9DF',
+                                                    }),
+                                                    pointerEvents: isSelectedQc ? 'none' : 'auto',
+                                                }}
+                                            >
+                                                <TextWrap style={styles.dropdownItemTxtStyle}>
+                                                    {item.title}
+                                                </TextWrap>
+                                            </View>
+                                        );
+                                    }}
+                                    showsVerticalScrollIndicator={false}
+                                    dropdownStyle={styles.dropdownMenuStyle}
+                                />
                             </FlexBox>
                         </FlexBox>
 
@@ -383,7 +410,9 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
                             gap={5}
                             style={{ width: '100%', paddingHorizontal: 10, marginBottom: 20 }}
                         >
-                            <TextWrap style={styles.description}>Nhân viên được phân công:</TextWrap>
+                            <TextWrap style={styles.description}>
+                                Nhân viên được phân công:
+                            </TextWrap>
                             <TextWrap
                                 fontSize={18}
                                 color={
@@ -437,8 +466,6 @@ export const styling = (themeVariables: IThemeVariables) =>
             // position: 'absolute',
             // top: 0,
             // left: 0,
-            width: Dimensions.get('window').width,
-            height: Dimensions.get('window').height,
             backgroundColor: themeVariables.colors.black50,
         },
         maskOutter: {
@@ -458,8 +485,6 @@ export const styling = (themeVariables: IThemeVariables) =>
             left: 0,
             top: '50%',
             transform: [{ translateY: '-50%' }],
-            width: Dimensions.get('window').width,
-            height: Dimensions.get('window').height * 1,
             backgroundColor: themeVariables.colors.black50,
         },
         maskInner: {

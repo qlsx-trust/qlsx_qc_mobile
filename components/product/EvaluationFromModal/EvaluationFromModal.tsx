@@ -11,18 +11,10 @@ import { useThemeContext } from '@/providers/ThemeProvider';
 import { IThemeVariables } from '@/shared/theme/themes';
 import { getDataStorage, setDataStorage } from '@/utils/KeychainHelper';
 import { toast } from '@/utils/ToastMessage';
-import { FontAwesome6 } from '@expo/vector-icons';
+import { FontAwesome6, Ionicons } from '@expo/vector-icons';
 import { Camera } from 'expo-camera';
 import { useState } from 'react';
-import {
-    Dimensions,
-    Image,
-    Keyboard,
-    Linking,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-} from 'react-native';
+import { Image, Keyboard, Linking, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import ImageSelection from '../ImageSelection';
 import { ICheckItem } from '@/providers/ProductionPlanProvider';
 
@@ -37,11 +29,14 @@ const EvaluationFromModal = ({
     modalProps,
     onConfirmFeedback,
 }: IEvaluationFromModalProps) => {
-    const dimensions = Dimensions.get('window');
-
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
-
+    // State to store layout dimensions
+    const [layout, setLayout] = useState({ width: 0, height: 0 });
+    const onLayout = (event: any) => {
+        const { width, height } = event.nativeEvent.layout;
+        setLayout({ width, height });
+    };
     const [imageUrl, setImageUrl] = useState<string>(evaluationItem.reportFileUri);
     const [feedback, setFeedback] = useState<string>(evaluationItem.note);
     const [showCamera, setShowCamera] = useState<boolean>(false);
@@ -69,19 +64,61 @@ const EvaluationFromModal = ({
     const handleSubmitFeedback = () => {
         onConfirmFeedback({
             feedback,
-            imageUrl
+            imageUrl,
         });
     };
 
     return (
         <>
-            <CommonModal {...modalProps} previewImage={showCamera}>
+            <CommonModal {...modalProps} previewImage={showCamera} onLayoutProps={onLayout}>
                 {showCamera && (
-                    <ImageSelection setShowCamera={setShowCamera} setImageUrl={setImageUrl} />
+                    <ImageSelection
+                        layout={layout}
+                        setShowCamera={setShowCamera}
+                        setImageUrl={setImageUrl}
+                    />
                 )}
                 <FlexBox direction="column" width={'100%'}>
-                    <TextWrap style={styles.header}>Phản hồi lỗi</TextWrap>
+                    <TextWrap style={styles.header}>Phản hồi lỗi:</TextWrap>
                 </FlexBox>
+                <FlexBox
+                    direction="row"
+                    width={'100%'}
+                    justifyContent="flex-start"
+                    alignItems="center"
+                    gap={10}
+                    style={{ marginTop: 20, marginBottom: 10 }}
+                >
+                    <TextWrap style={styles.description}>Ảnh đính kèm</TextWrap>
+                    {imageUrl && (
+                        <TouchableOpacity style={styles.button} onPress={handlePermissionCamera}>
+                            <Ionicons
+                                name="camera-reverse-outline"
+                                size={24}
+                                color={themeVariables.colors.primary}
+                            />
+                        </TouchableOpacity>
+                    )}
+                </FlexBox>
+                {imageUrl ? (
+                    <Image
+                        source={{ uri: imageUrl }}
+                        style={{ width: '100%', height: 180, objectFit: 'contain' }}
+                    />
+                ) : (
+                    <FlexBox style={{ width: '100%' }}>
+                        <TouchableOpacity
+                            style={{ width: 100, height: 100 }}
+                            onPress={handlePermissionCamera}
+                        >
+                            <FontAwesome6
+                                name="camera"
+                                size={100}
+                                color={themeVariables.colors.primary}
+                            />
+                        </TouchableOpacity>
+                    </FlexBox>
+                )}
                 <FlexBox
                     direction="column"
                     style={{ marginTop: 30 }}
@@ -106,29 +143,6 @@ const EvaluationFromModal = ({
                         onSubmitEditing={Keyboard.dismiss}
                     />
                 </FlexBox>
-                <FlexBox
-                    direction="row"
-                    width={'100%'}
-                    justifyContent="flex-start"
-                    alignItems="center"
-                    gap={10}
-                    style={{ marginTop: 20, marginBottom: 10 }}
-                >
-                    <TextWrap style={styles.description}>Ảnh lỗi</TextWrap>
-                    <TouchableOpacity style={styles.button} onPress={handlePermissionCamera}>
-                        <FontAwesome6
-                            name="camera"
-                            size={24}
-                            color={themeVariables.colors.primary}
-                        />
-                    </TouchableOpacity>
-                </FlexBox>
-                {imageUrl && (
-                    <Image
-                        source={{ uri: imageUrl }}
-                        style={{ width: '100%', height: 280, objectFit: 'contain' }}
-                    />
-                )}
 
                 <FlexBox justifyContent="space-between" gap={16} style={{ marginTop: 20 }}>
                     <AppButton

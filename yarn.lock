@@ -6045,7 +6045,7 @@ react-native-calendar-picker@^8.0.5:
     prop-types "^15.6.0"
     recyclerlistview "^3.0.0"
 
-react-native-edge-to-edge@1.6.0:
+react-native-edge-to-edge@1.6.0, react-native-edge-to-edge@^1.6.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/react-native-edge-to-edge/-/react-native-edge-to-edge-1.6.0.tgz#2ba63b941704a7f713e298185c26cde4d9e4b973"
   integrity sha512-2WCNdE3Qd6Fwg9+4BpbATUxCLcouF6YRY7K+J36KJ4l3y+tWN6XCqAC4DuoGblAAbb2sLkhEDp4FOlbOIot2Og==

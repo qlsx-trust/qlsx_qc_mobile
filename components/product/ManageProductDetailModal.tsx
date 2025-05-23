@@ -17,7 +17,6 @@ import { FontAwesome6, Ionicons } from '@expo/vector-icons';
 import { Camera } from 'expo-camera';
 import { useEffect, useState } from 'react';
 import {
-    Dimensions,
     Image,
     Keyboard,
     KeyboardAvoidingView,
@@ -28,6 +27,7 @@ import {
 } from 'react-native';
 import ImageSelection from './ImageSelection';
 import Config from '@/constants/config';
+import { last } from 'lodash';
 
 interface IManageProductDetailModalProps {
     checkItem?: IProductCheckItem;
@@ -42,10 +42,16 @@ const ManageProductDetailModal = ({
     onAddProductCheckItem,
     onEditCheckItem,
 }: IManageProductDetailModalProps) => {
-    const dimensions = Dimensions.get('window');
 
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
+
+    // State to store layout dimensions
+    const [layout, setLayout] = useState({ width: 0, height: 0 });
+    const onLayout = (event: any) => {
+        const { width, height } = event.nativeEvent.layout;
+        setLayout({ width, height });
+    };
 
     const isEditMode = !!checkItem;
 
@@ -110,9 +116,9 @@ const ManageProductDetailModal = ({
 
     return (
         <KeyboardAvoidingView>
-            <CommonModal {...modalProps} previewImage={showCamera}>
+            <CommonModal {...modalProps} previewImage={showCamera} onLayoutProps={onLayout}>
                 {showCamera && (
-                    <ImageSelection setShowCamera={setShowCamera} setImageUrl={setImageUrl} />
+                    <ImageSelection layout={layout} setShowCamera={setShowCamera} setImageUrl={setImageUrl} />
                 )}
                 <FlexBox direction="column" width={'100%'}>
                     <TextWrap style={styles.header}>

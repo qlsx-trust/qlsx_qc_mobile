@@ -1,6 +1,6 @@
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { IThemeVariables } from '@/shared/theme/themes';
-import { Dimensions, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -10,21 +10,23 @@ import TextWrap from '@/components/common/TextWrap';
 import ConfirmModal from '@/components/ConfirmModal';
 import AddEvaluationItemModal from '@/components/product/AddEvaluationItemModal';
 import CheckListItem from '@/components/product/CheckListItem';
-import ImageSelection from '@/components/product/ImageSelection';
 import { BUTTON_COMMON_TYPE, SCREEN_KEY } from '@/constants/common';
 import Config from '@/constants/config';
 import { ICheckItem, useProductionPlanContext } from '@/providers/ProductionPlanProvider';
 import { CommonRepository } from '@/repositories/CommonRepository';
 import { toast } from '@/utils/ToastMessage';
-import { AntDesign } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import Moment from 'moment';
 import { useEffect, useState } from 'react';
-import { publish } from 'pubsub-js';
 
 const ProductScreen = () => {
-    const dimensions = Dimensions.get('window');
+   // State to store layout dimensions
+    const [layout, setLayout] = useState({ width: 0, height: 0 });
+    const onLayout = (event: any) => {
+        const { width, height } = event.nativeEvent.layout;
+        setLayout({ width, height });
+    };
     const { themeVariables, theme } = useThemeContext();
     const { productionPlan } = useProductionPlanContext();
     const styles = styling(themeVariables);
@@ -170,15 +172,7 @@ const ProductScreen = () => {
 
     return (
         // <KeyboardAvoidingView behavior={isIOS ? 'padding' : 'height'}>
-        <SafeAreaView style={styles.container}>
-            {showCamera && (
-                <ImageSelection
-                    setShowCamera={setShowCamera}
-                    setImageUrl={(url: string) => {
-                        PubSub.publish('TAKE_PHOTO_CHECK_ITEM', url);
-                    }}
-                />
-            )}
+        <SafeAreaView style={styles.container} onLayout={onLayout}>
             <FlexBox
                 gap={10}
                 height={'100%'}
@@ -267,52 +261,6 @@ const ProductScreen = () => {
                                 )}
                             </TextWrap>
                         </TextWrap>
-
-                        {pdfPreviews?.length ? (
-                            <FlexBox
-                                direction="column"
-                                gap={5}
-                                justifyContent="flex-start"
-                                alignItems="flex-start"
-                            >
-                                <TextWrap
-                                    style={styles.description}
-                                    color={themeVariables.colors.textDefault}
-                                >
-                                    Mẫu tham khảo các mục đánh giá:
-                                </TextWrap>
-                                <FlexBox
-                                    direction="row"
-                                    gap={5}
-                                    justifyContent="flex-start"
-                                    alignItems="center"
-                                    style={{ flexWrap: 'wrap' }}
-                                >
-                                    {pdfPreviews.map((pdf, index) => (
-                                        <TouchableOpacity
-                                            key={`pdf-prewview-${index}`}
-                                            onPress={() =>
-                                                handlePreviewEvaluationForm(pdf.documentUrl)
-                                            }
-                                        >
-                                            <TextWrap
-                                                style={{ ...styles.description }}
-                                                color={themeVariables.colors.primary}
-                                            >
-                                                <AntDesign
-                                                    name="pdffile1"
-                                                    size={18}
-                                                    color={themeVariables.colors.primary}
-                                                />{' '}
-                                                {pdf.documentName}
-                                            </TextWrap>
-                                        </TouchableOpacity>
-                                    ))}
-                                </FlexBox>
-                            </FlexBox>
-                        ) : (
-                            <Text></Text>
-                        )}
                     </FlexBox>
                 </FlexBox>
                 <FlexBox
@@ -328,20 +276,20 @@ const ProductScreen = () => {
                 >
                     <FlexBox justifyContent="space-between" alignItems="flex-end">
                         <TextWrap style={styles.title} color={themeVariables.colors.textDefault}>
-                            Các mục đánh giá ({checkedItems}/{checkItems.length})
+                            Các mục đã đánh giá ({checkedItems}/{checkItems.length})
                         </TextWrap>
                     </FlexBox>
-                    <FlexBox gap={30} alignItems="flex-end">
+                    <FlexBox gap={20} alignItems="flex-end">
                         <AppButton
                             label="Thêm mục"
                             onPress={() => setShowAddEvaluationItemModal(true)}
-                            viewStyle={{}}
+                            viewStyle={{width: 150}}
                             variant={BUTTON_COMMON_TYPE.CANCEL}
                         />
                         <AppButton
                             label="Gửi đánh giá"
                             onPress={handleSubmit}
-                            viewStyle={{}}
+                            viewStyle={{width: 150}}
                             isLoading={loadingSubmit}
                             disabled={loadingSubmit || !checkedItems || !enableSubmitEvaluation}
                             variant={BUTTON_COMMON_TYPE.PRIMARY}
@@ -351,41 +299,12 @@ const ProductScreen = () => {
                 {checkItems?.length ? (
                     <FlexBox style={{ width: '100%' }}>
                         <FlexBox direction="column" style={{ width: '100%' }}>
-                            <FlexBox
-                                gap={20}
-                                justifyContent="space-between"
-                                style={{ width: '100%' }}
-                            >
-                                <TextWrap color={themeVariables.colors.primary} fontSize={24}>
-                                    Mục đánh giá {stepItem + 1}
-                                </TextWrap>
-                                <FlexBox gap={30}>
-                                    <AppButton
-                                        label="< Quay lại"
-                                        disabled={stepItem == 0}
-                                        onPress={() => {
-                                            if (stepItem == 0) return;
-                                            setStepItem((current) => current - 1);
-                                        }}
-                                        viewStyle={{}}
-                                        variant={BUTTON_COMMON_TYPE.CANCEL}
-                                    />
-                                    <AppButton
-                                        label="Tiếp tục >"
-                                        disabled={stepItem == checkItems.length - 1}
-                                        onPress={() => {
-                                            if (stepItem == checkItems.length - 1) return;
-                                            setStepItem((current) => current + 1);
-                                        }}
-                                        viewStyle={{}}
-                                        variant={BUTTON_COMMON_TYPE.CANCEL}
-                                    />
-                                </FlexBox>
-                            </FlexBox>
                             <CheckListItem
+                                checkItems={checkItems}
                                 sessionCheckItem={checkItems[stepItem]}
                                 index={stepItem}
                                 onUpdateCheckItem={handleUpdateCheckItem}
+                                setStepItem={setStepItem}
                             />
                         </FlexBox>
                     </FlexBox>

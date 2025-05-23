@@ -13,10 +13,11 @@ import { CameraType, CameraView } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 
 import React, { useEffect, useState } from 'react';
-import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { PinchGestureHandler, State } from 'react-native-gesture-handler';
 
 interface Props {
+    layout: any;
     setShowCamera: Function;
     setImageUrl: Function;
 }
@@ -41,7 +42,7 @@ const flashModes: any = {
     },
 };
 
-const ImageSelection = ({ setShowCamera, setImageUrl }: Props) => {
+const ImageSelection = ({ layout, setShowCamera, setImageUrl }: Props) => {
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
 
@@ -190,7 +191,9 @@ const ImageSelection = ({ setShowCamera, setImageUrl }: Props) => {
     };
 
     return (
-        <View style={[styles.cameraContainer]}>
+        <View
+            style={[styles.cameraContainer, { width: layout.width, height: layout.height }]}
+        >
             <View style={styles.closeBox}>
                 {!imageUri && (
                     <>
@@ -230,7 +233,7 @@ const ImageSelection = ({ setShowCamera, setImageUrl }: Props) => {
                                 direction="row"
                                 alignItems="center"
                                 justifyContent="space-between"
-                                style={styles.zoomConfig}
+                                style={{ ...styles.zoomConfig, left: layout.width / 2 - 60 }}
                                 width={120}
                             >
                                 {ZOOM_SELECTS.map((zoom: number, index: number) => (
@@ -286,7 +289,6 @@ const ImageSelection = ({ setShowCamera, setImageUrl }: Props) => {
                     alignItems="center"
                     style={{ height: 120, paddingHorizontal: 20 }}
                 >
-                    
                     <TouchableOpacity onPress={changeTypeCamera} style={styles.buttonTakePhoto}>
                         <CameraRotateIcon
                             width={35}
@@ -322,8 +324,6 @@ export const styling = (themeVariables: IThemeVariables) =>
             position: 'absolute',
             top: 0,
             left: 0,
-            width: Dimensions.get('window').width,
-            height: Dimensions.get('window').height,
             backgroundColor: themeVariables.colors.black50,
         },
         fixedRatio: {
@@ -384,7 +384,6 @@ export const styling = (themeVariables: IThemeVariables) =>
             bottom: 10,
             flex: 1,
             backgroundColor: '#80808057',
-            left: Dimensions.get('window').width / 2 - 60,
             paddingVertical: 5,
             borderRadius: 20,
             paddingHorizontal: 7,

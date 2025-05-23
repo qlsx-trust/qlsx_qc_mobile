@@ -1,11 +1,15 @@
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { IThemeVariables } from '@/shared/theme/themes';
 import Feather from '@expo/vector-icons/Feather';
-import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+    Image,
+    StyleSheet,
+    TouchableOpacity,
+    View
+} from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import ScanQRCodeIcon from '@/assets/qr-code-scanner.svg';
 import AppButton from '@/components/common/AppButton';
 import FlexBox from '@/components/common/FlexBox';
 import TextWrapper from '@/components/common/TextWrap';
@@ -27,9 +31,15 @@ const HomeScreen = () => {
     const [permission, requestPermission] = useCameraPermissions();
     const [showCamera, setShowCamera] = useState(false);
     const [facing, setFacing] = useState<CameraType>('back');
-    const { width } = Dimensions.get('window');
-    const maskRowHeight = Math.round((Dimensions.get('window').height - 250) / 20);
-    const maskColWidth = (width - 250) / 2;
+    // State to store layout dimensions
+    const [layout, setLayout] = useState({ width: 0, height: 0 });
+    const onLayout = (event: any) => {
+        const { width, height } = event.nativeEvent.layout;
+        setLayout({ width, height });
+    };
+
+    const maskRowHeight = Math.round((layout.height - 250) / 20);
+    const maskColWidth = (layout.width - 250) / 2;
 
     const [scanResult, setScanResult] = useState<string>('');
     const [showConfirmResultCode, setShowConfirmResultCode] = useState<boolean>(false);
@@ -80,7 +90,7 @@ const HomeScreen = () => {
 
     return (
         // <KeyboardAvoidingView behavior={isIOS ? 'padding' : 'height'}>
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} onLayout={onLayout}>
             <FlexBox
                 gap={20}
                 height={'100%'}
@@ -92,7 +102,15 @@ const HomeScreen = () => {
             >
                 {showCamera && (
                     <>
-                        <View style={[styles.cameraWrapper]}>
+                        <View
+                            style={[
+                                styles.cameraWrapper,
+                                {
+                                    width: layout.width,
+                                    height: layout.height,
+                                },
+                            ]}
+                        >
                             <FlexBox
                                 direction="row"
                                 alignItems="center"
@@ -120,7 +138,13 @@ const HomeScreen = () => {
                                 }}
                                 onBarcodeScanned={isReady ? handleBarCodeScan : undefined}
                                 onCameraReady={onCameraReady}
-                                style={[styles.cameraContainer]}
+                                style={[
+                                    styles.cameraContainer,
+                                    {
+                                        width: layout.width,
+                                        height: layout.height * 1,
+                                    },
+                                ]}
                                 facing={facing}
                                 ratio={'1:1'}
                                 mute={true}
@@ -287,8 +311,6 @@ export const styling = (themeVariables: IThemeVariables) =>
             left: 0,
             top: '50%',
             transform: [{ translateY: '-50%' }],
-            width: Dimensions.get('window').width,
-            height: Dimensions.get('window').height * 1,
             backgroundColor: themeVariables.colors.black50,
         },
 
@@ -298,8 +320,6 @@ export const styling = (themeVariables: IThemeVariables) =>
             position: 'absolute',
             top: 0,
             left: 0,
-            width: Dimensions.get('window').width,
-            height: Dimensions.get('window').height,
             backgroundColor: themeVariables.colors.black50,
         },
         maskOutter: {

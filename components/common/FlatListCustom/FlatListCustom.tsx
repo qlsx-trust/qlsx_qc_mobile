@@ -1,7 +1,7 @@
 import Loading from '@/components/common/Loading';
 import { PAGE_SIZE } from '@/constants/common';
-import React from 'react';
-import { ActivityIndicator, Dimensions, FlatList, RefreshControl, View } from 'react-native';
+import React, { useState } from 'react';
+import { ActivityIndicator, FlatList, RefreshControl, View } from 'react-native';
 
 interface IFlatListCustomProps {
     isLoading: boolean;
@@ -28,7 +28,6 @@ const FlatListCustom = ({
     styleMore,
     numColumns = 1,
 }: IFlatListCustomProps) => {
-    const dimensions = Dimensions.get('window');
 
     if (isLoading) return <Loading />;
 
@@ -36,7 +35,7 @@ const FlatListCustom = ({
         <FlatList
             style={
                 isShowModal
-                    ? { maxHeight: dimensions.height / 4, width: '100%', ...styleMore }
+                    ? { maxHeight: 300, width: '100%', ...styleMore }
                     : { height: '100%', ...styleMore }
             }
             ListEmptyComponent={() => renderEmptyComponent()}

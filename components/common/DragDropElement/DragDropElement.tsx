@@ -1,21 +1,21 @@
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { IThemeVariables } from '@/shared/theme/themes';
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Dimensions, PanResponder, StyleSheet } from 'react-native';
+import { Animated, PanResponder, StyleSheet } from 'react-native';
 
 type Props = {
     children: any;
-    left?: number;
+    right?: number;
     bottom?: number;
 };
 
 const DragDropElement: React.FC<Props> = ({
     children,
-    left = Dimensions.get('window').width - 80,
+    right = 80,
     bottom = 30,
 }) => {
     const { themeVariables } = useThemeContext();
-    const styles = styling(themeVariables, left, bottom);
+    const styles = styling(themeVariables, right, bottom);
     const positionAnimate = useRef(new Animated.ValueXY());
     const position = useRef({
         x: 0,
@@ -71,7 +71,7 @@ const DragDropElement: React.FC<Props> = ({
     );
 };
 
-export const styling = (themeVariables: IThemeVariables, left: number, bottom: number) =>
+export const styling = (themeVariables: IThemeVariables, right: number, bottom: number) =>
     StyleSheet.create({
         buttonWrap: {
             width: 60,
@@ -84,7 +84,7 @@ export const styling = (themeVariables: IThemeVariables, left: number, bottom: n
             zIndex: 99,
             position: 'absolute',
             bottom: bottom,
-            left: left,
+            right: right,
         },
     });
 

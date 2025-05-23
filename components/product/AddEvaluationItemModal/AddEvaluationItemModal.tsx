@@ -6,7 +6,7 @@ import { BUTTON_COMMON_TYPE } from '@/constants/common';
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { IThemeVariables } from '@/shared/theme/themes';
 import { useState } from 'react';
-import { Dimensions, Keyboard, StyleSheet, TextInput } from 'react-native';
+import { Keyboard, StyleSheet, TextInput } from 'react-native';
 
 interface IAddEvaluationItemModalProps {
     modalProps: CommonModalProps;
@@ -14,7 +14,6 @@ interface IAddEvaluationItemModalProps {
 }
 
 const AddEvaluationItemModal = ({ modalProps, onSuccess }: IAddEvaluationItemModalProps) => {
-    const dimensions = Dimensions.get('window');
 
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);

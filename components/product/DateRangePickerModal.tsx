@@ -1,6 +1,6 @@
 import CommonModal, { CommonModalProps } from '@/components/modals/CommonModal';
 import { IThemeVariables } from '@/shared/theme/themes';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import CalendarPicker from 'react-native-calendar-picker';
 import FlexBox from '../common/FlexBox';
 import AppButton from '../common/AppButton';
@@ -103,89 +103,6 @@ export const styling = (themeVariables: IThemeVariables) =>
         },
         button: {
             width: '49%',
-        },
-
-        cameraWrapper: {
-            flex: 1,
-            zIndex: 90,
-            // position: 'absolute',
-            // top: 0,
-            // left: 0,
-            width: Dimensions.get('window').width,
-            height: Dimensions.get('window').height,
-            backgroundColor: themeVariables.colors.black50,
-        },
-        maskOutter: {
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            alignItems: 'center',
-            justifyContent: 'space-around',
-        },
-        cameraContainer: {
-            flex: 1,
-            zIndex: 100,
-            position: 'absolute',
-            // top: 0,
-            left: 0,
-            top: '50%',
-            transform: [{ translateY: '-50%' }],
-            width: Dimensions.get('window').width,
-            height: Dimensions.get('window').height * 1,
-            backgroundColor: themeVariables.colors.black50,
-        },
-        maskInner: {
-            width: 250,
-            backgroundColor: 'transparent',
-            borderColor: 'white',
-            borderWidth: 1,
-        },
-        maskFrame: {
-            backgroundColor: 'rgba(1, 1, 1, 0.628)',
-        },
-        maskRow: {
-            width: '100%',
-        },
-        maskCenter: { flexDirection: 'row' },
-        textInput: {
-            width: '100%',
-            padding: 12,
-            overflow: 'scroll',
-            height: 50,
-            borderRadius: 12,
-            borderStyle: 'solid',
-            borderColor: themeVariables.colors.borderColor,
-            borderWidth: 1,
-            backgroundColor: themeVariables.colors.BackgroundInputArea,
-            fontSize: 14,
-            fontWeight: '400',
-            color: themeVariables.colors.textDefault,
-            marginTop: 10,
-        },
-        textArea: {
-            width: '100%',
-            padding: 12,
-            overflow: 'scroll',
-            height: 120,
-            borderRadius: 12,
-            borderStyle: 'solid',
-            borderColor: themeVariables.colors.borderColor,
-            borderWidth: 1,
-            backgroundColor: themeVariables.colors.BackgroundInputArea,
-            fontSize: 14,
-            fontWeight: '400',
-            lineHeight: 20,
-            color: themeVariables.colors.textDefault,
-            marginTop: 10,
-        },
-        closeBox: {
-            height: 250,
-            position: 'absolute',
-            top: -250,
-            right: 80,
-            zIndex: 110,
         },
         dropdownButtonStyle: {
             width: 300,

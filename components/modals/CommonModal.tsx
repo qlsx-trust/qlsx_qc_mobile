@@ -1,14 +1,15 @@
 import FlexBox from '@/components/common/FlexBox';
 import { useThemeContext } from '@/providers/ThemeProvider';
-import { THEME_WS } from '@/shared/theme/themes';
-import React from 'react';
-import { Dimensions, ModalProps, Pressable, StyleSheet, View } from 'react-native';
+import { IThemeVariables, THEME_WS, themeValues } from '@/shared/theme/themes';
+import React, { useState } from 'react';
+import { ModalProps, Pressable, StyleSheet, View } from 'react-native';
 import Modal from 'react-native-modal';
 
 export interface CommonModalProps extends ModalProps {
     children?: React.ReactNode;
     previewImage?: boolean;
     onClose: () => void;
+    onLayoutProps?: Function;
     closeOnClickOutside?: boolean;
 }
 
@@ -17,11 +18,20 @@ const CommonModal = ({
     previewImage,
     transparent = true,
     onClose,
+    onLayoutProps,
     closeOnClickOutside = false,
     ...props
 }: CommonModalProps) => {
     const { themeVariables, theme } = useThemeContext();
-    const styles = styling();
+    const styles = styling(themeVariables);
+
+    // State to store layout dimensions
+    const [layout, setLayout] = useState({ width: 0, height: 0 });
+    const onLayout = (event: any) => {
+        onLayoutProps?.(event)
+        const { width, height } = event.nativeEvent.layout;
+        setLayout({ width, height });
+    };
 
     return (
         <Modal
@@ -29,7 +39,9 @@ const CommonModal = ({
             onModalHide={onClose}
             avoidKeyboard
             onBackButtonPress={onClose}
-            style={{ margin: 0 }}
+            style={{ margin: 0}}
+            onLayout={onLayout}
+            hasBackdrop
         >
             <Pressable style={styles.overlay} onPressOut={() => closeOnClickOutside && onClose()}>
                 {previewImage ? (
@@ -45,7 +57,7 @@ const CommonModal = ({
                                 : themeVariables.colors.white
                         }
                         borderRadius={16}
-                        style={styles.modal}
+                        style={{ ...styles.modal, maxWidth: (layout.width * 4) / 5 }}
                     >
                         {children}
                     </FlexBox>
@@ -55,17 +67,17 @@ const CommonModal = ({
     );
 };
 
-export const styling = () =>
+export const styling = (themeVariables: IThemeVariables) =>
     StyleSheet.create({
         overlay: {
             flex: 1,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            backgroundColor: themeVariables.colors.overlayModal
         },
         modal: {
             padding: 16,
-            maxWidth: Dimensions.get('window').width * 4/5,
         },
     });
 

@@ -5,7 +5,7 @@ import { CommonRepository } from '@/repositories/CommonRepository';
 import { IThemeVariables } from '@/shared/theme/themes';
 import Moment from 'moment';
 import { useEffect, useState } from 'react';
-import { Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import SearchBar from '../SearchBar';
 import EmptyFolder from '../common/EmptyList/EmptyFolder';
 import FlatListCustom from '../common/FlatListCustom';
@@ -20,8 +20,6 @@ import DateRangePickerModal from './DateRangePickerModal';
 interface IListProductPlanForQCProps {}
 
 const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
-    const dimensions = Dimensions.get('window');
-
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
     const { updateProductionPlan } = useProductionPlanContext();

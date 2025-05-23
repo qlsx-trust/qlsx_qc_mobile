@@ -4,8 +4,8 @@ import { SCREEN_KEY } from '@/constants/common';
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { IThemeVariables } from '@/shared/theme/themes';
 import { router } from 'expo-router';
-import React from 'react';
-import { Dimensions, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import {  StyleSheet, TouchableOpacity } from 'react-native';
 
 const CreateProductItem = ({
    
@@ -21,7 +21,7 @@ const CreateProductItem = ({
     return (
         <>
             {/* create folder button */}
-            <DragDropElement bottom={70}>
+            <DragDropElement bottom={70} right={80}>
                 <TouchableOpacity
                     onPress={handleCreateProductItem}
                     style={{ left: -15, position: 'absolute', top: -8 }}
@@ -46,7 +46,7 @@ export const styling = (themeVariables: IThemeVariables) =>
             zIndex: 99,
             position: 'absolute',
             bottom: 150,
-            left: Dimensions.get('window').width - 80,
+            right: 80,
         },
     });
 
