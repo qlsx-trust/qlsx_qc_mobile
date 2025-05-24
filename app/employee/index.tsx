@@ -3,6 +3,7 @@ import EmptyFolder from '@/components/common/EmptyList/EmptyFolder';
 import FlatListCustom from '@/components/common/FlatListCustom';
 import FlexBox from '@/components/common/FlexBox';
 import { default as TextWrap, default as TextWrapper } from '@/components/common/TextWrap';
+import ConfirmModal from '@/components/ConfirmModal';
 import { BUTTON_COMMON_TYPE } from '@/constants/common';
 import Config from '@/constants/config';
 import { useThemeContext } from '@/providers/ThemeProvider';
@@ -16,12 +17,13 @@ import { BarcodeScanningResult, CameraType, CameraView, useCameraPermissions } f
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
+    ActivityIndicator,
     Keyboard,
     SafeAreaView,
     StyleSheet,
     TextInput,
     TouchableOpacity,
-    View
+    View,
 } from 'react-native';
 
 const ManageEmployeeScreen = () => {
@@ -34,6 +36,9 @@ const ManageEmployeeScreen = () => {
         setLayout({ width, height });
     };
 
+    const [selectedItem, setSelectedItem] = useState<IEmployee | null>(null);
+    const [showConfirmDeleteItem, setShowConfirmDeleteItem] = useState<boolean>(false);
+    const [isLoadingDelete, setIsLoadingDelete] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [employees, setEmployees] = useState<IEmployee[]>([]);
     const [recallEmployee, setRecallEmployee] = useState<number>(0);
@@ -127,6 +132,26 @@ const ManageEmployeeScreen = () => {
             console.error(err);
         } finally {
             setIsLoadingSubmit(false);
+        }
+    };
+
+    const handleRemoveQC = async () => {
+        try {
+            if (!selectedItem?.employeeCode) return;
+            setShowConfirmDeleteItem(false)
+            setIsLoadingDelete(true);
+            const response = await CommonRepository.deleteQCEmployees(selectedItem?.employeeCode);
+            setSelectedItem(null);
+            if (!response.error) {
+                setRecallEmployee(new Date().getTime());
+                toast.success('Xóa nhân viên thành công');
+            }
+            {
+                toast.success('Xóa nhân viên thất bại');
+            }
+        } catch (error) {
+        } finally {
+            setIsLoadingDelete(false);
         }
     };
 
@@ -300,14 +325,37 @@ const ManageEmployeeScreen = () => {
                         return (
                             <FlexBox
                                 key={`employee-${item.employeeCode}`}
-                                direction="column"
-                                justifyContent="flex-start"
-                                alignItems="flex-start"
+                                justifyContent="space-between"
+                                alignItems="center"
                                 style={styles.productCardItem}
                             >
-                                <TextWrapper style={{ width: '100%' }} fontSize={16}>
+                                <TextWrapper
+                                    style={{ width: '90%' }}
+                                    numberOfLines={1}
+                                    fontSize={16}
+                                >
                                     {item.employeeCode},{item.fullName}
                                 </TextWrapper>
+                                <TouchableOpacity
+                                    style={{}}
+                                    onPress={(e) => {
+                                        e.preventDefault();
+                                        setSelectedItem(item);
+                                        setShowConfirmDeleteItem(true);
+                                    }}
+                                    disabled={isLoadingDelete}
+                                >
+                                    {isLoadingDelete &&
+                                    selectedItem?.employeeCode == item.employeeCode ? (
+                                        <ActivityIndicator size={20} />
+                                    ) : (
+                                        <Feather
+                                            name="trash-2"
+                                            size={20}
+                                            color={themeVariables.colors.danger}
+                                        />
+                                    )}
+                                </TouchableOpacity>
                             </FlexBox>
                         );
                     }}
@@ -317,6 +365,18 @@ const ManageEmployeeScreen = () => {
                     onLoadMore={() => {}}
                 />
             </FlexBox>
+
+            {showConfirmDeleteItem && (
+                <ConfirmModal
+                    title="Xóa nhân viên"
+                    description="Bạn có chắc muốn xóa nhân viên này?"
+                    onConfirm={handleRemoveQC}
+                    modalProps={{
+                        visible: showConfirmDeleteItem,
+                        onClose: () => setShowConfirmDeleteItem(false),
+                    }}
+                />
+            )}
         </SafeAreaView>
         // </KeyboardAvoidingView>
     );

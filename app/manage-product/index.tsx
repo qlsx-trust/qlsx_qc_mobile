@@ -136,7 +136,7 @@ const productionManagementScreen = () => {
                         </TextWrapper>
                     </FlexBox>
                 </TouchableOpacity>
-                <SearchBar handleSearchText={debouncedSearch} placeHolder="Tìm kiếm ..." />
+                <SearchBar handleSearchText={debouncedSearch} placeHolder="Tìm kiếm mã sản phẩm, tên sản phẩm ..." />
 
                 <FlexBox justifyContent="space-between" style={{ width: '100%' }}>
                     <View></View>

@@ -130,6 +130,12 @@ export const CommonRepository = createRepository({
         });
     },
 
+    deleteQCEmployees(fetch, employeeCode: string) {
+        return fetch<any>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/employee/delete-employee-by-code?employeeCode=${employeeCode}`, {
+            method: 'DELETE',
+        });
+    },
+
     deleteAssignQCProductPlan(fetch, payload: any) {
         return fetch<any>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/production-plan-qcassign`, {
             method: 'DELETE',

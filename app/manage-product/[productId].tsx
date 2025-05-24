@@ -34,6 +34,7 @@ const ProductDetailManagementScreen = () => {
         const { width, height } = event.nativeEvent.layout;
         setLayout({ width, height });
     };
+    const isMobilePhoneScreen = layout.width < 500
 
     const { productId } = useLocalSearchParams<{
         productId: string;
@@ -249,6 +250,7 @@ const ProductDetailManagementScreen = () => {
                         >
                             {productCheckItems.map((item, index: number) => (
                                 <ProductCheckItem
+                                    isMobilePhoneScreen={isMobilePhoneScreen}
                                     key={`product-item-${index}`}
                                     item={item}
                                     index={index}

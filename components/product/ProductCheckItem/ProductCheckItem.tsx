@@ -15,10 +15,11 @@ import ConfirmModal from '@/components/ConfirmModal';
 interface Props {
     item: IProductCheckItem;
     index: number;
+    isMobilePhoneScreen: boolean;
     onUpdateCheckItem: Function;
     onRemoveCheckItem: Function;
 }
-const ProductCheckItem = ({ item, index, onUpdateCheckItem, onRemoveCheckItem }: Props) => {
+const ProductCheckItem = ({ item, index, isMobilePhoneScreen, onUpdateCheckItem, onRemoveCheckItem }: Props) => {
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
     const [evaluationItem, setEvaluationItem] = useState<IProductCheckItem>(item);
@@ -52,7 +53,6 @@ const ProductCheckItem = ({ item, index, onUpdateCheckItem, onRemoveCheckItem }:
                     alignItems="flex-start"
                     justifyContent="flex-start"
                     gap={5}
-                    width={'100%'}
                     style={{ paddingBottom: 10, paddingTop: 10 }}
                     >
                     {urlImage ? (
@@ -79,7 +79,7 @@ const ProductCheckItem = ({ item, index, onUpdateCheckItem, onRemoveCheckItem }:
                         direction="column"
                         justifyContent="flex-start"
                         alignItems="flex-start"
-                        style={{ width: '80%' }}
+                        style={{ width: isMobilePhoneScreen ? '70%' : '80%' }}
                         gap={5}
                     >
                         <TextWrap style={{ ...styles.title }} numberOfLines={1} textAlign="left">
@@ -95,7 +95,7 @@ const ProductCheckItem = ({ item, index, onUpdateCheckItem, onRemoveCheckItem }:
                         </TextWrap>
                     </FlexBox>
                     <TouchableOpacity
-                        style={{ position: 'absolute', right: 0, bottom: 0 }}
+                        style={{ position: 'absolute', right: isMobilePhoneScreen ? 20 : 0, bottom: 0 }}
                         onPress={(e) => {
                             e.preventDefault();
                             setShowConfirmDeleteItem(true);
@@ -160,6 +160,7 @@ export const styling = (themeVariables: IThemeVariables) =>
             borderTopColor: themeVariables.colors.borderColor,
             padding: 4,
             marginTop: 10,
+            position: 'relative'
         },
 
         header: {
