@@ -27,9 +27,10 @@ import SelectDropdown from 'react-native-select-dropdown';
 interface IAssignQCModalProps {
     modalProps: CommonModalProps;
     productPlan?: IProductionPlan;
+    onRecallListProductPlan: Function;
 }
 
-const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
+const AssignQCModal = ({ productPlan, onRecallListProductPlan, modalProps }: IAssignQCModalProps) => {
     // State to store layout dimensions
     const [layout, setLayout] = useState({ width: 0, height: 0 });
     const onLayout = (event: any) => {
@@ -154,7 +155,7 @@ const AssignQCModal = ({ productPlan, modalProps }: IAssignQCModalProps) => {
             };
             const res = await CommonRepository.assignQCProductPlan(payload);
             if (!res.error) {
-                PubSub.publish(PUB_TOPIC.RECALL_PRODUCTION_PLAN);
+                onRecallListProductPlan();
                 setRecallEmployee(new Date().getTime());
                 toast.success('Phân công thành công');
                 setAssignedQc([qcCode]);

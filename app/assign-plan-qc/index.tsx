@@ -120,11 +120,6 @@ const PlanAssignmentScreen = () => {
         getListProduct();
     }, [retryCall]);
 
-    useEffect(() => {
-        PubSub.subscribe(PUB_TOPIC.RECALL_PRODUCTION_PLAN, () => {
-            getListProduct();
-        });
-    }, [filterParams]);
 
     const checkTimeBackground = (product: IProductionPlan) => {
         if (new Date().getTime() < new Date(product.productionStartTime).getTime()) {
@@ -339,6 +334,9 @@ const PlanAssignmentScreen = () => {
                     modalProps={{
                         visible: showAssignQcModal,
                         onClose: () => setShowAssignQcModal(false),
+                    }}
+                    onRecallListProductPlan={() => {
+                        setRetryCall(new Date().getTime());
                     }}
                 />
             )}
