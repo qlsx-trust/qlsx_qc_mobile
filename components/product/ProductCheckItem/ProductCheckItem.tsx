@@ -129,7 +129,10 @@ const ProductCheckItem = ({ item, index, isMobilePhoneScreen, onUpdateCheckItem,
                 <ConfirmModal
                     title="Xóa tiêu chí đánh giá ngoại quan"
                     description="Bạn có chắc muốn xóa tiêu chí đánh giá ngoại quan này?"
-                    onConfirm={() => onRemoveCheckItem?.(item.categoryCode)}
+                    onConfirm={() => {
+                        onRemoveCheckItem?.(item.categoryCode);
+                        setShowConfirmDeleteItem(false);
+                    }}
                     modalProps={{
                         visible: showConfirmDeleteItem,
                         onClose: () => setShowConfirmDeleteItem(false),

@@ -30,7 +30,8 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
 
     const getCTSXById = async () => {
          try {
-            const response = await CommonRepository.getMostRecentProductionPlanById(scanResult);
+            const planId = scanResult.includes('planId:') ? scanResult.split('planId:')[0] : scanResult;
+            const response = await CommonRepository.getMostRecentProductionPlanById(planId);
             if (response.data) {
                 setProductPlan(response.data)
             }
@@ -43,7 +44,8 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
     const handleConfirmCode = async () => {
         try {
             setIsLoadingConfirm(true);
-            const response = await CommonRepository.getMostRecentProductionPlanById(scanResult);
+            const planId = scanResult.includes('planId:') ? scanResult.split('planId:')[0] : scanResult;
+            const response = await CommonRepository.getMostRecentProductionPlanById(planId);
             if (response.data) {
                 updateProductionPlan(response.data);
                 router.push(`${SCREEN_KEY.product}`);
@@ -75,6 +77,12 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
                         )
                     }
                </TextWrap>
+
+               {!scanResult.includes('planId:') && (
+                    <TextWrap style={styles.description} color={themeVariables.colors.danger}>
+                        Note: Mã CTSX Không đúng đính dạng, vui lòng quét lại
+                    </TextWrap>
+               )}
 
                 <FlexBox justifyContent="space-between" gap={16} style={{ marginTop: 16 }}>
                     <AppButton
@@ -111,7 +119,7 @@ export const styling = (themeVariables: IThemeVariables) =>
             fontSize: 14,
             fontWeight: '400',
             lineHeight: 20,
-            textAlign: 'center',
+            textAlign: 'left',
         },
         textButton: {
             fontSize: 16,
