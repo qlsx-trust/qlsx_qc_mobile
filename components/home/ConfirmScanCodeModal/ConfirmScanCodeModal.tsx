@@ -28,9 +28,13 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
         if(scanResult) getCTSXById()
     }, [scanResult])
 
+    const formatPlanIDScanResult = (scanResult: string) => {
+        return scanResult.includes('planId:') ? scanResult.split('planId:')[1] : scanResult;
+    }
+
     const getCTSXById = async () => {
          try {
-            const planId = scanResult.includes('planId:') ? scanResult.split('planId:')[0] : scanResult;
+            const planId = formatPlanIDScanResult(scanResult);
             const response = await CommonRepository.getMostRecentProductionPlanById(planId);
             if (response.data) {
                 setProductPlan(response.data)
@@ -44,7 +48,7 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
     const handleConfirmCode = async () => {
         try {
             setIsLoadingConfirm(true);
-            const planId = scanResult.includes('planId:') ? scanResult.split('planId:')[0] : scanResult;
+             const planId = formatPlanIDScanResult(scanResult);
             const response = await CommonRepository.getMostRecentProductionPlanById(planId);
             if (response.data) {
                 updateProductionPlan(response.data);
