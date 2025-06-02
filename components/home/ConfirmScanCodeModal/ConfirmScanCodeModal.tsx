@@ -22,35 +22,62 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
     const { updateProductionPlan } = useProductionPlanContext();
     const styles = styling(themeVariables);
     const [isLoadingConfirm, setIsLoadingConfirm] = useState<boolean>(false);
-    const [productPlan, setProductPlan] = useState<IProductionPlan | null>(null)
+    const [productPlan, setProductPlan] = useState<IProductionPlan | null>(null);
 
     useEffect(() => {
-        if(scanResult) getCTSXById()
-    }, [scanResult])
+        if (scanResult) getCTSXById();
+    }, [scanResult]);
 
     const formatPlanIDScanResult = (scanResult: string) => {
         return scanResult.includes('planId:') ? scanResult.split('planId:')[1] : scanResult;
-    }
+    };
 
     const getCTSXById = async () => {
-         try {
+        try {
             const planId = formatPlanIDScanResult(scanResult);
             const response = await CommonRepository.getMostRecentProductionPlanById(planId);
             if (response.data) {
-                setProductPlan(response.data)
+                setProductPlan(response.data);
             }
-          
         } catch (error) {
         } finally {
         }
-    }
+    };
+
+    const checkValidTimeCheck = async (startTimePlan: string) => {
+        try {
+            const response = await CommonRepository.getToleranceTimeQC();
+            // check tolerance-time-qc
+            const value = response?.data?.value;
+            if (!value) {
+                // not config
+                return true;
+            }
+            const gapTime = new Date().getTime() - new Date(startTimePlan).getTime();
+            return gapTime > value * 60 * 1000;
+        } catch (error) {
+            toast.error('Mã máy không hợp lệ, vui lòng thử lại');
+            return true;
+        }
+    };
 
     const handleConfirmCode = async () => {
         try {
             setIsLoadingConfirm(true);
-             const planId = formatPlanIDScanResult(scanResult);
+            const planId = formatPlanIDScanResult(scanResult);
             const response = await CommonRepository.getMostRecentProductionPlanById(planId);
             if (response.data) {
+                if (!response.data?.machineStartTime) {
+                    toast.error('Chưa đến thời gian kiểm tra, vui lòng thử lại');
+                    return;
+                }
+                // check tolerance-time-qc
+                const isValidTimeCheckQc = await checkValidTimeCheck(
+                    response.data?.machineStartTime
+                );
+                if (!isValidTimeCheckQc) {
+                    toast.error('Chưa đến thời gian kiểm tra, vui lòng thử lại');
+                }
                 updateProductionPlan(response.data);
                 router.push(`${SCREEN_KEY.product}`);
                 modalProps.onClose();
@@ -73,20 +100,21 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
 
                 <TextWrap style={styles.title} color={themeVariables.colors.textDefault}>
                     Kết quả quét mã:{' '}
-                    {
-                        productPlan ? (
-                            <TextWrap color={themeVariables.colors.primary}> {productPlan?.machineCode} - {productPlan?.productCode} </TextWrap>
-                        ) : (
-                            <TextWrap color={themeVariables.colors.primary}> {scanResult} </TextWrap>
-                        )
-                    }
-               </TextWrap>
+                    {productPlan ? (
+                        <TextWrap color={themeVariables.colors.primary}>
+                            {' '}
+                            {productPlan?.machineCode} - {productPlan?.productCode}{' '}
+                        </TextWrap>
+                    ) : (
+                        <TextWrap color={themeVariables.colors.primary}> {scanResult} </TextWrap>
+                    )}
+                </TextWrap>
 
-               {!scanResult.includes('planId:') && (
+                {!scanResult.includes('planId:') && (
                     <TextWrap style={styles.description} color={themeVariables.colors.danger}>
                         Note: Mã CTSX Không đúng đính dạng, vui lòng quét lại
                     </TextWrap>
-               )}
+                )}
 
                 <FlexBox justifyContent="space-between" gap={16} style={{ marginTop: 16 }}>
                     <AppButton

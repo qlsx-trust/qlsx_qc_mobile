@@ -40,6 +40,15 @@ export const CommonRepository = createRepository({
         );
     },
 
+    getToleranceTimeQC(fetch) {
+        return fetch<any>(
+            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/setting-config/tolerance-time-qc`,
+            {
+                method: 'GET',
+            }
+        );
+    },
+
     submitQcTestResult(fetch, payload: any) {
         return fetch<any>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/qc-test-result`, {
             method: 'POST',
@@ -52,6 +61,25 @@ export const CommonRepository = createRepository({
             `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/product-management/code/${productCode}`,
             {
                 method: 'GET',
+            }
+        );
+    },
+
+
+    qcPickUpItem(fetch, planId: string) {
+        return fetch<ProductCheckItem>(
+            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/production-plans/${planId}/qc-pick-up`,
+            {
+                method: 'PUT',
+            }
+        );
+    },
+
+     qcPickDownItem(fetch, planId: string) {
+        return fetch<ProductCheckItem>(
+            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/production-plans/${planId}/qc-pick-down`,
+            {
+                method: 'PUT',
             }
         );
     },

@@ -21,7 +21,7 @@ import Moment from 'moment';
 import { useEffect, useState } from 'react';
 
 const ProductScreen = () => {
-   // State to store layout dimensions
+    // State to store layout dimensions
     const [layout, setLayout] = useState({ width: 0, height: 0 });
     const onLayout = (event: any) => {
         const { width, height } = event.nativeEvent.layout;
@@ -51,7 +51,13 @@ const ProductScreen = () => {
     }, [productionPlan]);
 
     useEffect(() => {
-        PubSub.subscribe('HANDLE_CAMERA_CHECK_ITEM', (_,isShowCamera) => {
+        // QC pick up 1 item
+        if (!productionPlan?.id) return;
+        qcPickUp(productionPlan?.id);
+    }, [productionPlan]);
+
+    useEffect(() => {
+        PubSub.subscribe('HANDLE_CAMERA_CHECK_ITEM', (_, isShowCamera) => {
             setShowCamera(Boolean(isShowCamera));
         });
 
@@ -60,10 +66,29 @@ const ProductScreen = () => {
         };
     }, []);
 
+    const qcPickUp = async (planId: string) => {
+        try {
+            await CommonRepository.qcPickUpItem(planId);
+        } catch (error) {
+            console.log('@@Error: ', error);
+        }
+    };
+
+    const qcPickDown = async (planId: string) => {
+        try {
+            if (!planId) return;
+            await CommonRepository.qcPickDownItem(planId);
+        } catch (error) {
+            console.log('@@Error: ', error);
+        }
+    };
+
     const enableSubmitEvaluation =
         checkItems?.length &&
         checkItems?.every((item) => {
-            return item.status == 'ok' || (item.status == 'ng' && (item.note || item.reportFileUri));
+            return (
+                item.status == 'ok' || (item.status == 'ng' && (item.note || item.reportFileUri))
+            );
         });
 
     const checkedItems =
@@ -159,9 +184,15 @@ const ProductScreen = () => {
                     });
                 }
             });
+            const isAllPassCheck =
+                checkItems.filter((item) => item.status == 'ok')?.length == checkItems?.length;
             const response = await CommonRepository.submitQcTestResult(formdata);
             if (response.data) {
+                if (isAllPassCheck && productionPlan?.id) {
+                    await qcPickDown(productionPlan?.id);
+                }
                 toast.success('Gửi các đánh giá thành công');
+                backHomeScreen();
             }
         } catch (error) {
             console.log(error);
@@ -284,13 +315,13 @@ const ProductScreen = () => {
                         <AppButton
                             label="Thêm mục"
                             onPress={() => setShowAddEvaluationItemModal(true)}
-                            viewStyle={{width: 150}}
+                            viewStyle={{ width: 150 }}
                             variant={BUTTON_COMMON_TYPE.CANCEL}
                         />
                         <AppButton
                             label="Gửi đánh giá"
                             onPress={handleSubmit}
-                            viewStyle={{width: 150}}
+                            viewStyle={{ width: 150 }}
                             isLoading={loadingSubmit}
                             disabled={loadingSubmit || !checkedItems || !enableSubmitEvaluation}
                             variant={BUTTON_COMMON_TYPE.PRIMARY}

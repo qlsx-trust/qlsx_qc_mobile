@@ -32,14 +32,14 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
     const [totalCount, setTotalCount] = useState<number>(1);
     const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout>();
     const [filterParams, setFilterParams] = useState<{
-            name: string;
-            productionStartTime: string;
-            productionEndTime: string;
-        }>({
-            name: '',
-            productionStartTime: moment(new Date()).format('YYYY-MM-DD'),
-            productionEndTime: moment(new Date()).add(1, 'days').format('YYYY-MM-DD'),
-        });
+        name: string;
+        productionStartTime: string;
+        productionEndTime: string;
+    }>({
+        name: '',
+        productionStartTime: moment(new Date()).format('YYYY-MM-DD'),
+        productionEndTime: moment(new Date()).add(1, 'days').format('YYYY-MM-DD'),
+    });
     const [showDateRangeFilter, setShowDateRangeFilter] = useState<boolean>(false);
 
     const [numOfItemLine, setNumOfItemLine] = useState<number>(2);
@@ -135,9 +135,41 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
         setRetryCall(new Date().getTime());
     };
 
+    const checkValidTimeCheck = async (startTimePlan: string) => {
+        try {
+            console.log(startTimePlan);
+            const response = await CommonRepository.getToleranceTimeQC();
+            // check tolerance-time-qc
+            const value = response?.data?.value;
+            if (!value) {
+                // not config
+                return true;
+            }
+            const gapTime = new Date().getTime() - new Date(startTimePlan).getTime();
+            console.log(gapTime / 60 / 1000);
+            return gapTime > value * 60 * 1000;
+        } catch (error) {
+            toast.error('Mã máy không hợp lệ, vui lòng thử lại');
+            return true;
+        }
+    };
+
     const handleConfirmCode = async (planId: string) => {
         try {
             const response = await CommonRepository.getMostRecentProductionPlanById(planId);
+            if (!response.data) {
+                toast.error('Mã máy không hợp lệ, vui lòng thử lại');
+                return;
+            }
+            if (!response.data?.machineStartTime) {
+                toast.error('Chưa đến thời gian kiểm tra, vui lòng thử lại');
+                return;
+            }
+            // check tolerance-time-qc
+            const isValidTimeCheckQc = await checkValidTimeCheck(response.data?.machineStartTime);
+            if (!isValidTimeCheckQc) {
+                toast.error('Chưa đến thời gian kiểm tra, vui lòng thử lại');
+            }
             updateProductionPlan(response.data);
             router.push(`${SCREEN_KEY.product}`);
         } catch (error) {
@@ -155,7 +187,10 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
                 gap={15}
                 style={styles.header}
             >
-                <SearchBar handleSearchText={debouncedSearch}  placeHolder="Tìm kiếm mã máy, mã sản phẩm, tên sản phẩm ..." />
+                <SearchBar
+                    handleSearchText={debouncedSearch}
+                    placeHolder="Tìm kiếm mã máy, mã sản phẩm, tên sản phẩm ..."
+                />
                 <FlexBox justifyContent="space-between" style={{ width: '100%' }}>
                     <FlexBox
                         style={{
@@ -229,7 +264,7 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
                         <TouchableOpacity
                             onPress={() => handleConfirmCode(item.id)}
                             key={`product-item-${item.id}`}
-                           style={{width: isGridView ? '50%' : '100%'}}
+                            style={{ width: isGridView ? '50%' : '100%' }}
                         >
                             <FlexBox
                                 direction="column"
@@ -357,7 +392,7 @@ export const styling = (themeVariables: IThemeVariables) =>
             borderWidth: 0.5,
             paddingHorizontal: 10,
             marginBottom: 1,
-            marginRight:1,
+            marginRight: 1,
             borderColor: themeVariables.colors.borderLightColor,
             gap: 10,
         },
