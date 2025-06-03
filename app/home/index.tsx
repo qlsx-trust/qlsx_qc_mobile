@@ -183,7 +183,7 @@ const HomeScreen = () => {
                     style={{ width: '100%' }}
                 >
                     <TextWrapper fontSize={18}>
-                        {managerQc ? 'Quản lý: ' : 'Nhân viên: '}
+                        Tài khoản:{' '}
                     </TextWrapper>
                     <TextWrapper fontSize={24} color={themeVariables.colors.primary}>
                         {user?.userName},{user?.fullName}

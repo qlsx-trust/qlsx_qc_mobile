@@ -19,6 +19,7 @@ import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import Moment from 'moment';
 import { useEffect, useState } from 'react';
+import ManageProductDetailModal from '@/components/product/ManageProductDetailModal';
 
 const ProductScreen = () => {
     // State to store layout dimensions
@@ -130,20 +131,20 @@ const ProductScreen = () => {
         router.replace(SCREEN_KEY.home);
     };
 
-    const handlePreviewEvaluationForm = async (pdfPreviewUrl: string) => {
-        await WebBrowser.openBrowserAsync(`${Config.EXPO_PUBLIC_BACKEND_URL}${pdfPreviewUrl}`);
-    };
-
-    const handleAddEvaluation = (evaluationItem: string) => {
+    const handleAddEvaluation = (evaluationItem: any) => {
         const checkItemsTmp = [...checkItems];
-        checkItemsTmp.push({
+        const newItem = {
             categoryCode: `CATADD-${new Date().getTime()}`,
-            name: evaluationItem,
-            note: '',
+            name: evaluationItem.name,
+            note: evaluationItem.note,
+            productImagePrototype: [evaluationItem.imageUrl],
             status: '',
             reportFileUri: '',
-        });
+        };
+        const nextStep = stepItem + 1;
+        checkItemsTmp.splice(nextStep, 0, newItem);
         setCheckItems([...checkItemsTmp]);
+        setStepItem(nextStep);
         setShowAddEvaluationItemModal(false);
     };
 
@@ -173,6 +174,8 @@ const ProductScreen = () => {
                     status: item.status,
                 };
             });
+            // TODO, submit new check item
+            
             formdata.append('TestResult', JSON.stringify(testResult));
             formdata.append('ProductionPlanId', productionPlan?.id);
             checkItems.forEach((item) => {
@@ -288,7 +291,7 @@ const ProductScreen = () => {
                             <TextWrap> ngày </TextWrap>
                             <TextWrap color={themeVariables.colors.primary}>
                                 {Moment(productionPlan?.productionEndTime || '').format(
-                                    'DD/MM/YYY'
+                                    'DD/MM/YYYY'
                                 )}
                             </TextWrap>
                         </TextWrap>
@@ -362,12 +365,12 @@ const ProductScreen = () => {
             )}
 
             {showAddEvaluationItemModal && (
-                <AddEvaluationItemModal
-                    onSuccess={handleAddEvaluation}
+                 <ManageProductDetailModal
                     modalProps={{
                         visible: showAddEvaluationItemModal,
                         onClose: () => setShowAddEvaluationItemModal(false),
                     }}
+                    onAddProductCheckItem={handleAddEvaluation}
                 />
             )}
         </SafeAreaView>

@@ -6,25 +6,21 @@ import AssignQCModal from '@/components/product/AssignQCModal';
 import DateRangePickerModal from '@/components/product/DateRangePickerModal';
 import SearchBar from '@/components/SearchBar';
 import { PAGE_SIZE } from '@/constants/common';
-import { PUB_TOPIC } from '@/constants/pubTopic';
 import { IProductionPlan } from '@/providers/ProductionPlanProvider';
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { CommonRepository } from '@/repositories/CommonRepository';
 import { IThemeVariables } from '@/shared/theme/themes';
-import { IEmployee } from '@/types/employee';
 import { AntDesign, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import moment from 'moment';
-import Moment from 'moment';
+import { default as moment, default as Moment } from 'moment';
 import { useEffect, useState } from 'react';
-import { SafeAreaView, StyleSheet, TouchableOpacity, View } from 'react-native';
-import CalendarPicker from 'react-native-calendar-picker';
+import { SafeAreaView, StyleSheet, TouchableOpacity } from 'react-native';
 
 const PlanAssignmentScreen = () => {
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
     // const { logout, user } = useAuthContext();
-// State to store layout dimensions
+    // State to store layout dimensions
     const [layout, setLayout] = useState({ width: 0, height: 0 });
     const onLayout = (event: any) => {
         const { width, height } = event.nativeEvent.layout;
@@ -120,7 +116,6 @@ const PlanAssignmentScreen = () => {
         getListProduct();
     }, [retryCall]);
 
-
     const checkTimeBackground = (product: IProductionPlan) => {
         if (new Date().getTime() < new Date(product.productionStartTime).getTime()) {
             return 'transparent';
@@ -196,11 +191,11 @@ const PlanAssignmentScreen = () => {
                                 <TextWrapper>
                                     Từ{' '}
                                     {Moment(filterParams.productionStartTime || '').format(
-                                        'MM/DD/YYYY'
+                                        'DD/MM/YYYY'
                                     )}{' '}
                                     đến{' '}
                                     {Moment(filterParams.productionEndTime || '').format(
-                                        'MM/DD/YYYY'
+                                        'DD/MM/YYYY'
                                     )}
                                 </TextWrapper>
                             ) : (
@@ -311,11 +306,11 @@ const PlanAssignmentScreen = () => {
                                         numberOfLines={1}
                                     >
                                         {Moment(item?.productionStartTime || '').format(
-                                            'MM/DD/YYYY HH:mm'
+                                            'DD/MM/YYYY HH:mm'
                                         )}{' '}
                                         -{' '}
                                         {Moment(item?.productionEndTime || '').format(
-                                            'MM/DD/YYYY HH:mm'
+                                            'DD/MM/YYYY HH:mm'
                                         )}
                                     </TextWrapper>
                                 </FlexBox>

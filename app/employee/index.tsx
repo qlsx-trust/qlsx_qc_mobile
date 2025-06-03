@@ -100,6 +100,11 @@ const ManageEmployeeScreen = () => {
             Keyboard.dismiss();
             setIsLoadingSubmit(true);
 
+            const existEmployee = employees.find(employee => `${employee.employeeCode},${employee.fullName}` == employeeQcCode)
+            if(existEmployee) {
+                 setErrorCheckCode('Mã nhân viên đã tồn tại');
+                 return
+            }
             const resCheck = await CommonRepository.checkQCEmployeeCode(employeeQcCode);
             if (resCheck.error) {
                 setIsLoadingSubmit(false);
@@ -246,7 +251,7 @@ const ManageEmployeeScreen = () => {
                         onPress={() => {
                             router.back();
                         }}
-                        style={{ padding: 4 }}
+                        // style={{ padding: 4 }}
                     >
                         <FlexBox>
                             <AntDesign
@@ -268,7 +273,7 @@ const ManageEmployeeScreen = () => {
                 width={'100%'}
                 justifyContent="flex-start"
                 alignItems="flex-start"
-                style={styles.header}
+                style={{...styles.header}}
             >
                 <TextWrap style={styles.title}>Thêm nhân viên:</TextWrap>
                 <TextInput
@@ -289,7 +294,7 @@ const ManageEmployeeScreen = () => {
                         {errorCheckCode}
                     </TextWrap>
                 )}
-                <FlexBox justifyContent="space-between" style={{ width: '100%' }}>
+                <FlexBox justifyContent="space-between" style={{ width: '100%', paddingHorizontal: 5 }}>
                     <AppButton
                         viewStyle={styles.button}
                         label="Quét mã"
@@ -310,7 +315,7 @@ const ManageEmployeeScreen = () => {
                 justifyContent="flex-start"
                 alignItems="flex-start"
                 gap={10}
-                style={{ paddingHorizontal: 20, width: '100%', maxHeight: layout.height - 300 }}
+                style={{ paddingHorizontal: containerStyles.paddingHorizontal + 5, width: '100%', maxHeight: layout.height - 300 }}
             >
                 <TextWrap style={styles.title}>Danh sách nhân viên:</TextWrap>
                 <FlatListCustom

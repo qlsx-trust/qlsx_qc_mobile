@@ -31,6 +31,7 @@ const productionCreateManagementScreen = () => {
         const { width, height } = event.nativeEvent.layout;
         setLayout({ width, height });
     };
+    const isMobilePhoneScreen = layout.width < 500
 
     const [productCode, setProductCode] = useState<string>('');
     const [productName, setProductName] = useState<string>('');
@@ -237,8 +238,9 @@ const productionCreateManagementScreen = () => {
                             item={item}
                             index={index}
                             onUpdateCheckItem={handleUpdateCheckItem}
-                            onRemoveCheckItem={handleRemoveCheckItem}
-                        />
+                            onRemoveCheckItem={handleRemoveCheckItem} 
+                            isMobilePhoneScreen={isMobilePhoneScreen}                        
+                            />
                     ))}
                 </ScrollView>
             </FlexBox>

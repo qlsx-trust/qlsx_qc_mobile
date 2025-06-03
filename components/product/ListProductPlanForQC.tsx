@@ -137,7 +137,6 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
 
     const checkValidTimeCheck = async (startTimePlan: string) => {
         try {
-            console.log(startTimePlan);
             const response = await CommonRepository.getToleranceTimeQC();
             // check tolerance-time-qc
             const value = response?.data?.value;
@@ -146,7 +145,6 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
                 return true;
             }
             const gapTime = new Date().getTime() - new Date(startTimePlan).getTime();
-            console.log(gapTime / 60 / 1000);
             return gapTime > value * 60 * 1000;
         } catch (error) {
             toast.error('Mã máy không hợp lệ, vui lòng thử lại');
@@ -161,15 +159,15 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
                 toast.error('Mã máy không hợp lệ, vui lòng thử lại');
                 return;
             }
-            if (!response.data?.machineStartTime) {
-                toast.error('Chưa đến thời gian kiểm tra, vui lòng thử lại');
-                return;
-            }
             // check tolerance-time-qc
-            const isValidTimeCheckQc = await checkValidTimeCheck(response.data?.machineStartTime);
-            if (!isValidTimeCheckQc) {
-                toast.error('Chưa đến thời gian kiểm tra, vui lòng thử lại');
-            }
+            // if (!response.data?.machineStartTime) {
+            //     toast.error('Chưa đến thời gian kiểm tra, vui lòng thử lại');
+            //     return;
+            // }
+            // const isValidTimeCheckQc = await checkValidTimeCheck(response.data?.machineStartTime);
+            // if (!isValidTimeCheckQc) {
+            //     toast.error('Chưa đến thời gian kiểm tra, vui lòng thử lại');
+            // }
             updateProductionPlan(response.data);
             router.push(`${SCREEN_KEY.product}`);
         } catch (error) {
@@ -209,11 +207,11 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
                                 <TextWrapper>
                                     Từ{' '}
                                     {Moment(filterParams.productionStartTime || '').format(
-                                        'MM/DD/YYYY'
+                                        'DD/MM/YYYY'
                                     )}{' '}
                                     đến{' '}
                                     {Moment(filterParams.productionEndTime || '').format(
-                                        'MM/DD/YYYY'
+                                        'DD/MM/YYYY'
                                     )}
                                 </TextWrapper>
                             ) : (
@@ -306,11 +304,11 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
                                         numberOfLines={1}
                                     >
                                         {Moment(item?.productionStartTime || '').format(
-                                            'MM/DD/YYYY HH:mm'
+                                            'DD/MM/YYYY HH:mm'
                                         )}{' '}
                                         -{' '}
                                         {Moment(item?.productionEndTime || '').format(
-                                            'MM/DD/YYYY HH:mm'
+                                            'DD/MM/YYYY HH:mm'
                                         )}
                                     </TextWrapper>
                                 </FlexBox>

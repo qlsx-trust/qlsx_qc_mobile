@@ -80,7 +80,7 @@ const AssignQCModal = ({ productPlan, onRecallListProductPlan, modalProps }: IAs
             };
         });
 
-        data.push({ value: 'other', title: 'Nhân viên khác' });
+        data.push({ value: 'other', title: 'Thêm nhân viên' });
         return data;
     }, [employees]);
 
@@ -273,7 +273,6 @@ const AssignQCModal = ({ productPlan, onRecallListProductPlan, modalProps }: IAs
                                 style={{
                                     ...styles.description,
                                     width: '100%',
-                                    paddingLeft: 10,
                                     textAlign: 'left',
                                 }}
                             >
@@ -362,7 +361,7 @@ const AssignQCModal = ({ productPlan, onRecallListProductPlan, modalProps }: IAs
                                 width={'100%'}
                                 justifyContent="flex-start"
                                 alignItems="flex-start"
-                                style={{ paddingHorizontal: 10, marginBottom: 20 }}
+                                style={{marginBottom: 20 }}
                             >
                                 <TextWrap style={styles.description}>Mã nhân viên khác:</TextWrap>
                                 <TextInput
@@ -386,7 +385,7 @@ const AssignQCModal = ({ productPlan, onRecallListProductPlan, modalProps }: IAs
                                         {errorCheckCode}
                                     </TextWrap>
                                 )}
-                                <FlexBox justifyContent="space-between" style={{ width: '100%' }}>
+                                <FlexBox justifyContent="space-between" style={{ width: '100%', paddingHorizontal: 5 }}>
                                     <AppButton
                                         viewStyle={styles.button}
                                         label="Quét mã"
@@ -409,7 +408,7 @@ const AssignQCModal = ({ productPlan, onRecallListProductPlan, modalProps }: IAs
                             justifyContent="flex-start"
                             alignItems="flex-start"
                             gap={5}
-                            style={{ width: '100%', paddingHorizontal: 10, marginBottom: 20, flexWrap: 'wrap' }}
+                            style={{ width: '100%', paddingHorizontal: 0, marginBottom: 20, flexWrap: 'wrap' }}
                         >
                             <TextWrap style={styles.description}>
                                 Nhân viên được phân công:

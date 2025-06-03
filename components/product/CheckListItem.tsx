@@ -1,12 +1,12 @@
 import FlexBox from '@/components/common/FlexBox';
 import PreviewImageModal from '@/components/common/PreviewImageModal';
 import TextWrap from '@/components/common/TextWrap';
-import { BUTTON_COMMON_TYPE } from '@/constants/common';
+import { BUTTON_COMMON_TYPE, PATH_SERVER_MEDIA } from '@/constants/common';
 import Config from '@/constants/config';
 import { ICheckItem } from '@/providers/ProductionPlanProvider';
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { IThemeVariables } from '@/shared/theme/themes';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import AppButton from '../common/AppButton';
 import EvaluationFromModal from './EvaluationFromModal';
@@ -30,20 +30,29 @@ const CheckListItem = ({
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
 
-    const isMobilePhoneScreen = layout.width < 500
+    const isMobilePhoneScreen = layout.width < 500;
 
     const [showPreviewImageModal, setShowPreviewImageModal] = useState<boolean>(false);
     const [previewImageUrl, setPreviewImageUrl] = useState<string>('');
 
     const [showConfirmNGModal, setShowConfirmNGModal] = useState<boolean>(false);
 
-    const productImageModel = sessionCheckItem?.productImagePrototype
-        ? `${Config.EXPO_PUBLIC_BACKEND_URL}${sessionCheckItem.productImagePrototype[0]}`
-        : null;
+    const productImageModel = useMemo(() => {
+        if (
+            !sessionCheckItem.productImagePrototype?.length ||
+            !sessionCheckItem?.productImagePrototype[0]
+        )
+            return null;
+        const url = sessionCheckItem.productImagePrototype[0];
+        if (url.includes(PATH_SERVER_MEDIA)) {
+            return `${Config.EXPO_PUBLIC_BACKEND_URL}${url}`;
+        }
+
+        return url;
+    }, [sessionCheckItem.productImagePrototype]);
 
     const isOK = sessionCheckItem.status == 'ok';
     const isNG = sessionCheckItem.status == 'ng';
-
 
     const handleConfirmOk = async () => {
         if (sessionCheckItem.status == 'ok') return;
@@ -162,7 +171,12 @@ const CheckListItem = ({
                         </TouchableOpacity>
                     </FlexBox>
                 </FlexBox>
-                <View style={{ marginTop: 40, marginBottom: isMobilePhoneScreen ? 0 : 20 }}>
+                <View
+                    style={{
+                        marginTop: isMobilePhoneScreen ? 0 : 60,
+                        marginBottom: isMobilePhoneScreen ? 0 : 20,
+                    }}
+                >
                     {productImageModel ? (
                         <TouchableOpacity
                             onPress={(e) => {

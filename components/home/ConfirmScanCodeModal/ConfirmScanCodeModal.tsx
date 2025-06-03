@@ -22,7 +22,10 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
     const { updateProductionPlan } = useProductionPlanContext();
     const styles = styling(themeVariables);
     const [isLoadingConfirm, setIsLoadingConfirm] = useState<boolean>(false);
+    const [isLoadingGetPlan, setIsLoadingGetPlan] = useState<boolean>(true);
     const [productPlan, setProductPlan] = useState<IProductionPlan | null>(null);
+
+    const invalidProductPlan = !isLoadingGetPlan && (!scanResult.includes('planId:') || !productPlan);
 
     useEffect(() => {
         if (scanResult) getCTSXById();
@@ -34,6 +37,7 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
 
     const getCTSXById = async () => {
         try {
+            setIsLoadingGetPlan(true);
             const planId = formatPlanIDScanResult(scanResult);
             const response = await CommonRepository.getMostRecentProductionPlanById(planId);
             if (response.data) {
@@ -41,6 +45,7 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
             }
         } catch (error) {
         } finally {
+            setIsLoadingGetPlan(false);
         }
     };
 
@@ -67,17 +72,17 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
             const planId = formatPlanIDScanResult(scanResult);
             const response = await CommonRepository.getMostRecentProductionPlanById(planId);
             if (response.data) {
-                if (!response.data?.machineStartTime) {
-                    toast.error('Chưa đến thời gian kiểm tra, vui lòng thử lại');
-                    return;
-                }
+                // if (!response.data?.machineStartTime) {
+                //     toast.error('Chưa đến thời gian kiểm tra, vui lòng thử lại');
+                //     return;
+                // }
                 // check tolerance-time-qc
-                const isValidTimeCheckQc = await checkValidTimeCheck(
-                    response.data?.machineStartTime
-                );
-                if (!isValidTimeCheckQc) {
-                    toast.error('Chưa đến thời gian kiểm tra, vui lòng thử lại');
-                }
+                // const isValidTimeCheckQc = await checkValidTimeCheck(
+                //     response.data?.machineStartTime
+                // );
+                // if (!isValidTimeCheckQc) {
+                //     toast.error('Chưa đến thời gian kiểm tra, vui lòng thử lại');
+                // }
                 updateProductionPlan(response.data);
                 router.push(`${SCREEN_KEY.product}`);
                 modalProps.onClose();
@@ -98,21 +103,44 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
                     Xác nhận
                 </TextWrap>
 
-                <TextWrap style={styles.title} color={themeVariables.colors.textDefault}>
-                    Kết quả quét mã:{' '}
+                <FlexBox
+                    direction="column"
+                    justifyContent="flex-start"
+                    alignItems="flex-start"
+                    gap={10}
+                >
                     {productPlan ? (
-                        <TextWrap color={themeVariables.colors.primary}>
-                            {' '}
-                            {productPlan?.machineCode} - {productPlan?.productCode}{' '}
-                        </TextWrap>
+                        <>
+                            <TextWrap color={themeVariables.colors.textDefault} fontSize={18}>
+                                Kết quả quét mã:
+                            </TextWrap>
+                            <FlexBox
+                                direction="column"
+                                justifyContent="flex-start"
+                                alignItems="flex-start"
+                                gap={5}
+                            >
+                                <TextWrap color={themeVariables.colors.primary} fontSize={18}>
+                                    Mã máy: {productPlan?.machineCode}
+                                </TextWrap>
+                                <TextWrap color={themeVariables.colors.primary} fontSize={18}>
+                                    Mã sản phẩm: {productPlan?.productCode}
+                                </TextWrap>
+                                <TextWrap color={themeVariables.colors.primary} fontSize={18}>
+                                    Tên sản phẩm: {productPlan?.productName}
+                                </TextWrap>
+                            </FlexBox>
+                        </>
                     ) : (
-                        <TextWrap color={themeVariables.colors.primary}> {scanResult} </TextWrap>
+                        <TextWrap color={themeVariables.colors.primary} fontSize={18}>
+                            Kết quả quét mã: {scanResult}
+                        </TextWrap>
                     )}
-                </TextWrap>
+                </FlexBox>
 
-                {!scanResult.includes('planId:') && (
+                {invalidProductPlan && (
                     <TextWrap style={styles.description} color={themeVariables.colors.danger}>
-                        Note: Mã CTSX Không đúng đính dạng, vui lòng quét lại
+                        Mã CTSX Không hợp lệ, vui lòng quét lại
                     </TextWrap>
                 )}
 
@@ -128,7 +156,7 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
                         label="Xác nhận"
                         onPress={handleConfirmCode}
                         isLoading={isLoadingConfirm}
-                        disabled={isLoadingConfirm}
+                        disabled={isLoadingConfirm || invalidProductPlan}
                     />
                 </FlexBox>
             </FlexBox>
