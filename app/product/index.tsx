@@ -141,10 +141,15 @@ const ProductScreen = () => {
             status: '',
             reportFileUri: '',
         };
-        const nextStep = stepItem + 1;
-        checkItemsTmp.splice(nextStep, 0, newItem);
-        setCheckItems([...checkItemsTmp]);
-        setStepItem(nextStep);
+        if (checkItemsTmp?.length) {
+            const nextStep = stepItem + 1;
+            checkItemsTmp.splice(nextStep, 0, newItem);
+            setCheckItems([...checkItemsTmp]);
+            setStepItem(nextStep);
+        } else {
+            checkItemsTmp.push(newItem);
+            setCheckItems([...checkItemsTmp]);
+        }
         setShowAddEvaluationItemModal(false);
     };
 
@@ -174,8 +179,9 @@ const ProductScreen = () => {
                     status: item.status,
                 };
             });
-            // TODO, submit new check item
-            
+            //submit new check item
+            // TODO
+
             formdata.append('TestResult', JSON.stringify(testResult));
             formdata.append('ProductionPlanId', productionPlan?.id);
             checkItems.forEach((item) => {
@@ -365,7 +371,7 @@ const ProductScreen = () => {
             )}
 
             {showAddEvaluationItemModal && (
-                 <ManageProductDetailModal
+                <ManageProductDetailModal
                     modalProps={{
                         visible: showAddEvaluationItemModal,
                         onClose: () => setShowAddEvaluationItemModal(false),

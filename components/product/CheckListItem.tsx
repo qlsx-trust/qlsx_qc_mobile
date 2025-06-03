@@ -39,7 +39,7 @@ const CheckListItem = ({
 
     const productImageModel = useMemo(() => {
         if (
-            !sessionCheckItem.productImagePrototype?.length ||
+            !sessionCheckItem?.productImagePrototype?.length ||
             !sessionCheckItem?.productImagePrototype[0]
         )
             return null;
@@ -49,13 +49,13 @@ const CheckListItem = ({
         }
 
         return url;
-    }, [sessionCheckItem.productImagePrototype]);
+    }, [sessionCheckItem]);
 
-    const isOK = sessionCheckItem.status == 'ok';
-    const isNG = sessionCheckItem.status == 'ng';
+    const isOK = sessionCheckItem?.status == 'ok';
+    const isNG = sessionCheckItem?.status == 'ng';
 
     const handleConfirmOk = async () => {
-        if (sessionCheckItem.status == 'ok') return;
+        if (sessionCheckItem?.status == 'ok') return;
         onUpdateCheckItem(index, {
             ...sessionCheckItem,
             note: '',
