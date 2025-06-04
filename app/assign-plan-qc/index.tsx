@@ -331,6 +331,8 @@ const PlanAssignmentScreen = () => {
                         onClose: () => setShowAssignQcModal(false),
                     }}
                     onRecallListProductPlan={() => {
+                        setIsLoadMore(false);
+                        setPageNumber(1)
                         setRetryCall(new Date().getTime());
                     }}
                 />
