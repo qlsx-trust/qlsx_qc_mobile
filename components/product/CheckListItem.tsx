@@ -13,6 +13,7 @@ import EvaluationFromModal from './EvaluationFromModal';
 
 interface Props {
     layout: any;
+    isDisableAction?: boolean;
     sessionCheckItem: ICheckItem;
     checkItems: ICheckItem[];
     index: number;
@@ -21,6 +22,7 @@ interface Props {
 }
 const CheckListItem = ({
     layout,
+    isDisableAction,
     checkItems,
     sessionCheckItem,
     index,
@@ -98,18 +100,31 @@ const CheckListItem = ({
                         alignItems="flex-start"
                         width={'50%'}
                     >
-                        <TextWrap
-                            style={{}}
-                            color={getColorText()}
-                            numberOfLines={2}
-                            textAlign="left"
-                            fontSize={18}
+                        <FlexBox
+                            direction="column"
+                            justifyContent="flex-start"
+                            alignItems="flex-start"
+                            gap={2}
                         >
-                            <TextWrap color={themeVariables.colors.subTextDefault}>
-                                Mục {index + 1}:{' '}
+                            <TextWrap
+                                style={{}}
+                                color={getColorText()}
+                                numberOfLines={2}
+                                textAlign="left"
+                                fontSize={18}
+                            >
+                                Mục {index + 1}: {sessionCheckItem.name}
                             </TextWrap>
-                            {sessionCheckItem.name}
-                        </TextWrap>
+                            <TextWrap
+                                style={{ height: 60 }}
+                                color={themeVariables.colors.subTextDefault}
+                                numberOfLines={3}
+                                textAlign="left"
+                                fontSize={14}
+                            >
+                                {sessionCheckItem.description}
+                            </TextWrap>
+                        </FlexBox>
                     </FlexBox>
                     <FlexBox
                         direction="row"
@@ -129,6 +144,7 @@ const CheckListItem = ({
                                     : themeVariables.colors.bgDefault,
                                 opacity: isNG ? 0.4 : 1,
                             }}
+                            disabled={isDisableAction}
                             onPress={handleConfirmOk}
                         >
                             <TextWrap
@@ -156,6 +172,7 @@ const CheckListItem = ({
                                     : themeVariables.colors.bgDefault,
                                 borderWidth: 1,
                             }}
+                            disabled={isDisableAction}
                         >
                             <TextWrap
                                 fontSize={18}
@@ -173,7 +190,7 @@ const CheckListItem = ({
                 </FlexBox>
                 <View
                     style={{
-                        marginTop: isMobilePhoneScreen ? 0 : 60,
+                        marginTop: isMobilePhoneScreen ? 0 : 30,
                         marginBottom: isMobilePhoneScreen ? 0 : 20,
                     }}
                 >

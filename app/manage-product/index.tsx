@@ -136,7 +136,10 @@ const productionManagementScreen = () => {
                         </TextWrapper>
                     </FlexBox>
                 </TouchableOpacity>
-                <SearchBar handleSearchText={debouncedSearch} placeHolder="Tìm kiếm mã sản phẩm, tên sản phẩm ..." />
+                <SearchBar
+                    handleSearchText={debouncedSearch}
+                    placeHolder="Tìm kiếm mã sản phẩm, tên sản phẩm ..."
+                />
 
                 <FlexBox justifyContent="space-between" style={{ width: '100%' }}>
                     <View></View>
@@ -208,23 +211,33 @@ const productionManagementScreen = () => {
                                         Mã SP: {item.productCode}
                                     </TextWrapper>
                                     <FlexBox direction="row" gap={10} justifyContent="flex-start">
-                                        {item?.checkItems !== undefined &&
-                                        Number.isInteger(item?.checkItems?.length) ? (
-                                            <FlexBox
-                                                gap={2}
-                                                style={{ minWidth: 100 }}
-                                                justifyContent="flex-start"
+                                        {item.isHasCavity ? (
+                                            <TextWrapper
+                                                fontSize={12}
+                                                numberOfLines={1}
+                                                color={themeVariables.colors.subTextDefault}
                                             >
-                                                <NoteIcon width={16} height={16} />
-                                                <TextWrapper
-                                                    fontSize={12}
-                                                    numberOfLines={1}
-                                                    color={themeVariables.colors.subTextDefault}
-                                                >
-                                                    {item.checkItems?.length} tiêu chí
-                                                </TextWrapper>
-                                            </FlexBox>
-                                        ) : null}
+                                                Cavity
+                                            </TextWrapper>
+                                        ) : (
+                                            <>
+                                                {item?.checkItems !== undefined &&
+                                                Number.isInteger(item?.checkItems?.length) ? (
+                                                    <FlexBox gap={2} justifyContent="flex-start">
+                                                        <NoteIcon width={16} height={16} />
+                                                        <TextWrapper
+                                                            fontSize={12}
+                                                            numberOfLines={1}
+                                                            color={
+                                                                themeVariables.colors.subTextDefault
+                                                            }
+                                                        >
+                                                            {item.checkItems?.length} tiêu chí
+                                                        </TextWrapper>
+                                                    </FlexBox>
+                                                ) : null}
+                                            </>
+                                        )}
                                     </FlexBox>
                                 </FlexBox>
                             </FlexBox>

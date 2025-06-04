@@ -14,7 +14,7 @@ import { AntDesign, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-i
 import { router } from 'expo-router';
 import { default as moment, default as Moment } from 'moment';
 import { useEffect, useState } from 'react';
-import { SafeAreaView, StyleSheet, TouchableOpacity } from 'react-native';
+import { SafeAreaView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 const PlanAssignmentScreen = () => {
     const { themeVariables } = useThemeContext();
@@ -45,6 +45,8 @@ const PlanAssignmentScreen = () => {
     const [selectedProductPlan, setSelectedProductPlan] = useState<IProductionPlan | null>(null);
     const [showAssignQcModal, setShowAssignQcModal] = useState<boolean>(false);
     const [numOfItemLine, setNumOfItemLine] = useState<number>(2);
+
+    const [newUpatedPlan, setNewUpatedPlan] = useState<string>('');
 
     const isGridView = numOfItemLine == 2;
 
@@ -257,9 +259,19 @@ const PlanAssignmentScreen = () => {
                                 alignItems="flex-start"
                                 style={{
                                     ...styles.productCardItem,
+                                    position: 'relative',
                                     backgroundColor: checkTimeBackground(item),
                                 }}
                             >
+                                {newUpatedPlan == item.id && (
+                                    <View style={{ position: 'absolute', right: 5, top: 5 }}>
+                                        <AntDesign
+                                            name="star"
+                                            size={20}
+                                            color={themeVariables.colors.primary200}
+                                        />
+                                    </View>
+                                )}
                                 <TextWrapper fontSize={16}>
                                     {item.machineCode} -{' '}
                                     <TextWrapper
@@ -276,6 +288,7 @@ const PlanAssignmentScreen = () => {
                                             : 'Trống'}
                                     </TextWrapper>
                                 </TextWrapper>
+
                                 <FlexBox
                                     style={{ width: '100%' }}
                                     justifyContent="flex-start"
@@ -330,8 +343,18 @@ const PlanAssignmentScreen = () => {
                         visible: showAssignQcModal,
                         onClose: () => setShowAssignQcModal(false),
                     }}
-                    onRecallListProductPlan={() => {
-                        setRetryCall(new Date().getTime());
+                    onRecallListProductPlan={(planId: string, qcCode: string) => {
+                        // update assign qc by planId
+                        setProductPlans((current) =>
+                            current.map((plan) => {
+                                if (plan.id == planId) {
+                                    plan.assignedToQC = [qcCode];
+                                }
+                                return plan;
+                            })
+                        );
+                        setNewUpatedPlan(planId);
+                        setShowAssignQcModal(false);
                     }}
                 />
             )}

@@ -53,6 +53,7 @@ const ManageProductDetailModal = ({
         setLayout({ width, height });
     };
 
+
     const isEditMode = !!checkItem;
 
     const [name, setName] = useState<string>('');

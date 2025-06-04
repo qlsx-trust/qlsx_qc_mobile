@@ -6,6 +6,8 @@ export interface IProduct {
     productDocuments: [];
     checkItems: IProductCheckItem[];
     description: string;
+    isHasCavity: boolean;
+    isSubmitted?: boolean;
 }
 
 export interface IProductCheckItem {

@@ -12,6 +12,7 @@ export interface ICheckItem {
     categoryCode: string;
     name: string;
     note: string;
+    description?: string;
     status: string;
     reportFileUri: string;
     productImagePrototype?: string[]
@@ -29,10 +30,13 @@ export interface ProductCheckItem {
     checkItems: {
         name: string;
         note: string;
+        description?: string;
         categoryCode: string;
         productImagePrototype?: string[]
     }[];
     description: string;
+    stepItem?: number;
+    isSubmitted?: boolean;
 }
 
 export interface IProductionPlan {
@@ -61,6 +65,7 @@ export interface IProductionPlan {
     isReadyMold: boolean;
     isReadyMachine: boolean;
     assignedToQC: string[]
+    cavity: number;
 }
 
 type StateType = {

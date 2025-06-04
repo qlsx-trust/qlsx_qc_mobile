@@ -170,4 +170,10 @@ export const CommonRepository = createRepository({
             data: payload,
         });
     },
+
+    getProductCavities(fetch, productCode: string) {
+        return fetch<any>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/product-management/cavity/${productCode}`, {
+            method: 'GET',
+        });
+    },
 });

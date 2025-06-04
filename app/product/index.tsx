@@ -4,22 +4,22 @@ import { StyleSheet, TouchableOpacity } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import AppButton from '@/components/common/AppButton';
 import FlexBox from '@/components/common/FlexBox';
 import TextWrap from '@/components/common/TextWrap';
 import ConfirmModal from '@/components/ConfirmModal';
-import AddEvaluationItemModal from '@/components/product/AddEvaluationItemModal';
-import CheckListItem from '@/components/product/CheckListItem';
-import { BUTTON_COMMON_TYPE, SCREEN_KEY } from '@/constants/common';
-import Config from '@/constants/config';
-import { ICheckItem, useProductionPlanContext } from '@/providers/ProductionPlanProvider';
+import ProductEvaluationItem from '@/components/product/ProductEvaluationItem';
+import { SCREEN_KEY } from '@/constants/common';
+import {
+    ICheckItem,
+    ProductCheckItem,
+    useProductionPlanContext,
+} from '@/providers/ProductionPlanProvider';
 import { CommonRepository } from '@/repositories/CommonRepository';
 import { toast } from '@/utils/ToastMessage';
 import { router } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
 import Moment from 'moment';
 import { useEffect, useState } from 'react';
-import ManageProductDetailModal from '@/components/product/ManageProductDetailModal';
+import { MaterialIcons } from '@expo/vector-icons';
 
 const ProductScreen = () => {
     // State to store layout dimensions
@@ -34,27 +34,79 @@ const ProductScreen = () => {
     const [showCamera, setShowCamera] = useState<boolean>(false);
 
     const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
-    const [showAddEvaluationItemModal, setShowAddEvaluationItemModal] = useState<boolean>(false);
-    const [pdfPreviews, setPdfPreviews] = useState<
-        {
-            documentName: string;
-            documentUrl: string;
-        }[]
-    >([]);
+
     const [checkItems, setCheckItems] = useState<ICheckItem[]>([]);
+    const [productCavities, setproductCavities] = useState<ProductCheckItem[]>([]);
 
     const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false);
 
+    const [currentSelectedProductCavity, setCurrentSelectedProductCavity] = useState<
+        ProductCheckItem | undefined
+    >(undefined);
     const [stepItem, setStepItem] = useState<number>(0);
 
-    useEffect(() => {
-        getProductEvaluation();
-    }, [productionPlan]);
+    const isCavityProduct = productionPlan?.cavity == 1;
+
+    const getProductCavity = async () => {
+        try {
+            if (!productionPlan?.productCode) {
+                return;
+            }
+            const response = await CommonRepository.getProductCavities(productionPlan?.productCode);
+            if (response.data) {
+                const checkItemsProductCavity: ProductCheckItem[] = (response.data || [])
+                    .sort((a: ProductCheckItem, b: ProductCheckItem) =>
+                        a.productCode.localeCompare(b.productCode)
+                    )
+                    .map((productCheckItem: ProductCheckItem) => {
+                        const checkItemFormatted = productCheckItem.checkItems.map((item) => {
+                            return {
+                                categoryCode: item.categoryCode,
+                                name: item.name,
+                                description: item.note,
+                                productImagePrototype: item?.productImagePrototype,
+                                note: '',
+                                status: '',
+                                reportFileUri: '',
+                            };
+                        });
+                        return {
+                            ...productCheckItem,
+                            stepItem: 0,
+                            isSubmitted: false,
+                            checkItems: checkItemFormatted,
+                        };
+                    });
+                setproductCavities(checkItemsProductCavity);
+                if (checkItemsProductCavity?.length) {
+                    setCurrentSelectedProductCavity(checkItemsProductCavity[0]);
+                    setStepItem(0);
+                    setCheckItems(checkItemsProductCavity[0].checkItems as ICheckItem[]);
+                    const promises = checkItemsProductCavity.map(() =>
+                        qcPickUp(productionPlan?.id)
+                    ); // Assuming each item has an id
+                    for await (const result of promises) {
+                        // TODO
+                        console.log('pick item');
+                    }
+                }
+            }
+        } catch (error) {
+            console.log('error: ', error);
+        }
+    };
 
     useEffect(() => {
-        // QC pick up 1 item
-        if (!productionPlan?.id) return;
-        qcPickUp(productionPlan?.id);
+        if (!productionPlan) {
+            return;
+        }
+        // get cavity
+        if (productionPlan?.cavity == 1) {
+            getProductCavity();
+        } else {
+            getProductEvaluation();
+            qcPickUp(productionPlan?.id);
+        }
     }, [productionPlan]);
 
     useEffect(() => {
@@ -68,29 +120,21 @@ const ProductScreen = () => {
     }, []);
 
     const qcPickUp = async (planId: string) => {
-        try {
-            await CommonRepository.qcPickUpItem(planId);
-        } catch (error) {
-            console.log('@@Error: ', error);
-        }
+        // try {
+        //     await CommonRepository.qcPickUpItem(planId);
+        // } catch (error) {
+        //     console.log('@@Error: ', error);
+        // }
     };
 
     const qcPickDown = async (planId: string) => {
-        try {
-            if (!planId) return;
-            await CommonRepository.qcPickDownItem(planId);
-        } catch (error) {
-            console.log('@@Error: ', error);
-        }
+        // try {
+        //     if (!planId) return;
+        //     await CommonRepository.qcPickDownItem(planId);
+        // } catch (error) {
+        //     console.log('@@Error: ', error);
+        // }
     };
-
-    const enableSubmitEvaluation =
-        checkItems?.length &&
-        checkItems?.every((item) => {
-            return (
-                item.status == 'ok' || (item.status == 'ng' && (item.note || item.reportFileUri))
-            );
-        });
 
     const checkedItems =
         checkItems?.length > 0
@@ -109,12 +153,12 @@ const ProductScreen = () => {
             );
             if (response.data) {
                 const productEvaluation = response.data;
-                setPdfPreviews(productEvaluation?.productDocuments);
                 if (productEvaluation?.checkItems?.length) {
                     const checkItemFormatted = productEvaluation.checkItems.map((item) => {
                         return {
                             categoryCode: item.categoryCode,
                             name: item.name,
+                            description: item.note,
                             productImagePrototype: item?.productImagePrototype,
                             note: '',
                             status: '',
@@ -150,7 +194,44 @@ const ProductScreen = () => {
             checkItemsTmp.push(newItem);
             setCheckItems([...checkItemsTmp]);
         }
-        setShowAddEvaluationItemModal(false);
+    };
+
+    const handleAddEvaluationCavity = (evaluationItem: any) => {
+        const checkItemsTmp = [...checkItems];
+        const newItem = {
+            categoryCode: `CATADD-${new Date().getTime()}`,
+            name: evaluationItem.name,
+            note: evaluationItem.note,
+            productImagePrototype: [evaluationItem.imageUrl],
+            status: '',
+            reportFileUri: '',
+        };
+        let nextStep = 0;
+        if (checkItemsTmp?.length) {
+            nextStep = stepItem + 1;
+            checkItemsTmp.splice(nextStep, 0, newItem);
+            setCheckItems([...checkItemsTmp]);
+            setStepItem(nextStep);
+        } else {
+            checkItemsTmp.push(newItem);
+            setCheckItems([...checkItemsTmp]);
+        }
+
+        const productCavitiesUpdate = [...productCavities].map((item) => {
+            if (currentSelectedProductCavity?.id == item.id) {
+                return {
+                    ...item,
+                    checkItems: [...checkItemsTmp],
+                    stepItem: nextStep,
+                };
+            }
+            return item;
+        });
+        setproductCavities(productCavitiesUpdate);
+        const productCavity = productCavitiesUpdate.find(
+            (item) => currentSelectedProductCavity?.id == item.id
+        );
+        if (productCavity) setCurrentSelectedProductCavity(productCavity);
     };
 
     const handleUpdateCheckItem = (index: number, updatedItem: ICheckItem) => {
@@ -159,14 +240,27 @@ const ProductScreen = () => {
         setCheckItems([...checkItemsTmp]);
     };
 
-    const handleDeleteCheckItem = (deletedItem: ICheckItem) => {
-        const checkItemsTmp = [...checkItems].filter(
-            (item) => item.categoryCode != deletedItem.categoryCode
-        );
+    const handleUpdateCheckItemCavity = (index: number, updatedItem: ICheckItem) => {
+        const checkItemsTmp = [...checkItems];
+        checkItemsTmp[index] = { ...updatedItem };
         setCheckItems([...checkItemsTmp]);
+        const productCavitiesUpdate = [...productCavities].map((item) => {
+            if (currentSelectedProductCavity?.id == item.id) {
+                return {
+                    ...item,
+                    checkItems: [...checkItemsTmp],
+                };
+            }
+            return item;
+        });
+        setproductCavities(productCavitiesUpdate);
+        const productCavity = productCavitiesUpdate.find(
+            (item) => currentSelectedProductCavity?.id == item.id
+        );
+        if (productCavity) setCurrentSelectedProductCavity(productCavity);
     };
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (isFromCavity: boolean) => {
         try {
             setLoadingSubmit(true);
             const formdata = new FormData();
@@ -200,14 +294,58 @@ const ProductScreen = () => {
                 if (isAllPassCheck && productionPlan?.id) {
                     await qcPickDown(productionPlan?.id);
                 }
-                toast.success('Gửi các đánh giá thành công');
-                backHomeScreen();
+
+                if (isFromCavity) {
+                    const productCavitiesUpdate = [...productCavities].map((item) => {
+                        const isSubmitted =
+                            currentSelectedProductCavity?.id == item.id ? true : item.isSubmitted;
+                        return { ...item, isSubmitted };
+                    });
+                    setproductCavities(productCavitiesUpdate);
+                    const productCavity = productCavitiesUpdate.find(
+                        (item) => currentSelectedProductCavity?.id == item.id
+                    );
+                    if (productCavity) setCurrentSelectedProductCavity(productCavity);
+                    toast.success('Gửi đánh giá thành công');
+
+                    // submit all cavity
+                    if (
+                        productCavitiesUpdate.filter((item) => item.isSubmitted)?.length ==
+                        productCavitiesUpdate.length
+                    ) {
+                        backHomeScreen();
+                    }
+                } else {
+                    toast.success('Gửi đánh giá thành công');
+                    backHomeScreen();
+                }
             }
         } catch (error) {
             console.log(error);
         } finally {
             setLoadingSubmit(false);
         }
+    };
+
+    const handleChangeProductCavity = (productCavity: ProductCheckItem) => {
+        setCurrentSelectedProductCavity(productCavity);
+        setStepItem(productCavity.stepItem || 0);
+        setCheckItems(productCavity.checkItems as ICheckItem[]);
+    };
+
+    const handleUpdateStepItemCavity = (step: number) => {
+        setStepItem(step);
+        const productCavitiesUpdate = [...productCavities].map((item) => {
+            return {
+                ...item,
+                stepItem: currentSelectedProductCavity?.id == item.id ? step : item.stepItem,
+            };
+        });
+        setproductCavities(productCavitiesUpdate);
+        const productCavity = productCavitiesUpdate.find(
+            (item) => currentSelectedProductCavity?.id == item.id
+        );
+        if (productCavity) setCurrentSelectedProductCavity(productCavity);
     };
 
     return (
@@ -223,7 +361,15 @@ const ProductScreen = () => {
             >
                 <TouchableOpacity
                     onPress={() => {
-                        if (checkedItems > 0 && checkedItems < checkItems.length) {
+                        let isNotFinishSubmit = false;
+                        if (isCavityProduct) {
+                            isNotFinishSubmit =
+                                productCavities.filter((item) => item.isSubmitted)?.length > 0;
+                        } else {
+                            isNotFinishSubmit =
+                                checkedItems > 0 && checkedItems < checkItems.length;
+                        }
+                        if (isNotFinishSubmit) {
                             setShowConfirmModal(true);
                         } else {
                             backHomeScreen();
@@ -301,63 +447,103 @@ const ProductScreen = () => {
                                 )}
                             </TextWrap>
                         </TextWrap>
+                        {isCavityProduct && (
+                            <TextWrap
+                                style={styles.description}
+                                color={themeVariables.colors.textDefault}
+                            >
+                                <TextWrap>Cavity: </TextWrap>
+                                <TextWrap color={themeVariables.colors.primary}>
+                                    {' '}
+                                    {productCavities?.length} sản phẩm
+                                </TextWrap>
+                            </TextWrap>
+                        )}
                     </FlexBox>
                 </FlexBox>
-                <FlexBox
-                    direction="row"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    style={{
-                        width: '100%',
-                        paddingBottom: 20,
-                        flexWrap: 'wrap',
-                        borderBottomWidth: 1,
-                        borderBottomColor: themeVariables.colors.borderColor,
-                    }}
-                >
-                    <FlexBox justifyContent="space-between" alignItems="flex-end">
-                        <TextWrap style={styles.title} color={themeVariables.colors.textDefault}>
-                            Các mục đã đánh giá ({checkedItems}/{checkItems.length})
-                        </TextWrap>
-                    </FlexBox>
-                    <FlexBox gap={20} alignItems="flex-end">
-                        <AppButton
-                            label="Thêm mục"
-                            onPress={() => setShowAddEvaluationItemModal(true)}
-                            viewStyle={{ width: 150 }}
-                            variant={BUTTON_COMMON_TYPE.CANCEL}
-                        />
-                        <AppButton
-                            label="Gửi đánh giá"
-                            onPress={handleSubmit}
-                            viewStyle={{ width: 150 }}
-                            isLoading={loadingSubmit}
-                            disabled={loadingSubmit || !checkedItems || !enableSubmitEvaluation}
-                            variant={BUTTON_COMMON_TYPE.PRIMARY}
-                        />
-                    </FlexBox>
-                </FlexBox>
-                {checkItems?.length ? (
-                    <FlexBox style={{ width: '100%' }}>
-                        <FlexBox direction="column" style={{ width: '100%' }}>
-                            <CheckListItem
-                                layout={layout}
-                                checkItems={checkItems}
-                                sessionCheckItem={checkItems[stepItem]}
-                                index={stepItem}
-                                onUpdateCheckItem={handleUpdateCheckItem}
-                                setStepItem={setStepItem}
-                            />
-                        </FlexBox>
-                    </FlexBox>
+                {!isCavityProduct ? (
+                    <ProductEvaluationItem
+                        layout={layout}
+                        stepItem={stepItem}
+                        setStepItem={setStepItem}
+                        checkedItems={checkedItems}
+                        checkItems={checkItems}
+                        loadingSubmit={loadingSubmit}
+                        onUpdateCheckItem={handleUpdateCheckItem}
+                        onSubmit={handleSubmit}
+                        onAddEvaluation={handleAddEvaluation}
+                    />
                 ) : (
-                    <FlexBox style={{ height: 300, width: '100%' }}>
-                        <TextWrap fontSize={18} color={themeVariables.colors.subTextDefault}>
-                            Không có mục đánh giá nào, vui lòng liên hệ quản lý hoặc chọn thêm mục
-                        </TextWrap>
+                    <FlexBox direction="column" justifyContent="flex-start" alignItems="flex-start">
+                        <FlexBox
+                            style={{ flexWrap: 'wrap', marginVertical: 10 }}
+                            justifyContent="flex-start"
+                            alignItems="flex-start"
+                        >
+                            {productCavities.map((productCavity: ProductCheckItem) => (
+                                <TouchableOpacity
+                                    key={`product-cavity-tab-${productCavity.id}`}
+                                    style={{
+                                        borderWidth: 1,
+                                        padding: 10,
+                                        minWidth: 40,
+                                        width: 150,
+                                        borderColor: themeVariables.colors.borderColor,
+                                        backgroundColor:
+                                            currentSelectedProductCavity?.productCode ==
+                                                productCavity.productCode ||
+                                            productCavity.isSubmitted
+                                                ? themeVariables.colors.primary200
+                                                : themeVariables.colors.bgDefault,
+                                    }}
+                                    onPress={() => handleChangeProductCavity(productCavity)}
+                                >
+                                    <FlexBox gap={2}>
+                                        <TextWrap
+                                            fontSize={18}
+                                            textAlign="center"
+                                            numberOfLines={1}
+                                            color={
+                                                currentSelectedProductCavity?.productCode ==
+                                                productCavity.productCode
+                                                    ? themeVariables.colors.white
+                                                    : themeVariables.colors.textDefault
+                                            }
+                                        >
+                                            {productCavity.productCode}
+                                        </TextWrap>
+                                        {productCavity?.isSubmitted && (
+                                            <MaterialIcons
+                                                name="done"
+                                                style={{ marginLeft: 10 }}
+                                                size={20}
+                                                color="green"
+                                            />
+                                        )}
+                                    </FlexBox>
+                                </TouchableOpacity>
+                            ))}
+                        </FlexBox>
+                        {currentSelectedProductCavity && (
+                            <ProductEvaluationItem
+                                currentSelectedProductCavity={currentSelectedProductCavity}
+                                layout={layout}
+                                stepItem={stepItem}
+                                setStepItem={(step: number) => {
+                                    handleUpdateStepItemCavity(step);
+                                }}
+                                checkedItems={checkedItems}
+                                checkItems={checkItems}
+                                loadingSubmit={loadingSubmit}
+                                onUpdateCheckItem={handleUpdateCheckItemCavity}
+                                onSubmit={() => handleSubmit(true)}
+                                onAddEvaluation={handleAddEvaluationCavity}
+                            />
+                        )}
                     </FlexBox>
                 )}
             </FlexBox>
+
             {showConfirmModal && (
                 <ConfirmModal
                     title="Trở lại"
@@ -367,16 +553,6 @@ const ProductScreen = () => {
                         visible: showConfirmModal,
                         onClose: () => setShowConfirmModal(false),
                     }}
-                />
-            )}
-
-            {showAddEvaluationItemModal && (
-                <ManageProductDetailModal
-                    modalProps={{
-                        visible: showAddEvaluationItemModal,
-                        onClose: () => setShowAddEvaluationItemModal(false),
-                    }}
-                    onAddProductCheckItem={handleAddEvaluation}
                 />
             )}
         </SafeAreaView>

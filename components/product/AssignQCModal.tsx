@@ -137,17 +137,7 @@ const AssignQCModal = ({ productPlan, onRecallListProductPlan, modalProps }: IAs
                     return;
                 }
             }
-            let isDeletedSuccess = false;
-            if (assignedQc?.length) {
-                const qcAssignedCodes = employees.filter((employee) =>
-                    assignedQc.find((qc) => qc.includes(employee.employeeCode))
-                );
-                const removeAssigedQcpromises = qcAssignedCodes.map((qc) =>
-                    deleteAssignQc(qc.employeeCode)
-                );
-                const res = await PromiseAllSettled(removeAssigedQcpromises);
-                if (res?.length) isDeletedSuccess = true;
-            }
+           
             setErrorCheckCode('');
             const payload = {
                 productionPlanId: productPlan?.id,
@@ -155,14 +145,14 @@ const AssignQCModal = ({ productPlan, onRecallListProductPlan, modalProps }: IAs
             };
             const res = await CommonRepository.assignQCProductPlan(payload);
             if (!res.error) {
-                onRecallListProductPlan();
+                onRecallListProductPlan(productPlan?.id, getFullNameCodeQc(qcCode));
                 setRecallEmployee(new Date().getTime());
                 toast.success('Phân công thành công');
                 setAssignedQc([qcCode]);
                 setOtherQcCode('');
             } else {
                 toast.error('Phân công thất bại');
-                if (isDeletedSuccess) setAssignedQc([]);
+                // if (isDeletedSuccess) setAssignedQc([]);
             }
         } catch (err) {
             console.error(err);
