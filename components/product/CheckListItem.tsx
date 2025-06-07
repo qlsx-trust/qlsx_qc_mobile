@@ -205,8 +205,8 @@ const CheckListItem = ({
                             <Image
                                 source={{ uri: productImageModel }}
                                 style={{
-                                    width: isMobilePhoneScreen ? 300 : 400,
-                                    height: isMobilePhoneScreen ? 300 : 400,
+                                    width: isMobilePhoneScreen ? 300 : 350,
+                                    height: isMobilePhoneScreen ? 300 : 350,
                                     objectFit: 'cover',
                                 }}
                             />
@@ -217,8 +217,8 @@ const CheckListItem = ({
                                 uri: 'https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg',
                             }}
                             style={{
-                                width: isMobilePhoneScreen ? 300 : 400,
-                                height: isMobilePhoneScreen ? 300 : 400,
+                                width: isMobilePhoneScreen ? 300 : 350,
+                                height: isMobilePhoneScreen ? 300 : 350,
                                 objectFit: 'cover',
                             }}
                         />

@@ -21,7 +21,9 @@ export interface ICheckItem {
 export interface ProductCheckItem {
     id: string;
     avatarUrl: string;
+    cavityCode: string;
     productCode: string;
+    cavityIndex: number;
     productName: string;
     productDocuments: {
         documentName: string;

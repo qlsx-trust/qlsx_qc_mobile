@@ -1,7 +1,9 @@
 export interface IProduct {
     id: string;
     avatarUrl: string;
+    cavityCode: string;
     productCode: string;
+    cavityIndex: number;
     productName: string;
     productDocuments: [];
     checkItems: IProductCheckItem[];

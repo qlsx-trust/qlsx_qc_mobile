@@ -8,7 +8,7 @@ import CheckListItem from './CheckListItem';
 import ManageProductDetailModal from './ManageProductDetailModal';
 import { useState } from 'react';
 import { IThemeVariables } from '@/shared/theme/themes';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, ScrollView } from 'react-native';
 
 interface ProductEvaluationItemProps {
     layout: any;
@@ -90,6 +90,7 @@ const ProductEvaluationItem = ({
                     />
                 </FlexBox>
             </FlexBox>
+            <ScrollView style={{maxHeight: layout.height * 0.6}}>
             {checkItems?.length ? (
                 <FlexBox style={{ width: '100%' }}>
                     <FlexBox direction="column" style={{ width: '100%' }}>
@@ -111,6 +112,7 @@ const ProductEvaluationItem = ({
                     </TextWrap>
                 </FlexBox>
             )}
+            </ScrollView>
 
             {showAddEvaluationItemModal && (
                 <ManageProductDetailModal

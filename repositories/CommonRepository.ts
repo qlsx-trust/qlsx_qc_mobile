@@ -24,7 +24,7 @@ export const CommonRepository = createRepository({
 
     getMostRecentProductionPlan(fetch, machineCode: string) {
         return fetch<any>(
-            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/production-plans/most-recent-production-plan?machineCode=${machineCode}`,
+            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/production-plans/most-recent-production-plan?machineCode=${encodeURIComponent(machineCode)}`,
             {
                 method: 'GET',
             }
@@ -58,7 +58,7 @@ export const CommonRepository = createRepository({
 
     getCheckItemProduct(fetch, productCode: string) {
         return fetch<ProductCheckItem>(
-            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/product-management/code/${productCode}`,
+            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/product-management/code/${encodeURIComponent(productCode)}`,
             {
                 method: 'GET',
             }
@@ -110,6 +110,17 @@ export const CommonRepository = createRepository({
             }
         );
     },
+    
+    updateProductCavityCode(fetch, id: string, payload: any) {
+        return fetch<IProduct>(
+            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/product-management/${id}/update-code-name`,
+            {
+                method: 'PUT',
+                data: payload,
+            }
+        );
+    },
+
 
     createProductDetail(fetch, payload: any) {
         return fetch<IProduct>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/product-management`, {
@@ -145,7 +156,7 @@ export const CommonRepository = createRepository({
 
     checkQCEmployeeCode(fetch, employeeQRCode: string) {
         return fetch<any>(
-            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/employee/get-employee-by-code?employeeQRCode=${employeeQRCode}`,
+            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/employee/get-employee-by-code?employeeQRCode=${encodeURIComponent(employeeQRCode)}`,
             {
                 method: 'GET',
             }
@@ -159,7 +170,7 @@ export const CommonRepository = createRepository({
     },
 
     deleteQCEmployees(fetch, employeeCode: string) {
-        return fetch<any>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/employee/delete-employee-by-code?employeeCode=${employeeCode}`, {
+        return fetch<any>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/employee/delete-employee-by-code?employeeCode=${encodeURIComponent(employeeCode)}`, {
             method: 'DELETE',
         });
     },
@@ -172,7 +183,7 @@ export const CommonRepository = createRepository({
     },
 
     getProductCavities(fetch, productCode: string) {
-        return fetch<any>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/product-management/cavity/${productCode}`, {
+        return fetch<any>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/product-management/cavity/${encodeURIComponent(productCode)}`, {
             method: 'GET',
         });
     },

@@ -9,7 +9,7 @@ const toastMessage = (status: TOAST_STATUS, title: string, message?: string) => 
         text1: title,
         text2: message || undefined,
         visibilityTime: duration,
-        position: 'bottom',
+        position: 'top',
         swipeable: false,
     });
 };

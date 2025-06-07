@@ -105,7 +105,7 @@ export const styling = (themeVariables: IThemeVariables) =>
             height: 'auto',
         },
         customToastContainer: {
-            bottom: 80,
+            top: 0,
             display: 'flex',
             flexDirection: 'row',
             justifyContent: 'flex-start',

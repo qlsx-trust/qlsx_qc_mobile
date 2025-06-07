@@ -4,6 +4,7 @@ import { default as TextWrap, default as TextWrapper } from '@/components/common
 import LoadingScreen from '@/components/LoadingScreem';
 import ManageProductDetailModal from '@/components/product/ManageProductDetailModal';
 import ProductCheckItem from '@/components/product/ProductCheckItem';
+import UpdateCavityCodeModal from '@/components/product/UpdateCavityCodeModal';
 import { BUTTON_COMMON_TYPE, PATH_SERVER_MEDIA } from '@/constants/common';
 import { PUB_TOPIC } from '@/constants/pubTopic';
 import { ICheckItem } from '@/providers/ProductionPlanProvider';
@@ -53,6 +54,8 @@ const ProductDetailManagementScreen = () => {
     >(undefined);
     const [productCavities, setproductCavities] = useState<IProduct[]>([]);
 
+    const [showEditCavityCodeModal, setShowEditCavityCodeModal] = useState<boolean>(false);
+
     useEffect(() => {
         getProductDetail();
     }, []);
@@ -65,7 +68,7 @@ const ProductDetailManagementScreen = () => {
             const response = await CommonRepository.getProductCavities(productDetail?.productCode);
             if (response.data) {
                 const checkItemsProductCavity: IProduct[] = (response.data || [])
-                    .sort((a: IProduct, b: IProduct) => a.productCode.localeCompare(b.productCode))
+                    .sort((a: IProduct, b: IProduct) => a.cavityIndex - b.cavityIndex)
                     .map((productCheckItem: IProduct) => {
                         return {
                             ...productCheckItem,
@@ -309,18 +312,27 @@ const ProductDetailManagementScreen = () => {
                         <FlexBox
                             direction="row"
                             justifyContent="space-between"
-                            alignItems="flex-start"
-                            style={{ marginTop: 0 }}
+                            alignItems="center"
+                            style={{ marginTop: 10 }}
+                            gap={10}
                         >
                             <TextWrapper
                                 fontSize={16}
                                 color={themeVariables.colors.textDefault}
-                                style={{ marginTop: 10 }}
+                                style={{}}
                             >
                                 {isCavityProduct
                                     ? `Cavity: ${productCavities?.length}`
                                     : `Tiêu chí đánh giá (${productCheckItems.length} tiêu chí)`}
                             </TextWrapper>
+
+                            {isCavityProduct && (
+                                <TouchableOpacity onPress={() => setShowEditCavityCodeModal(true)}>
+                                    <TextWrap color={themeVariables.colors.primary}>
+                                        | Chỉnh sửa danh sách tên cavity
+                                    </TextWrap>
+                                </TouchableOpacity>
+                            )}
                         </FlexBox>
                         <FlexBox
                             direction="column"
@@ -333,7 +345,7 @@ const ProductDetailManagementScreen = () => {
                                 justifyContent="flex-start"
                                 alignItems="flex-start"
                             >
-                                {productCavities.map((productCavity: IProduct) => (
+                                {productCavities.map((productCavity: IProduct, index: number) => (
                                     <TouchableOpacity
                                         key={`product-cavity-tab-${productCavity.id}`}
                                         style={{
@@ -362,7 +374,7 @@ const ProductDetailManagementScreen = () => {
                                                         : themeVariables.colors.textDefault
                                                 }
                                             >
-                                                {productCavity.productCode}
+                                                {productCavity.cavityCode || index + 1}
                                             </TextWrap>
                                             {productCavity?.isSubmitted && (
                                                 <MaterialIcons
@@ -448,6 +460,17 @@ const ProductDetailManagementScreen = () => {
                                 ? handleAddproductCheckItemCavity(data)
                                 : handleAddproductCheckItem(data)
                         }
+                    />
+                )}
+
+                {showEditCavityCodeModal && productDetail && productCavities?.length && (
+                    <UpdateCavityCodeModal
+                        modalProps={{
+                            visible: showEditCavityCodeModal,
+                            onClose: () => setShowEditCavityCodeModal(false),
+                        }}
+                        productCavities={productCavities}
+                        onRecallListCavityProduct={() => getProductCavity(productDetail)}
                     />
                 )}
             </KeyboardAvoidingView>

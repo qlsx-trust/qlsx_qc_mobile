@@ -72,7 +72,7 @@ export default function RootLayout() {
                                 {screenToDisplay()}
                             </Stack>
                         </GestureHandlerRootView>
-                        <Toast config={toastConfig} />
+                        <Toast position='top' config={toastConfig} />
                     </MenuProvider>
                 </SafeAreaProvider>
                 </ProductionPlanContextProvider>

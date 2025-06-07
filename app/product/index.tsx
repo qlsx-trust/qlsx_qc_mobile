@@ -56,7 +56,7 @@ const ProductScreen = () => {
             if (response.data) {
                 const checkItemsProductCavity: ProductCheckItem[] = (response.data || [])
                     .sort((a: ProductCheckItem, b: ProductCheckItem) =>
-                        a.productCode.localeCompare(b.productCode)
+                        a.cavityIndex - b.cavityIndex
                     )
                     .map((productCheckItem: ProductCheckItem) => {
                         const checkItemFormatted = productCheckItem.checkItems.map((item) => {
@@ -455,7 +455,7 @@ const ProductScreen = () => {
                                 <TextWrap>Cavity: </TextWrap>
                                 <TextWrap color={themeVariables.colors.primary}>
                                     {' '}
-                                    {productCavities?.length} sản phẩm
+                                    {productCavities?.length}
                                 </TextWrap>
                             </TextWrap>
                         )}
@@ -480,7 +480,7 @@ const ProductScreen = () => {
                             justifyContent="flex-start"
                             alignItems="flex-start"
                         >
-                            {productCavities.map((productCavity: ProductCheckItem) => (
+                            {productCavities.map((productCavity: ProductCheckItem, index: number) => (
                                 <TouchableOpacity
                                     key={`product-cavity-tab-${productCavity.id}`}
                                     style={{
@@ -510,7 +510,7 @@ const ProductScreen = () => {
                                                     : themeVariables.colors.textDefault
                                             }
                                         >
-                                            {productCavity.productCode}
+                                            {productCavity.cavityCode || index + 1}
                                         </TextWrap>
                                         {productCavity?.isSubmitted && (
                                             <MaterialIcons
