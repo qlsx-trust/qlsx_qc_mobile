@@ -73,7 +73,7 @@ const ProductDetailManagementScreen = () => {
                         };
                     });
                 setproductCavities(checkItemsProductCavity);
-                if (checkItemsProductCavity?.length) {
+                if (checkItemsProductCavity?.length && !currentSelectedProductCavity) {
                     setCurrentSelectedProductCavity(checkItemsProductCavity[0]);
                     setProductCheckItems(
                         checkItemsProductCavity[0].checkItems as IProductCheckItem[]
@@ -137,7 +137,6 @@ const ProductDetailManagementScreen = () => {
                     item.productImagePrototype[0] &&
                     !item.productImagePrototype[0].includes(PATH_SERVER_MEDIA)
                 ) {
-                    console.log(item.productImagePrototype);
                     formdata.append(`category:${item.categoryCode}`, {
                         name: item.productImagePrototype[0].split('/').pop(),
                         type: 'image/jpeg',
@@ -319,7 +318,7 @@ const ProductDetailManagementScreen = () => {
                                 style={{ marginTop: 10 }}
                             >
                                 {isCavityProduct
-                                    ? `Cavity: ${productCavities?.length} sản phẩm`
+                                    ? `Cavity: ${productCavities?.length}`
                                     : `Tiêu chí đánh giá (${productCheckItems.length} tiêu chí)`}
                             </TextWrapper>
                         </FlexBox>

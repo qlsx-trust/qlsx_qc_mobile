@@ -10,7 +10,7 @@ import { IProductionPlan } from '@/providers/ProductionPlanProvider';
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { CommonRepository } from '@/repositories/CommonRepository';
 import { IThemeVariables } from '@/shared/theme/themes';
-import { AntDesign, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { AntDesign, Foundation, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { default as moment, default as Moment } from 'moment';
 import { useEffect, useState } from 'react';
@@ -265,11 +265,7 @@ const PlanAssignmentScreen = () => {
                             >
                                 {newUpatedPlan == item.id && (
                                     <View style={{ position: 'absolute', right: 5, top: 5 }}>
-                                        <AntDesign
-                                            name="star"
-                                            size={20}
-                                            color={themeVariables.colors.primary200}
-                                        />
+                                        <Foundation name="burst-new" size={24} color={themeVariables.colors.primary200} />
                                     </View>
                                 )}
                                 <TextWrapper fontSize={16}>
