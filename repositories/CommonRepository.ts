@@ -2,6 +2,7 @@ import Config from '@/constants/config';
 import createRepository from './CreateRepository';
 import { ProductCheckItem } from '@/providers/ProductionPlanProvider';
 import { IProduct } from '@/types/product';
+import { INotification } from '@/types/notification';
 
 export const CommonRepository = createRepository({
     login(fetch, payload: any) {
@@ -98,6 +99,24 @@ export const CommonRepository = createRepository({
             `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/product-management/${id}`,
             {
                 method: 'GET',
+            }
+        );
+    },
+
+    getListNotification(fetch, ) {
+        return fetch<INotification[]>(
+            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/notification`,
+            {
+                method: 'GET',
+            }
+        );
+    },
+
+    readNotification(fetch, id: string) {
+        return fetch<IProduct>(
+            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/notification/${id}/read`,
+            {
+                method: 'PUT',
             }
         );
     },

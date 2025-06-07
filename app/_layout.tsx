@@ -15,6 +15,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { AuthContextProvider } from '@/providers/UserProvider';
 import { ProductionPlanContextProvider } from '@/providers/ProductionPlanProvider';
+import { NotificationContextProvider } from '@/providers/NotificationProvider';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -61,20 +62,22 @@ export default function RootLayout() {
         <ThemeContexProvider>
             <AuthContextProvider>
                 <ProductionPlanContextProvider>
-                <SafeAreaProvider>
-                    <MenuProvider>
-                        <GestureHandlerRootView style={{ flex: 1 }}>
-                            <Stack
-                                screenOptions={{
-                                    headerShown: false,
-                                }}
-                            >
-                                {screenToDisplay()}
-                            </Stack>
-                        </GestureHandlerRootView>
-                        <Toast position='top' config={toastConfig} />
-                    </MenuProvider>
-                </SafeAreaProvider>
+                    <NotificationContextProvider>
+                        <SafeAreaProvider>
+                            <MenuProvider>
+                                <GestureHandlerRootView style={{ flex: 1 }}>
+                                    <Stack
+                                        screenOptions={{
+                                            headerShown: false,
+                                        }}
+                                    >
+                                        {screenToDisplay()}
+                                    </Stack>
+                                </GestureHandlerRootView>
+                                <Toast position="top" config={toastConfig} />
+                            </MenuProvider>
+                        </SafeAreaProvider>
+                    </NotificationContextProvider>
                 </ProductionPlanContextProvider>
             </AuthContextProvider>
         </ThemeContexProvider>
