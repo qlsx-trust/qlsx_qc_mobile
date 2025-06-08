@@ -25,14 +25,14 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
     const [isLoadingGetPlan, setIsLoadingGetPlan] = useState<boolean>(true);
     const [productPlan, setProductPlan] = useState<IProductionPlan | null>(null);
 
-    const invalidProductPlan = !isLoadingGetPlan && (!scanResult.includes('planId:') || !productPlan);
+    const invalidProductPlan = !isLoadingGetPlan && (!scanResult.includes('planId,') || !productPlan);
 
     useEffect(() => {
         if (scanResult) getCTSXById();
     }, [scanResult]);
 
     const formatPlanIDScanResult = (scanResult: string) => {
-        return scanResult.includes('planId:') ? scanResult.split('planId:')[1] : scanResult;
+        return scanResult.includes('planId,') ? scanResult.split('planId,')[1] : scanResult;
     };
 
     const getCTSXById = async () => {
