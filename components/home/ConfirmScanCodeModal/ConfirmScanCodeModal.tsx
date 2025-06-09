@@ -73,16 +73,16 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
             const response = await CommonRepository.getMostRecentProductionPlanById(planId);
             if (response.data) {
                 // check tolerance-time-qc
-                // if (!response.data?.machineStartTime) {
-                //     toast.error('Chưa đến thời gian kiểm tra, vui lòng thử lại');
-                //     return;
-                // }
-                // const isValidTimeCheckQc = await checkValidTimeCheck(
-                //     response.data?.machineStartTime
-                // );
-                // if (!isValidTimeCheckQc) {
-                //     toast.error('Chưa đến thời gian kiểm tra, vui lòng thử lại');
-                // }
+                if (!response.data?.machineStartTime) {
+                    toast.error('Chưa đến thời gian kiểm tra, vui lòng thử lại');
+                    return;
+                }
+                const isValidTimeCheckQc = await checkValidTimeCheck(
+                    response.data?.machineStartTime
+                );
+                if (!isValidTimeCheckQc) {
+                    toast.error('Chưa đến thời gian kiểm tra, vui lòng thử lại');
+                }
                 updateProductionPlan(response.data);
                 router.push(`${SCREEN_KEY.product}`);
                 modalProps.onClose();

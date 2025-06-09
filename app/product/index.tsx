@@ -82,13 +82,7 @@ const ProductScreen = () => {
                     setCurrentSelectedProductCavity(checkItemsProductCavity[0]);
                     setStepItem(0);
                     setCheckItems(checkItemsProductCavity[0].checkItems as ICheckItem[]);
-                    const promises = checkItemsProductCavity.map(() =>
-                        qcPickUp(productionPlan?.id)
-                    ); // Assuming each item has an id
-                    for await (const result of promises) {
-                        // TODO
-                        console.log('pick item');
-                    }
+                    qcPickUp(productionPlan?.id);
                 }
             }
         } catch (error) {
@@ -120,20 +114,20 @@ const ProductScreen = () => {
     }, []);
 
     const qcPickUp = async (planId: string) => {
-        // try {
-        //     await CommonRepository.qcPickUpItem(planId);
-        // } catch (error) {
-        //     console.log('@@Error: ', error);
-        // }
+        try {
+            await CommonRepository.qcPickUpItem(planId);
+        } catch (error) {
+            console.log('@@Error: ', error);
+        }
     };
 
     const qcPickDown = async (planId: string) => {
-        // try {
-        //     if (!planId) return;
-        //     await CommonRepository.qcPickDownItem(planId);
-        // } catch (error) {
-        //     console.log('@@Error: ', error);
-        // }
+        try {
+            if (!planId) return;
+            await CommonRepository.qcPickDownItem(planId);
+        } catch (error) {
+            console.log('@@Error: ', error);
+        }
     };
 
     const checkedItems =
