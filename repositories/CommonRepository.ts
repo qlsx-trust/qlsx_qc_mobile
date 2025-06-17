@@ -57,6 +57,13 @@ export const CommonRepository = createRepository({
         });
     },
 
+    submitQcTestResultBatch(fetch, batchId: string, payload: any) {
+        return fetch<any>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/qc-test-result/${batchId}`, {
+            method: 'PUT',
+            data: payload,
+        });
+    },
+
     getCheckItemProduct(fetch, productCode: string) {
         return fetch<ProductCheckItem>(
             `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/product-management/code/${encodeURIComponent(productCode)}`,

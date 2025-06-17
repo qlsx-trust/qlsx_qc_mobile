@@ -55,8 +55,8 @@ const ProductScreen = () => {
             const response = await CommonRepository.getProductCavities(productionPlan?.productCode);
             if (response.data) {
                 const checkItemsProductCavity: ProductCheckItem[] = (response.data || [])
-                    .sort((a: ProductCheckItem, b: ProductCheckItem) =>
-                        a.cavityIndex - b.cavityIndex
+                    .sort(
+                        (a: ProductCheckItem, b: ProductCheckItem) => a.cavityIndex - b.cavityIndex
                     )
                     .map((productCheckItem: ProductCheckItem) => {
                         const checkItemFormatted = productCheckItem.checkItems.map((item) => {
@@ -254,37 +254,59 @@ const ProductScreen = () => {
         if (productCavity) setCurrentSelectedProductCavity(productCavity);
     };
 
+    const chunkCheckItemArray = (array: ICheckItem[], size: number) => {
+        const chunks = [];
+        for (let i = 0; i < array.length; i += size) {
+            chunks.push(array.slice(i, i + size));
+        }
+        return chunks;
+    };
+
     const handleSubmit = async (isFromCavity: boolean) => {
         try {
             setLoadingSubmit(true);
-            const formdata = new FormData();
-            formdata.append('ConfirmationTime', `${new Date().toISOString()}`);
-            const testResult = checkItems.map((item) => {
-                return {
-                    categoryCode: item.categoryCode,
-                    name: item.name,
-                    note: item.note,
-                    status: item.status,
-                };
-            });
-            //submit new check item
-            // TODO
+            // Split checkItems into batches of 10
+            const BATCH_SIZE = 10;
+            const batches = chunkCheckItemArray(checkItems, BATCH_SIZE);
+            // Prepare testResult for the current batch
+            let nextSubmitId = '';
+            let isSubmitSuccess = false;
+            for (const batch of batches) {
+                const formdata = new FormData();
+                formdata.append('ConfirmationTime', `${new Date().toISOString()}`);
+                formdata.append('ProductionPlanId', productionPlan?.id);
 
-            formdata.append('TestResult', JSON.stringify(testResult));
-            formdata.append('ProductionPlanId', productionPlan?.id);
-            checkItems.forEach((item) => {
-                if (item.reportFileUri) {
-                    formdata.append(item.categoryCode, {
-                        name: item.reportFileUri.split('/').pop(),
-                        type: 'image/jpeg',
-                        uri: item.reportFileUri,
-                    });
+                const testResult = batch.map((item) => {
+                    return {
+                        categoryCode: item.categoryCode,
+                        name: item.name,
+                        note: item.note,
+                        status: item.status,
+                    };
+                });
+                formdata.append('TestResult', JSON.stringify(testResult));
+                batch.forEach((item) => {
+                    if (item.reportFileUri) {
+                        formdata.append(item.categoryCode, {
+                            name: item.reportFileUri.split('/').pop(),
+                            type: 'image/jpeg',
+                            uri: item.reportFileUri,
+                        });
+                    }
+                });
+                let response: any;
+                if(!nextSubmitId) {
+                    response = await CommonRepository.submitQcTestResult(formdata);
+                    nextSubmitId = response.data;
+                } else {
+                    response = await CommonRepository.submitQcTestResultBatch(nextSubmitId, formdata);
                 }
-            });
+                isSubmitSuccess = !!response.data;
+            }
+
             const isAllPassCheck =
                 checkItems.filter((item) => item.status == 'ok')?.length == checkItems?.length;
-            const response = await CommonRepository.submitQcTestResult(formdata);
-            if (response.data) {
+            if (isSubmitSuccess) {
                 if (isAllPassCheck && productionPlan?.id) {
                     await qcPickDown(productionPlan?.id);
                 }
@@ -474,49 +496,51 @@ const ProductScreen = () => {
                             justifyContent="flex-start"
                             alignItems="flex-start"
                         >
-                            {productCavities.map((productCavity: ProductCheckItem, index: number) => (
-                                <TouchableOpacity
-                                    key={`product-cavity-tab-${productCavity.id}`}
-                                    style={{
-                                        borderWidth: 1,
-                                        padding: 10,
-                                        minWidth: 40,
-                                        width: 150,
-                                        borderColor: themeVariables.colors.borderColor,
-                                        backgroundColor:
-                                            currentSelectedProductCavity?.productCode ==
-                                                productCavity.productCode ||
-                                            productCavity.isSubmitted
-                                                ? themeVariables.colors.primary200
-                                                : themeVariables.colors.bgDefault,
-                                    }}
-                                    onPress={() => handleChangeProductCavity(productCavity)}
-                                >
-                                    <FlexBox gap={2}>
-                                        <TextWrap
-                                            fontSize={18}
-                                            textAlign="center"
-                                            numberOfLines={1}
-                                            color={
+                            {productCavities.map(
+                                (productCavity: ProductCheckItem, index: number) => (
+                                    <TouchableOpacity
+                                        key={`product-cavity-tab-${productCavity.id}`}
+                                        style={{
+                                            borderWidth: 1,
+                                            padding: 10,
+                                            minWidth: 40,
+                                            width: 150,
+                                            borderColor: themeVariables.colors.borderColor,
+                                            backgroundColor:
                                                 currentSelectedProductCavity?.productCode ==
-                                                productCavity.productCode
-                                                    ? themeVariables.colors.white
-                                                    : themeVariables.colors.textDefault
-                                            }
-                                        >
-                                            {productCavity.cavityCode || index + 1}
-                                        </TextWrap>
-                                        {productCavity?.isSubmitted && (
-                                            <MaterialIcons
-                                                name="done"
-                                                style={{ marginLeft: 10 }}
-                                                size={20}
-                                                color="green"
-                                            />
-                                        )}
-                                    </FlexBox>
-                                </TouchableOpacity>
-                            ))}
+                                                    productCavity.productCode ||
+                                                productCavity.isSubmitted
+                                                    ? themeVariables.colors.primary200
+                                                    : themeVariables.colors.bgDefault,
+                                        }}
+                                        onPress={() => handleChangeProductCavity(productCavity)}
+                                    >
+                                        <FlexBox gap={2}>
+                                            <TextWrap
+                                                fontSize={18}
+                                                textAlign="center"
+                                                numberOfLines={1}
+                                                color={
+                                                    currentSelectedProductCavity?.productCode ==
+                                                    productCavity.productCode
+                                                        ? themeVariables.colors.white
+                                                        : themeVariables.colors.textDefault
+                                                }
+                                            >
+                                                {productCavity.cavityCode || index + 1}
+                                            </TextWrap>
+                                            {productCavity?.isSubmitted && (
+                                                <MaterialIcons
+                                                    name="done"
+                                                    style={{ marginLeft: 10 }}
+                                                    size={20}
+                                                    color="green"
+                                                />
+                                            )}
+                                        </FlexBox>
+                                    </TouchableOpacity>
+                                )
+                            )}
                         </FlexBox>
                         {currentSelectedProductCavity && (
                             <ProductEvaluationItem
