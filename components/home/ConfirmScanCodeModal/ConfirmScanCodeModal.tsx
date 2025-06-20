@@ -19,13 +19,14 @@ interface IConfirmScanCodeModalProps {
 
 const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalProps) => {
     const { themeVariables } = useThemeContext();
-    const { updateProductionPlan } = useProductionPlanContext();
+    const { updateProductionPlan, toleranceTime } = useProductionPlanContext();
     const styles = styling(themeVariables);
     const [isLoadingConfirm, setIsLoadingConfirm] = useState<boolean>(false);
     const [isLoadingGetPlan, setIsLoadingGetPlan] = useState<boolean>(true);
     const [productPlan, setProductPlan] = useState<IProductionPlan | null>(null);
 
-    const invalidProductPlan = !isLoadingGetPlan && (!scanResult.includes('planId,') || !productPlan);
+    const invalidProductPlan =
+        !isLoadingGetPlan && (!scanResult.includes('planId,') || !productPlan);
 
     useEffect(() => {
         if (scanResult) getCTSXById();
@@ -50,20 +51,12 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
     };
 
     const checkValidTimeCheck = async (startTimePlan: string) => {
-        try {
-            const response = await CommonRepository.getToleranceTimeQC();
-            // check tolerance-time-qc
-            const value = response?.data?.value;
-            if (!value) {
-                // not config
-                return true;
-            }
-            const gapTime = new Date().getTime() - new Date(startTimePlan).getTime();
-            return gapTime > value * 60 * 1000;
-        } catch (error) {
-            toast.error('Mã máy không hợp lệ, vui lòng thử lại');
+        if (!toleranceTime) {
+            // not config
             return true;
         }
+        const gapTime = new Date().getTime() - new Date(startTimePlan).getTime();
+        return gapTime > toleranceTime * 60 * 1000;
     };
 
     const handleConfirmCode = async () => {

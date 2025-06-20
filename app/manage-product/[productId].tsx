@@ -326,13 +326,13 @@ const ProductDetailManagementScreen = () => {
                                     : `Tiêu chí đánh giá (${productCheckItems.length} tiêu chí)`}
                             </TextWrapper>
 
-                            {isCavityProduct && (
+                            {/* {isCavityProduct && (
                                 <TouchableOpacity onPress={() => setShowEditCavityCodeModal(true)}>
                                     <TextWrap color={themeVariables.colors.primary}>
                                         | Chỉnh sửa danh sách tên cavity
                                     </TextWrap>
                                 </TouchableOpacity>
-                            )}
+                            )} */}
                         </FlexBox>
                         <FlexBox
                             direction="column"

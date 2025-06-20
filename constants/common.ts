@@ -37,6 +37,7 @@ export const SCREEN_KEY = {
     createProduct: 'create-product',
     assignPlanQC: 'assign-plan-qc',
     employee: 'employee',
+    configuration: 'configuration',
 };
 
 export const SCREEN_STACK_DESCRIPTION = {
@@ -78,4 +79,5 @@ export const PAGE_SIZE = {
     PRODUCT: 30,
     MESSAGE_DEFAULT: 20,
     LOAD_DEFAULT: 20,
+    FULL_SIZE: 9999,
 };

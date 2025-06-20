@@ -1,3 +1,4 @@
+import AppButton from '@/components/common/AppButton';
 import EmptyFolder from '@/components/common/EmptyList/EmptyFolder';
 import FlatListCustom from '@/components/common/FlatListCustom';
 import FlexBox from '@/components/common/FlexBox';
@@ -5,7 +6,7 @@ import TextWrapper from '@/components/common/TextWrap';
 import AssignQCModal from '@/components/product/AssignQCModal';
 import DateRangePickerModal from '@/components/product/DateRangePickerModal';
 import SearchBar from '@/components/SearchBar';
-import { PAGE_SIZE } from '@/constants/common';
+import { BUTTON_COMMON_TYPE, PAGE_SIZE } from '@/constants/common';
 import { IProductionPlan } from '@/providers/ProductionPlanProvider';
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { CommonRepository } from '@/repositories/CommonRepository';
@@ -60,8 +61,8 @@ const PlanAssignmentScreen = () => {
         try {
             firstCall ? setIsLoading(true) : setIsLoadMore(true);
             const params = {
-                Skip: (pageNumber - 1) * PAGE_SIZE.DEFAULT,
-                Take: PAGE_SIZE.DEFAULT,
+                Skip: (pageNumber - 1) * PAGE_SIZE.FULL_SIZE,
+                Take: PAGE_SIZE.FULL_SIZE,
                 Keyword: filterParams.name,
                 ProductionStartTime: filterParams.productionStartTime,
                 ProductionEndTime: filterParams.productionEndTime,
@@ -171,11 +172,40 @@ const PlanAssignmentScreen = () => {
                         </TextWrapper>
                     </FlexBox>
                 </TouchableOpacity>
-                <SearchBar
-                    handleSearchText={debouncedSearch}
-                    placeHolder="Tìm kiếm mã máy, mã sản phẩm, tên sản phẩm ..."
-                />
                 <FlexBox justifyContent="space-between" style={{ width: '100%' }}>
+                    <View style={{ width: '80%' }}>
+                        <SearchBar
+                            handleSearchText={debouncedSearch}
+                            placeHolder="Tìm kiếm mã máy, mã sản phẩm, tên sản phẩm ..."
+                        />
+                    </View>
+                    <FlexBox gap={10}>
+                        <TouchableOpacity onPress={() => setNumOfItemLine(1)}>
+                            <MaterialCommunityIcons
+                                name="table-of-contents"
+                                size={40}
+                                color={
+                                    !isGridView
+                                        ? themeVariables.colors.primary
+                                        : themeVariables.colors.textDefault
+                                }
+                            />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => setNumOfItemLine(2)}>
+                            <MaterialIcons
+                                name="grid-view"
+                                size={30}
+                                color={
+                                    isGridView
+                                        ? themeVariables.colors.primary
+                                        : themeVariables.colors.textDefault
+                                }
+                            />
+                        </TouchableOpacity>
+                    </FlexBox>
+                </FlexBox>
+
+                <FlexBox justifyContent="space-between" style={{ width: '100%', flexWrap: 'wrap' }}>
                     <FlexBox
                         style={{
                             width: 'auto',
@@ -206,28 +236,17 @@ const PlanAssignmentScreen = () => {
                         </TouchableOpacity>
                     </FlexBox>
                     <FlexBox gap={10}>
-                        <TouchableOpacity onPress={() => setNumOfItemLine(1)}>
-                            <MaterialCommunityIcons
-                                name="table-of-contents"
-                                size={40}
-                                color={
-                                    !isGridView
-                                        ? themeVariables.colors.primary
-                                        : themeVariables.colors.textDefault
-                                }
-                            />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => setNumOfItemLine(2)}>
-                            <MaterialIcons
-                                name="grid-view"
-                                size={30}
-                                color={
-                                    isGridView
-                                        ? themeVariables.colors.primary
-                                        : themeVariables.colors.textDefault
-                                }
-                            />
-                        </TouchableOpacity>
+                        <AppButton
+                            disabled={!productPlans?.length}
+                            variant={
+                                productPlans?.length
+                                    ? BUTTON_COMMON_TYPE.PRIMARY
+                                    : BUTTON_COMMON_TYPE.CANCEL
+                            }
+                            viewStyle={{ paddingHorizontal: 20 }}
+                            label="Phân công danh sách CTSX"
+                            onPress={() => setShowAssignQcModal(true)}
+                        />
                     </FlexBox>
                 </FlexBox>
             </FlexBox>
@@ -259,16 +278,21 @@ const PlanAssignmentScreen = () => {
                                 alignItems="flex-start"
                                 style={{
                                     ...styles.productCardItem,
+                                    minHeight: 140,
                                     position: 'relative',
                                     backgroundColor: checkTimeBackground(item),
                                 }}
                             >
                                 {newUpatedPlan == item.id && (
                                     <View style={{ position: 'absolute', right: 5, top: 5 }}>
-                                        <Foundation name="burst-new" size={24} color={themeVariables.colors.primary200} />
+                                        <Foundation
+                                            name="burst-new"
+                                            size={24}
+                                            color={themeVariables.colors.primary200}
+                                        />
                                     </View>
                                 )}
-                                <TextWrapper fontSize={16}>
+                                <TextWrapper fontSize={16} numberOfLines={3}>
                                     {item.machineCode} -{' '}
                                     <TextWrapper
                                         fontSize={16}
@@ -332,25 +356,19 @@ const PlanAssignmentScreen = () => {
                 )}
             />
 
-            {selectedProductPlan && showAssignQcModal && (
+            {showAssignQcModal && productPlans?.length && (
                 <AssignQCModal
+                    planIds={productPlans.map((plan) => plan.id)}
+                    isAssignAll={!selectedProductPlan}
                     productPlan={selectedProductPlan}
                     modalProps={{
                         visible: showAssignQcModal,
                         onClose: () => setShowAssignQcModal(false),
                     }}
-                    onRecallListProductPlan={(planId: string, qcCode: string) => {
+                    onRecallListProductPlan={(planId: string) => {
                         // update assign qc by planId
-                        setProductPlans((current) =>
-                            current.map((plan) => {
-                                if (plan.id == planId) {
-                                    plan.assignedToQC = [qcCode];
-                                }
-                                return plan;
-                            })
-                        );
-                        setNewUpatedPlan(planId);
-                        setShowAssignQcModal(false);
+                        setRetryCall(new Date().getTime());
+                        if (planId) setNewUpatedPlan(planId);
                     }}
                 />
             )}

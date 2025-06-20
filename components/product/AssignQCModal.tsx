@@ -3,34 +3,44 @@ import FlexBox from '@/components/common/FlexBox';
 import TextWrap from '@/components/common/TextWrap';
 import CommonModal, { CommonModalProps } from '@/components/modals/CommonModal';
 import { BUTTON_COMMON_TYPE } from '@/constants/common';
-import { PUB_TOPIC } from '@/constants/pubTopic';
+import Config from '@/constants/config';
 import { IProductionPlan } from '@/providers/ProductionPlanProvider';
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { CommonRepository } from '@/repositories/CommonRepository';
 import { IThemeVariables } from '@/shared/theme/themes';
 import { IEmployee } from '@/types/employee';
-import { PromiseAllSettled } from '@/utils/Mixed';
 import { toast } from '@/utils/ToastMessage';
 import { AntDesign, Entypo, Feather } from '@expo/vector-icons';
+import axios, { HttpStatusCode } from 'axios';
 import { BarcodeScanningResult, CameraType, CameraView, useCameraPermissions } from 'expo-camera';
 import { useEffect, useMemo, useState } from 'react';
 import {
     ActivityIndicator,
+    Dimensions,
     Keyboard,
     StyleSheet,
     TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import SelectDropdown from 'react-native-select-dropdown';
 
 interface IAssignQCModalProps {
     modalProps: CommonModalProps;
-    productPlan?: IProductionPlan;
+    planIds: string[];
+    isAssignAll: boolean;
+    productPlan?: IProductionPlan | null;
     onRecallListProductPlan: Function;
 }
 
-const AssignQCModal = ({ productPlan, onRecallListProductPlan, modalProps }: IAssignQCModalProps) => {
+const AssignQCModal = ({
+    productPlan,
+    isAssignAll,
+    planIds,
+    onRecallListProductPlan,
+    modalProps,
+}: IAssignQCModalProps) => {
     // State to store layout dimensions
     const [layout, setLayout] = useState({ width: 0, height: 0 });
     const onLayout = (event: any) => {
@@ -113,9 +123,17 @@ const AssignQCModal = ({ productPlan, onRecallListProductPlan, modalProps }: IAs
             setIsLoadingDelete(userCode);
             const payload = {
                 productionPlanId: productPlan?.id,
-                qcAssign: userCode,
+                qcAssign: userCode.split(',')[0],
             };
-            await CommonRepository.deleteAssignQCProductPlan(payload);
+            const res = await CommonRepository.deleteAssignQCProductPlan(payload);
+            if (!res.error) {
+                onRecallListProductPlan(productPlan?.id || '');
+                setRecallEmployee(new Date().getTime());
+                toast.success('Xóa phân công thành công');
+                setAssignedQc((current) => current.filter((qcCode) => qcCode != userCode));
+            } else {
+                toast.error('Xóa phân công thất bại');
+            }
         } catch (err) {
             console.error(err);
         } finally {
@@ -137,22 +155,32 @@ const AssignQCModal = ({ productPlan, onRecallListProductPlan, modalProps }: IAs
                     return;
                 }
             }
-           
+
             setErrorCheckCode('');
-            const payload = {
-                productionPlanId: productPlan?.id,
-                qcAssign: qcCode,
-            };
-            const res = await CommonRepository.assignQCProductPlan(payload);
+            const payload = isAssignAll
+                ? {
+                      productionPlanIds: planIds,
+                      qcAssigns: [...assignedQc, qcCode].map(
+                          (qcFullCode) => qcFullCode.split(',')[0]
+                      ),
+                  }
+                : {
+                      productionPlanId: productPlan?.id,
+                      qcAssign: qcCode.includes(',') ? qcCode.split(',')[0] : qcCode,
+                  };
+            const res = isAssignAll
+                ? await CommonRepository.assignQCProductPlanbatch(payload)
+                : await CommonRepository.assignQCProductPlan(payload);
             if (!res.error) {
-                onRecallListProductPlan(productPlan?.id, getFullNameCodeQc(qcCode));
+                onRecallListProductPlan(productPlan?.id || '');
                 setRecallEmployee(new Date().getTime());
                 toast.success('Phân công thành công');
-                setAssignedQc([qcCode]);
+                const assignedQcs = [...assignedQc];
+                assignedQcs.unshift(qcCode);
+                setAssignedQc(assignedQcs);
                 setOtherQcCode('');
             } else {
                 toast.error('Phân công thất bại');
-                // if (isDeletedSuccess) setAssignedQc([]);
             }
         } catch (err) {
             console.error(err);
@@ -351,7 +379,7 @@ const AssignQCModal = ({ productPlan, onRecallListProductPlan, modalProps }: IAs
                                 width={'100%'}
                                 justifyContent="flex-start"
                                 alignItems="flex-start"
-                                style={{marginBottom: 20 }}
+                                style={{ marginBottom: 20 }}
                             >
                                 <TextWrap style={styles.description}>Mã nhân viên khác:</TextWrap>
                                 <TextInput
@@ -375,7 +403,10 @@ const AssignQCModal = ({ productPlan, onRecallListProductPlan, modalProps }: IAs
                                         {errorCheckCode}
                                     </TextWrap>
                                 )}
-                                <FlexBox justifyContent="space-between" style={{ width: '100%', paddingHorizontal: 5 }}>
+                                <FlexBox
+                                    justifyContent="space-between"
+                                    style={{ width: '100%', paddingHorizontal: 5 }}
+                                >
                                     <AppButton
                                         viewStyle={styles.button}
                                         label="Quét mã"
@@ -392,27 +423,90 @@ const AssignQCModal = ({ productPlan, onRecallListProductPlan, modalProps }: IAs
                                 </FlexBox>
                             </FlexBox>
                         )}
-
                         <FlexBox
-                            direction="row"
+                            direction="column"
                             justifyContent="flex-start"
                             alignItems="flex-start"
-                            gap={5}
-                            style={{ width: '100%', paddingHorizontal: 0, marginBottom: 20, flexWrap: 'wrap' }}
+                            gap={8}
+                            style={{ width: '100%', marginVertical: 10 }}
                         >
-                            <TextWrap style={styles.description}>
+                            <TextWrap fontSize={16} style={styles.description}>
                                 Nhân viên được phân công:
                             </TextWrap>
-                            <TextWrap
-                                fontSize={18}
-                                color={
-                                    assignedQc?.length
-                                        ? themeVariables.colors.primary
-                                        : themeVariables.colors.danger
-                                }
-                            >
-                                {getFullNameCodeQc(assignedQc[0])}
-                            </TextWrap>
+
+                            {assignedQc?.length > 0 ? (
+                                <ScrollView
+                                    style={{
+                                        maxHeight: Dimensions.get('window').height * 0.3,
+                                        width: '100%',
+                                    }}
+                                >
+                                    {assignedQc.map((qc: string) => (
+                                        <FlexBox
+                                            direction="row"
+                                            justifyContent="flex-start"
+                                            alignItems="center"
+                                            gap={15}
+                                            style={{
+                                                width: '100%',
+                                                paddingHorizontal: 0,
+                                                marginVertical: 15,
+                                                flexWrap: 'wrap',
+                                            }}
+                                        >
+                                            {isLoadingDelete == qc ? (
+                                                <ActivityIndicator size={20} />
+                                            ) : (
+                                                <TouchableOpacity
+                                                    onPress={() => deleteAssignQc(qc)}
+                                                >
+                                                    <Feather
+                                                        name="trash-2"
+                                                        size={20}
+                                                        color={themeVariables.colors.danger}
+                                                    />
+                                                </TouchableOpacity>
+                                            )}
+                                            <TextWrap
+                                                fontSize={16}
+                                                style={{
+                                                    maxWidth: 400,
+                                                    minWidth: 300,
+                                                    width: '100%',
+                                                }}
+                                                color={
+                                                    assignedQc?.length
+                                                        ? themeVariables.colors.primary
+                                                        : themeVariables.colors.danger
+                                                }
+                                            >
+                                                {getFullNameCodeQc(qc)}
+                                            </TextWrap>
+                                        </FlexBox>
+                                    ))}
+                                </ScrollView>
+                            ) : (
+                                <>
+                                    {!isAssignAll && (
+                                        <TextWrap
+                                            fontSize={14}
+                                            color={themeVariables.colors.danger}
+                                        >
+                                            Chưa có nhân viên nào được phân công
+                                        </TextWrap>
+                                    )}
+                                </>
+                            )}
+                            {isAssignAll && (
+                                <TextWrap
+                                    textAlign="left"
+                                    fontSize={14}
+                                    color={themeVariables.colors.yellow}
+                                >
+                                    Ghi chú: Tất cả nhân viên được phân công trước đó sẽ được thay
+                                    thế bằng lượt phân công này
+                                </TextWrap>
+                            )}
                         </FlexBox>
 
                         <AppButton

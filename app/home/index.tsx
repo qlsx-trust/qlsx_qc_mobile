@@ -88,6 +88,10 @@ const HomeScreen = () => {
         router.push(SCREEN_KEY.employee);
     };
 
+     const handleConfiguration = () => {
+        router.push(SCREEN_KEY.configuration);
+    };
+
     return (
         // <KeyboardAvoidingView behavior={isIOS ? 'padding' : 'height'}>
         <SafeAreaView style={styles.container} onLayout={onLayout}>
@@ -220,6 +224,14 @@ const HomeScreen = () => {
                         <AppButton
                             label="Quản lý nhân viên QC"
                             onPress={handleEmployee}
+                            viewStyle={{ width: '80%', marginTop: 20 }}
+                            labelStyle={{ fontSize: 18 }}
+                            variant={BUTTON_COMMON_TYPE.PRIMARY_OUTLINE}
+                        />
+
+                         <AppButton
+                            label="Cấu hình cài đặt"
+                            onPress={handleConfiguration}
                             viewStyle={{ width: '80%', marginTop: 20 }}
                             labelStyle={{ fontSize: 18 }}
                             variant={BUTTON_COMMON_TYPE.PRIMARY_OUTLINE}

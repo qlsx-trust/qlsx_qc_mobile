@@ -16,13 +16,14 @@ import { toast } from '@/utils/ToastMessage';
 import { AntDesign, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import moment from 'moment';
 import DateRangePickerModal from './DateRangePickerModal';
+import usePlanWarningColor from '@/hooks/usePlanWarningColor';
 
 interface IListProductPlanForQCProps {}
 
 const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
-    const { updateProductionPlan } = useProductionPlanContext();
+    const { updateProductionPlan, toleranceTime, gapReviewTime } = useProductionPlanContext();
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isLoadMore, setIsLoadMore] = useState<boolean>(false);
@@ -53,8 +54,8 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
         try {
             firstCall ? setIsLoading(true) : setIsLoadMore(true);
             const params = {
-                Skip: (pageNumber - 1) * PAGE_SIZE.DEFAULT,
-                Take: PAGE_SIZE.DEFAULT,
+                Skip: (pageNumber - 1) * PAGE_SIZE.FULL_SIZE,
+                Take: PAGE_SIZE.FULL_SIZE,
                 Keyword: filterParams.name,
                 ProductionStartTime: filterParams.productionStartTime,
                 ProductionEndTime: filterParams.productionEndTime,
@@ -111,21 +112,6 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
         getListProduct();
     }, [retryCall]);
 
-    const checkTimeBackground = (product: IProductionPlan) => {
-        if (new Date().getTime() < new Date(product.productionStartTime).getTime()) {
-            return 'transparent';
-        }
-
-        if (
-            new Date().getTime() > new Date(product.productionStartTime).getTime() &&
-            new Date().getTime() < new Date(product.productionEndTime).getTime()
-        ) {
-            return '#f5f383';
-        }
-
-        return '#e3e2e2';
-    };
-
     const handleUpdateDateRangeFilter = (startDate: Date, endDate: Date) => {
         setFilterParams({
             ...filterParams,
@@ -135,21 +121,13 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
         setRetryCall(new Date().getTime());
     };
 
-    const checkValidTimeCheck = async (startTimePlan: string) => {
-        try {
-            const response = await CommonRepository.getToleranceTimeQC();
-            // check tolerance-time-qc
-            const value = response?.data?.value;
-            if (!value) {
-                // not config
-                return true;
-            }
-            const gapTime = new Date().getTime() - new Date(startTimePlan).getTime();
-            return gapTime > value * 60 * 1000;
-        } catch (error) {
-            toast.error('Mã máy không hợp lệ, vui lòng thử lại');
+    const checkValidStartTimeCheck = async (startTimePlan: string) => {
+        if (!toleranceTime) {
+            // not config
             return true;
         }
+        const gapTime = new Date().getTime() - new Date(startTimePlan).getTime();
+        return gapTime > toleranceTime * 60 * 1000;
     };
 
     const handleConfirmCode = async (planId: string) => {
@@ -160,14 +138,16 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
                 return;
             }
             // check tolerance-time-qc
-            // if (!response.data?.machineStartTime) {
-            //     toast.error('Chưa đến thời gian kiểm tra, vui lòng thử lại');
-            //     return;
-            // }
-            // const isValidTimeCheckQc = await checkValidTimeCheck(response.data?.machineStartTime);
-            // if (!isValidTimeCheckQc) {
-            //     toast.error('Chưa đến thời gian kiểm tra, vui lòng thử lại');
-            // }
+            if (!response.data?.machineStartTime) {
+                toast.error('Chưa đến thời gian kiểm tra, vui lòng thử lại');
+                return;
+            }
+            const isValidTimeCheckQc = await checkValidStartTimeCheck(
+                response.data?.machineStartTime
+            );
+            if (!isValidTimeCheckQc) {
+                toast.error('Chưa đến thời gian kiểm tra, vui lòng thử lại');
+            }
             updateProductionPlan(response.data);
             router.push(`${SCREEN_KEY.product}`);
         } catch (error) {
@@ -264,55 +244,7 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
                             key={`product-item-${item.id}`}
                             style={{ width: isGridView ? '50%' : '100%' }}
                         >
-                            <FlexBox
-                                direction="column"
-                                justifyContent="flex-start"
-                                alignItems="flex-start"
-                                style={{
-                                    ...styles.productCardItem,
-                                    backgroundColor: checkTimeBackground(item),
-                                }}
-                            >
-                                <TextWrapper fontSize={16}>Mã máy: {item.machineCode}</TextWrapper>
-                                <FlexBox
-                                    style={{ width: '100%' }}
-                                    justifyContent="flex-start"
-                                    gap={10}
-                                >
-                                    <TextWrapper
-                                        fontSize={12}
-                                        color={themeVariables.colors.primary}
-                                    >
-                                        {item.productCode}
-                                    </TextWrapper>
-                                    <TextWrapper
-                                        fontSize={12}
-                                        color={themeVariables.colors.subTextDefault}
-                                        numberOfLines={1}
-                                    >
-                                        {item.productName}
-                                    </TextWrapper>
-                                </FlexBox>
-                                <FlexBox
-                                    style={{ width: '100%' }}
-                                    justifyContent="flex-start"
-                                    gap={10}
-                                >
-                                    <TextWrapper
-                                        fontSize={12}
-                                        color={themeVariables.colors.subTextDefault}
-                                        numberOfLines={1}
-                                    >
-                                        {Moment(item?.productionStartTime || '').format(
-                                            'DD/MM/YYYY HH:mm'
-                                        )}{' '}
-                                        -{' '}
-                                        {Moment(item?.productionEndTime || '').format(
-                                            'DD/MM/YYYY HH:mm'
-                                        )}
-                                    </TextWrapper>
-                                </FlexBox>
-                            </FlexBox>
+                            <ProductPlanItem item={item} />
                         </TouchableOpacity>
                     );
                 }}
@@ -329,6 +261,55 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
                 onUpdateDaterange={handleUpdateDateRangeFilter}
             />
         </>
+    );
+};
+
+const ProductPlanItem = ({ item }: { item: IProductionPlan }) => {
+    const { themeVariables } = useThemeContext();
+    const styles = styling(themeVariables);
+    const { toleranceTime, gapReviewTime } = useProductionPlanContext();
+
+    const warningColor = usePlanWarningColor({
+        machineStartTime: item.machineStartTime,
+        toleranceTime,
+        gapReviewTime,
+        productionEndTime: item.productionEndTime,
+    });
+
+    return (
+        <FlexBox
+            direction="column"
+            justifyContent="flex-start"
+            alignItems="flex-start"
+            style={{
+                ...styles.productCardItem,
+                backgroundColor: warningColor,
+            }}
+        >
+            <TextWrapper fontSize={16}>Mã máy: {item.machineCode}</TextWrapper>
+            <FlexBox style={{ width: '100%' }} justifyContent="flex-start" gap={10}>
+                <TextWrapper fontSize={12} color={themeVariables.colors.primary}>
+                    {item.productCode}
+                </TextWrapper>
+                <TextWrapper
+                    fontSize={12}
+                    color={themeVariables.colors.subTextDefault}
+                    numberOfLines={1}
+                >
+                    {item.productName}
+                </TextWrapper>
+            </FlexBox>
+            <FlexBox style={{ width: '100%' }} justifyContent="flex-start" gap={10}>
+                <TextWrapper
+                    fontSize={12}
+                    color={themeVariables.colors.subTextDefault}
+                    numberOfLines={1}
+                >
+                    {Moment(item?.productionStartTime || '').format('DD/MM/YYYY HH:mm')} -{' '}
+                    {Moment(item?.productionEndTime || '').format('DD/MM/YYYY HH:mm')}
+                </TextWrapper>
+            </FlexBox>
+        </FlexBox>
     );
 };
 

@@ -50,6 +50,16 @@ export const CommonRepository = createRepository({
         );
     },
 
+    
+    getConfigReviewTimeQC(fetch) {
+        return fetch<any>(
+            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/setting-config/time-interval-between-reviews`,
+            {
+                method: 'GET',
+            }
+        );
+    },
+
     submitQcTestResult(fetch, payload: any) {
         return fetch<any>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/qc-test-result`, {
             method: 'POST',
@@ -73,7 +83,6 @@ export const CommonRepository = createRepository({
         );
     },
 
-
     qcPickUpItem(fetch, planId: string) {
         return fetch<ProductCheckItem>(
             `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/production-plans/${planId}/qc-pick-up`,
@@ -83,7 +92,7 @@ export const CommonRepository = createRepository({
         );
     },
 
-     qcPickDownItem(fetch, planId: string) {
+    qcPickDownItem(fetch, planId: string) {
         return fetch<ProductCheckItem>(
             `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/production-plans/${planId}/qc-pick-down`,
             {
@@ -110,22 +119,16 @@ export const CommonRepository = createRepository({
         );
     },
 
-    getListNotification(fetch, ) {
-        return fetch<INotification[]>(
-            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/notification`,
-            {
-                method: 'GET',
-            }
-        );
+    getListNotification(fetch) {
+        return fetch<INotification[]>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/notification`, {
+            method: 'GET',
+        });
     },
 
     readNotification(fetch, id: string) {
-        return fetch<IProduct>(
-            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/notification/${id}/read`,
-            {
-                method: 'PUT',
-            }
-        );
+        return fetch<IProduct>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/notification/${id}/read`, {
+            method: 'PUT',
+        });
     },
     updateProductDetail(fetch, id: string, payload: any) {
         return fetch<IProduct>(
@@ -136,7 +139,7 @@ export const CommonRepository = createRepository({
             }
         );
     },
-    
+
     updateProductCavityCode(fetch, id: string, payload: any) {
         return fetch<IProduct>(
             `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/product-management/${id}/update-code-name`,
@@ -146,7 +149,6 @@ export const CommonRepository = createRepository({
             }
         );
     },
-
 
     createProductDetail(fetch, payload: any) {
         return fetch<IProduct>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/product-management`, {
@@ -180,6 +182,16 @@ export const CommonRepository = createRepository({
         });
     },
 
+    assignQCProductPlanbatch(fetch, payload: any) {
+        return fetch<any>(
+            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/production-plan-qcassign/batch`,
+            {
+                method: 'POST',
+                data: payload,
+            }
+        );
+    },
+
     checkQCEmployeeCode(fetch, employeeQRCode: string) {
         return fetch<any>(
             `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/employee/get-employee-by-code?employeeQRCode=${encodeURIComponent(employeeQRCode)}`,
@@ -196,9 +208,12 @@ export const CommonRepository = createRepository({
     },
 
     deleteQCEmployees(fetch, employeeCode: string) {
-        return fetch<any>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/employee/delete-employee-by-code?employeeCode=${encodeURIComponent(employeeCode)}`, {
-            method: 'DELETE',
-        });
+        return fetch<any>(
+            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/employee/delete-employee-by-code?employeeCode=${encodeURIComponent(employeeCode)}`,
+            {
+                method: 'DELETE',
+            }
+        );
     },
 
     deleteAssignQCProductPlan(fetch, payload: any) {
@@ -209,8 +224,21 @@ export const CommonRepository = createRepository({
     },
 
     getProductCavities(fetch, productCode: string) {
-        return fetch<any>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/product-management/cavity/${encodeURIComponent(productCode)}`, {
-            method: 'GET',
-        });
+        return fetch<any>(
+            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/product-management/cavity/${encodeURIComponent(productCode)}`,
+            {
+                method: 'GET',
+            }
+        );
+    },
+
+    configToleranceTime(fetch, data: any) {
+        return fetch<any>(
+            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/setting-config/tolerance-time-qc`,
+            {
+                method: 'POST',
+                data,
+            }
+        );
     },
 });
