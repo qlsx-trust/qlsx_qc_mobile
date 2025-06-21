@@ -17,6 +17,11 @@ const usePlanWarningColor = ({
 
     useEffect(() => {
         const checkBlink = () => {
+            if (!machineStartTime || !productionEndTime) {
+                setColor('transparent');
+                return;
+            }
+
             const now = new Date();
             const start = new Date(machineStartTime);
             const end = new Date(productionEndTime);
@@ -40,7 +45,7 @@ const usePlanWarningColor = ({
 
             // Tính các mốc thời gian nhấp nháy (cách nhau gapReviewTime)
             const timeSinceWarningStart = now.getTime() - warningStart.getTime();
-            const isBlinkTime =
+            const isBlinkTime = gapMs && 
                 Math.floor(timeSinceWarningStart / gapMs) * gapMs <= timeSinceWarningStart;
 
             // Tạo hiệu ứng nhấp nháy (đỏ - transparent) mỗi 1 giây

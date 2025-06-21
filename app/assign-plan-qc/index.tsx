@@ -12,6 +12,7 @@ import { useThemeContext } from '@/providers/ThemeProvider';
 import { CommonRepository } from '@/repositories/CommonRepository';
 import { IThemeVariables } from '@/shared/theme/themes';
 import { AntDesign, Foundation, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import Checkbox from 'expo-checkbox';
 import { router } from 'expo-router';
 import { default as moment, default as Moment } from 'moment';
 import { useEffect, useState } from 'react';
@@ -72,8 +73,17 @@ const PlanAssignmentScreen = () => {
             if (!res.error) {
                 const data = res.data;
                 if (data?.items) {
+                    const oldProductPlans = [...productPlans];
                     const listProduct = firstCall ? data.items : productPlans.concat(data.items);
-                    setProductPlans(listProduct);
+                    setProductPlans(
+                        listProduct.map((product: IProductionPlan) => {
+                            const existPlan = oldProductPlans.find((plan) => plan.id == product.id);
+                            return {
+                                ...product,
+                                isChecked: existPlan ? existPlan.isChecked : true,
+                            };
+                        })
+                    );
                     setTotalCount(data.count);
                 }
             }
@@ -245,7 +255,10 @@ const PlanAssignmentScreen = () => {
                             }
                             viewStyle={{ paddingHorizontal: 20 }}
                             label="Phân công danh sách CTSX"
-                            onPress={() => setShowAssignQcModal(true)}
+                            onPress={() => {
+                                setSelectedProductPlan(null);
+                                setShowAssignQcModal(true);
+                            }}
                         />
                     </FlexBox>
                 </FlexBox>
@@ -292,22 +305,47 @@ const PlanAssignmentScreen = () => {
                                         />
                                     </View>
                                 )}
-                                <TextWrapper fontSize={16} numberOfLines={3}>
-                                    {item.machineCode} -{' '}
-                                    <TextWrapper
-                                        fontSize={16}
+                                <FlexBox gap={10} justifyContent="flex-start" alignItems="center">
+                                    <Checkbox
+                                        style={{ padding: 10 }}
+                                        value={item.isChecked}
+                                        onValueChange={(e) => {
+                                            setProductPlans((current) =>
+                                                current.map((product: IProductionPlan) => {
+                                                    return {
+                                                        ...product,
+                                                        isChecked:
+                                                            product.id == item.id
+                                                                ? !product.isChecked
+                                                                : product.isChecked,
+                                                    };
+                                                })
+                                            );
+                                        }}
                                         color={
-                                            item?.assignedToQC?.length
+                                            item.isChecked
                                                 ? themeVariables.colors.primary
-                                                : themeVariables.colors.danger
+                                                : undefined
                                         }
-                                        numberOfLines={1}
-                                    >
-                                        {item?.assignedToQC?.length
-                                            ? item?.assignedToQC.join(', ')
-                                            : 'Trống'}
+                                    />
+
+                                    <TextWrapper fontSize={16} numberOfLines={3}>
+                                        {item.machineCode} -{' '}
+                                        <TextWrapper
+                                            fontSize={16}
+                                            color={
+                                                item?.assignedToQC?.length
+                                                    ? themeVariables.colors.primary
+                                                    : themeVariables.colors.danger
+                                            }
+                                            numberOfLines={1}
+                                        >
+                                            {item?.assignedToQC?.length
+                                                ? item?.assignedToQC.join(', ')
+                                                : 'Trống'}
+                                        </TextWrapper>
                                     </TextWrapper>
-                                </TextWrapper>
+                                </FlexBox>
 
                                 <FlexBox
                                     style={{ width: '100%' }}
@@ -358,7 +396,7 @@ const PlanAssignmentScreen = () => {
 
             {showAssignQcModal && productPlans?.length && (
                 <AssignQCModal
-                    planIds={productPlans.map((plan) => plan.id)}
+                    planIds={productPlans.filter((plan) => plan.isChecked).map((plan) => plan.id)}
                     isAssignAll={!selectedProductPlan}
                     productPlan={selectedProductPlan}
                     modalProps={{
@@ -368,7 +406,7 @@ const PlanAssignmentScreen = () => {
                     onRecallListProductPlan={(planId: string) => {
                         // update assign qc by planId
                         setRetryCall(new Date().getTime());
-                        if (planId) setNewUpatedPlan(planId);
+                        setNewUpatedPlan(planId || '');
                     }}
                 />
             )}

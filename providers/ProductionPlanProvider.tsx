@@ -73,6 +73,7 @@ export interface IProductionPlan {
     cavity: number;
     lastTimeQCChecked: string;
     lastTimeQCCheckedBy: string;
+    isChecked?: boolean;
 }
 
 type StateType = {
