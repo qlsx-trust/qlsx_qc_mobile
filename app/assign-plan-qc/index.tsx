@@ -247,9 +247,9 @@ const PlanAssignmentScreen = () => {
                     </FlexBox>
                     <FlexBox gap={10}>
                         <AppButton
-                            disabled={!productPlans?.length}
+                            disabled={!productPlans?.filter(plan => plan.isChecked)?.length}
                             variant={
-                                productPlans?.length
+                                productPlans?.filter(plan => plan.isChecked)?.length
                                     ? BUTTON_COMMON_TYPE.PRIMARY
                                     : BUTTON_COMMON_TYPE.CANCEL
                             }
