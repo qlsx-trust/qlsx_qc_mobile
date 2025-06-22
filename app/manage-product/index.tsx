@@ -240,6 +240,14 @@ const productionManagementScreen = () => {
                                         )}
                                     </FlexBox>
                                 </FlexBox>
+                                <TextWrapper
+                                        fontSize={12}
+                                        color={themeVariables.colors.subTextDefault}
+                                        fontWeight="bold"
+                                        numberOfLines={1}
+                                    >
+                                        Mã khuôn: {item.moldCode}
+                                    </TextWrapper>
                             </FlexBox>
                         </TouchableOpacity>
                     );

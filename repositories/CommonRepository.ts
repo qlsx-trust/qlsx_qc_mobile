@@ -74,9 +74,9 @@ export const CommonRepository = createRepository({
         });
     },
 
-    getCheckItemProduct(fetch, productCode: string) {
+    getCheckItemProduct(fetch, productCode: string, moldCode: string) {
         return fetch<ProductCheckItem>(
-            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/product-management/code/${encodeURIComponent(productCode)}`,
+            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/product-management/code/${encodeURIComponent(productCode)}/${encodeURIComponent(moldCode)}`,
             {
                 method: 'GET',
             }
@@ -223,9 +223,9 @@ export const CommonRepository = createRepository({
         });
     },
 
-    getProductCavities(fetch, productCode: string) {
+    getProductCavities(fetch, productCode: string, moldCode: string) {
         return fetch<any>(
-            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/product-management/cavity/${encodeURIComponent(productCode)}`,
+            `${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/product-management/cavity/${encodeURIComponent(productCode)}/${encodeURIComponent(moldCode)}`,
             {
                 method: 'GET',
             }

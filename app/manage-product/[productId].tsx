@@ -62,10 +62,13 @@ const ProductDetailManagementScreen = () => {
 
     const getProductCavity = async (productDetail: IProduct) => {
         try {
-            if (!productDetail?.productCode) {
+            if (!productDetail?.productCode || !productDetail?.moldCode) {
                 return;
             }
-            const response = await CommonRepository.getProductCavities(productDetail?.productCode);
+            const response = await CommonRepository.getProductCavities(
+                productDetail?.productCode,
+                productDetail?.moldCode
+            );
             if (response.data) {
                 const checkItemsProductCavity: IProduct[] = (response.data || [])
                     .sort((a: IProduct, b: IProduct) => a.cavityIndex - b.cavityIndex)
@@ -309,11 +312,16 @@ const ProductDetailManagementScreen = () => {
                         >
                             Mã SP: {productDetail?.productCode}
                         </TextWrapper>
+                        <TextWrapper
+                        style={{marginTop: 5}}
+                        >
+                            Mã khuôn: {productDetail?.moldCode}
+                        </TextWrapper>
                         <FlexBox
                             direction="row"
                             justifyContent="space-between"
                             alignItems="center"
-                            style={{ marginTop: 10 }}
+                            style={{ marginTop: 5 }}
                             gap={10}
                         >
                             <TextWrapper

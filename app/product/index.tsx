@@ -52,7 +52,7 @@ const ProductScreen = () => {
             if (!productionPlan?.productCode) {
                 return;
             }
-            const response = await CommonRepository.getProductCavities(productionPlan?.productCode);
+            const response = await CommonRepository.getProductCavities(productionPlan?.productCode, productionPlan?.moldCode);
             if (response.data) {
                 const checkItemsProductCavity: ProductCheckItem[] = (response.data || [])
                     .sort(
@@ -143,7 +143,8 @@ const ProductScreen = () => {
         if (!productionPlan?.productCode) return;
         try {
             const response = await CommonRepository.getCheckItemProduct(
-                productionPlan?.productCode
+                productionPlan?.productCode,
+                productionPlan?.moldCode
             );
             if (response.data) {
                 const productEvaluation = response.data;

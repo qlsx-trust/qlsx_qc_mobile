@@ -1,6 +1,7 @@
 export interface IProduct {
     id: string;
     avatarUrl: string;
+    moldCode?: string;
     cavityCode: string;
     productCode: string;
     cavityIndex: number;
