@@ -4,8 +4,8 @@ import { useThemeContext } from '@/providers/ThemeProvider';
 import { CommonRepository } from '@/repositories/CommonRepository';
 import { IThemeVariables } from '@/shared/theme/themes';
 import Moment from 'moment';
-import { useEffect, useState } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Animated, StyleSheet, TouchableOpacity, View } from 'react-native';
 import SearchBar from '../SearchBar';
 import EmptyFolder from '../common/EmptyList/EmptyFolder';
 import FlatListCustom from '../common/FlatListCustom';
@@ -135,6 +135,14 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
             const response = await CommonRepository.getMostRecentProductionPlanById(planId);
             if (!response.data) {
                 toast.error('Mã máy không hợp lệ, vui lòng thử lại');
+                return;
+            }
+            
+            if (
+                response.data?.productionEndTime &&
+                new Date().getTime() > new Date(response.data?.productionEndTime).getTime()
+            ) {
+                toast.error('kế hoạch đã kết thúc, vui lòng thử lại');
                 return;
             }
             // check tolerance-time-qc
@@ -275,15 +283,34 @@ const ProductPlanItem = ({ item }: { item: IProductionPlan }) => {
         gapReviewTime,
         productionEndTime: item.productionEndTime,
     });
+    const animatedValue = useRef(new Animated.Value(1)).current;
+
+    useEffect(() => {
+        if (warningColor === 'red') {
+            Animated.timing(animatedValue, {
+                toValue: 1,
+                duration: 1000, // Thời gian chuyển đổi 1 giây
+                useNativeDriver: false,
+            }).start();
+        } else {
+            animatedValue.setValue(0); // Reset về đỏ khi không ở trạng thái cảnh báo
+        }
+    }, [warningColor, animatedValue]);
+
+    const backgroundColor = animatedValue.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['red', 'transparent'],
+    });
 
     return (
-        <FlexBox
-            direction="column"
-            justifyContent="flex-start"
-            alignItems="flex-start"
+        <Animated.View
             style={{
                 ...styles.productCardItem,
-                backgroundColor: warningColor,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-start',
+                alignItems: 'flex-start',
+                backgroundColor: warningColor === 'red' ? backgroundColor : 'transparent',
             }}
         >
             <TextWrapper fontSize={16}>Mã máy: {item.machineCode}</TextWrapper>
@@ -309,7 +336,7 @@ const ProductPlanItem = ({ item }: { item: IProductionPlan }) => {
                     {Moment(item?.productionEndTime || '').format('DD/MM/YYYY HH:mm')}
                 </TextWrapper>
             </FlexBox>
-        </FlexBox>
+        </Animated.View>
     );
 };
 

@@ -11,6 +11,7 @@ import { IProductionPlan } from '@/providers/ProductionPlanProvider';
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { CommonRepository } from '@/repositories/CommonRepository';
 import { IThemeVariables } from '@/shared/theme/themes';
+import { IEmployee } from '@/types/employee';
 import { AntDesign, Foundation, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import Checkbox from 'expo-checkbox';
 import { router } from 'expo-router';
@@ -53,6 +54,19 @@ const PlanAssignmentScreen = () => {
     const isGridView = numOfItemLine == 2;
 
     const [showDateRangeFilter, setShowDateRangeFilter] = useState<boolean>(false);
+    const [employees, setEmployees] = useState<IEmployee[]>([]);
+
+    useEffect(() => {
+        const getQCEmployees = async () => {
+            try {
+                const response = await CommonRepository.getQCEmployees();
+                if (response.data) {
+                    setEmployees(response.data || []);
+                }
+            } catch (error) {}
+        };
+        getQCEmployees();
+    }, []);
 
     /**
      * get list product
@@ -247,9 +261,9 @@ const PlanAssignmentScreen = () => {
                     </FlexBox>
                     <FlexBox gap={10}>
                         <AppButton
-                            disabled={!productPlans?.filter(plan => plan.isChecked)?.length}
+                            disabled={!productPlans?.filter((plan) => plan.isChecked)?.length}
                             variant={
-                                productPlans?.filter(plan => plan.isChecked)?.length
+                                productPlans?.filter((plan) => plan.isChecked)?.length
                                     ? BUTTON_COMMON_TYPE.PRIMARY
                                     : BUTTON_COMMON_TYPE.CANCEL
                             }
@@ -355,15 +369,15 @@ const PlanAssignmentScreen = () => {
                                     <TextWrapper
                                         fontSize={12}
                                         color={themeVariables.colors.primary}
-                                    >
-                                        {item.productCode}
-                                    </TextWrapper>
-                                    <TextWrapper
-                                        fontSize={12}
-                                        color={themeVariables.colors.subTextDefault}
                                         numberOfLines={1}
                                     >
-                                        {item.productName}
+                                        {item.productCode}{'  '}
+                                        <TextWrapper
+                                            fontSize={12}
+                                            color={themeVariables.colors.subTextDefault}
+                                        >
+                                            {item.productName}
+                                        </TextWrapper>
                                     </TextWrapper>
                                 </FlexBox>
                                 <FlexBox
@@ -399,6 +413,7 @@ const PlanAssignmentScreen = () => {
                     planIds={productPlans.filter((plan) => plan.isChecked).map((plan) => plan.id)}
                     isAssignAll={!selectedProductPlan}
                     productPlan={selectedProductPlan}
+                    employeesProps={employees}
                     modalProps={{
                         visible: showAssignQcModal,
                         onClose: () => setShowAssignQcModal(false),

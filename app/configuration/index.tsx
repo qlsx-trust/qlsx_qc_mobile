@@ -225,9 +225,9 @@ const ManageConfigurationScreen = () => {
                         onPress={() => handleConfigReviewTime()}
                     />
                 </FlexBox>
-                {!checkVaidNumber(toleranceTime) && (
+                {!checkVaidNumber(timeIntervalBetweenReview) && (
                     <TextWrap style={styles.description} color={themeVariables.colors.danger}>
-                        {toleranceTime
+                        {timeIntervalBetweenReview
                             ? 'Giá trị phải là dạng số và lớn hơn hoặc bằng 0'
                             : 'Không được để trống'}
                     </TextWrap>

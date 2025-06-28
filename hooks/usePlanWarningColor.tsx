@@ -16,55 +16,47 @@ const usePlanWarningColor = ({
     const TIME_WARNING_THRESHOLD = 20;
 
     useEffect(() => {
-        const checkBlink = () => {
-            if (!machineStartTime || !productionEndTime) {
-                setColor('transparent');
-                return;
-            }
-
-            const now = new Date();
-            const start = new Date(machineStartTime);
-            const end = new Date(productionEndTime);
+        if (!machineStartTime || !productionEndTime) {
+            setColor('transparent');
+            return;
+        }
+        // Tạo hiệu ứng nhấp nháy (đỏ - transparent) mỗi 1 giây
+        const interval = setInterval(() => {
+            const now = new Date().getTime();
+            const start = new Date(machineStartTime).getTime();
+            const end = new Date(productionEndTime).getTime();
             const toleranceMs = toleranceTime * 60 * 1000; //ms
             const gapMs = gapReviewTime * 60 * 1000; //ms
+            const warningTime = TIME_WARNING_THRESHOLD * 60 * 1000;
+            const firstReview = start + toleranceMs;
 
             // Nếu thời gian hiện tại lớn hơn productionEndTime, trả về transparent
+            // End time
             if (now > end) {
                 setColor('transparent');
                 return;
             }
 
-            // Tính thời điểm bắt đầu cảnh báo (machineStartTime + toleranceTime - 20 phút)
-            const warningStart = new Date(
-                start.getTime() + toleranceMs - TIME_WARNING_THRESHOLD * 60 * 1000
-            );
-            if (now < warningStart) {
-                setColor('transparent');
-                return;
-            }
-
-            // Tính các mốc thời gian nhấp nháy (cách nhau gapReviewTime)
-            const timeSinceWarningStart = now.getTime() - warningStart.getTime();
-            const isBlinkTime = gapMs && 
-                Math.floor(timeSinceWarningStart / gapMs) * gapMs <= timeSinceWarningStart;
-
-            // Tạo hiệu ứng nhấp nháy (đỏ - transparent) mỗi 1 giây
-            const interval = setInterval(() => {
-                if (isBlinkTime) {
-                    setColor((prev) => (prev === 'red' ? 'transparent' : 'red'));
+            if (now < firstReview) {
+                // Before firstReview
+                if (now >= firstReview - warningTime) {
+                    setColor('red'); // Warning period before first review
                 } else {
                     setColor('transparent');
                 }
-            }, 1000);
+            } else {
+                // After firstReview
+                const timeSinceFirstReview = now - firstReview;
+                const cyclePosition = timeSinceFirstReview % gapMs;
+                if (cyclePosition >= gapMs - warningTime) {
+                    setColor('red'); // Warning period before subsequent reviews
+                } else {
+                    setColor('transparent');
+                }
+            }
+        }, 1000);
 
-            return () => clearInterval(interval);
-        };
-
-        checkBlink();
-        // Cập nhật mỗi phút để kiểm tra mốc thời gian mới
-        const timer = setInterval(checkBlink, 60 * 1000);
-
-        return () => clearInterval(timer);
+        return () => clearInterval(interval);
     }, [machineStartTime, toleranceTime, gapReviewTime, productionEndTime]);
 
     return color;

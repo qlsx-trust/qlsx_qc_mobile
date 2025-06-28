@@ -27,6 +27,7 @@ import SelectDropdown from 'react-native-select-dropdown';
 interface IAssignQCModalProps {
     modalProps: CommonModalProps;
     planIds: string[];
+    employeesProps: IEmployee[];
     isAssignAll: boolean;
     productPlan?: IProductionPlan | null;
     onRecallListProductPlan: Function;
@@ -35,6 +36,7 @@ interface IAssignQCModalProps {
 const AssignQCModal = ({
     productPlan,
     isAssignAll,
+    employeesProps,
     planIds,
     onRecallListProductPlan,
     modalProps,
@@ -66,7 +68,7 @@ const AssignQCModal = ({
     const maskRowHeight = Math.round((layout.height - 250) / 20);
     const maskColWidth = (layout.width - 250) / 2;
 
-    const [employees, setEmployees] = useState<IEmployee[]>([]);
+    const [employees, setEmployees] = useState<IEmployee[]>(employeesProps || []);
     const [recallEmployee, setRecallEmployee] = useState<number>(0);
 
     useEffect(() => {

@@ -65,6 +65,13 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
             const planId = formatPlanIDScanResult(scanResult);
             const response = await CommonRepository.getMostRecentProductionPlanById(planId);
             if (response.data) {
+                if (
+                    response.data?.productionEndTime &&
+                    new Date().getTime() > new Date(response.data?.productionEndTime).getTime()
+                ) {
+                    toast.error('kế hoạch đã kết thúc, vui lòng thử lại');
+                    return;
+                }
                 // check tolerance-time-qc
                 if (!response.data?.machineStartTime) {
                     toast.error('Chưa đến thời gian kiểm tra, vui lòng thử lại');
