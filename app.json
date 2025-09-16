@@ -109,7 +109,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Cho phép truy cập vào camera",
+          "cameraPermission": "Cho phép truy cập camera để quét mã QR",
           "microphonePermission": "Cho phép truy cập vào microphone",
           "recordAudioAndroid": true
         }
