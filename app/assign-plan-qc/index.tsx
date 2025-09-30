@@ -12,6 +12,7 @@ import { useThemeContext } from '@/providers/ThemeProvider';
 import { CommonRepository } from '@/repositories/CommonRepository';
 import { IThemeVariables } from '@/shared/theme/themes';
 import { IEmployee } from '@/types/employee';
+import { toast } from '@/utils/ToastMessage';
 import { AntDesign, Foundation, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import Checkbox from 'expo-checkbox';
 import { router } from 'expo-router';
@@ -62,8 +63,14 @@ const PlanAssignmentScreen = () => {
                 const response = await CommonRepository.getQCEmployees();
                 if (response.data) {
                     setEmployees(response.data || []);
+                    toast.info(response.data)
+                } else {
+                    toast.error('empy list')
                 }
-            } catch (error) {}
+            } catch (error: unknown) {
+                toast.error(error as string)
+
+            }
         };
         getQCEmployees();
     }, []);
