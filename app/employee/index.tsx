@@ -147,11 +147,11 @@ const ManageEmployeeScreen = () => {
             setIsLoadingDelete(true);
             const response = await CommonRepository.deleteQCEmployees(selectedItem?.employeeCode);
             setSelectedItem(null);
+
             if (!response.error) {
                 setRecallEmployee(new Date().getTime());
                 toast.success('Xóa nhân viên thành công');
-            }
-            {
+            } else {
                 toast.success('Xóa nhân viên thất bại');
             }
         } catch (error) {
