@@ -312,9 +312,7 @@ const ProductDetailManagementScreen = () => {
                         >
                             Mã SP: {productDetail?.productCode}
                         </TextWrapper>
-                        <TextWrapper
-                        style={{marginTop: 5}}
-                        >
+                        <TextWrapper style={{ marginTop: 5 }}>
                             Mã khuôn: {productDetail?.moldCode}
                         </TextWrapper>
                         <FlexBox
@@ -423,6 +421,34 @@ const ProductDetailManagementScreen = () => {
                                 </FlexBox>
                             </FlexBox>
                         </FlexBox>
+                        {productCheckItems.length === 0 && (
+                                <FlexBox
+                                direction="column"
+                                justifyContent="center"
+                                alignItems="center"
+                                style={{ marginTop: 100, width: '100%' }}
+                            >
+                                <AntDesign
+                                    name="inbox"
+                                    size={50}
+                                    color={themeVariables.colors.textDefault}
+                                />
+                                <TextWrapper
+                                    fontSize={16}
+                                    color={themeVariables.colors.textDefault}
+                                    style={{ marginTop: 10 }}
+                                >
+                                    Chưa có tiêu chí đánh giá nào
+                                </TextWrapper>
+                                <TextWrapper
+                                    fontSize={14}
+                                    color={themeVariables.colors.textDefault}
+                                    style={{ marginTop: 5, textAlign: 'center', maxWidth: 300 }}
+                                >
+                                    Vui lòng thêm tiêu chí đánh giá để tiếp tục
+                                </TextWrapper>
+                            </FlexBox>
+                        )}
                         <ScrollView
                             contentContainerStyle={{
                                 paddingBottom: isCavityProduct
