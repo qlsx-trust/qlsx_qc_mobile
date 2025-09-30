@@ -82,7 +82,7 @@ const AssignQCModal = ({
             } catch (error) {}
         };
         getQCEmployees();
-    }, [recallEmployee]);
+    }, [recallEmployee, employeesProps]);
 
     const selectEmployeeOptions = useMemo(() => {
         const data = (employees || []).map((employee) => {
