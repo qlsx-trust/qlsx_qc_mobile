@@ -72,6 +72,7 @@ const AssignQCModal = ({
     const [recallEmployee, setRecallEmployee] = useState<number>(0);
 
     useEffect(() => {
+        if (employeesProps?.length > 0 && recallEmployee == 0) return;
         const getQCEmployees = async () => {
             try {
                 const response = await CommonRepository.getQCEmployees();
