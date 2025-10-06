@@ -9,7 +9,7 @@ import { CommonRepository } from '@/repositories/CommonRepository';
 import { IThemeVariables } from '@/shared/theme/themes';
 import { IEmployee } from '@/types/employee';
 import { toast } from '@/utils/ToastMessage';
-import { AntDesign, Entypo, Feather } from '@expo/vector-icons';
+import { AntDesign, Feather } from '@expo/vector-icons';
 import { BarcodeScanningResult, CameraType, CameraView, useCameraPermissions } from 'expo-camera';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -21,8 +21,9 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import DropDownPicker from 'react-native-dropdown-picker';
 import { ScrollView } from 'react-native-gesture-handler';
-import SelectDropdown from 'react-native-select-dropdown';
+
 
 interface IAssignQCModalProps {
     modalProps: CommonModalProps;
@@ -64,6 +65,7 @@ const AssignQCModal = ({
     const [permission, requestPermission] = useCameraPermissions();
     const [showCamera, setShowCamera] = useState(false);
     const [facing, setFacing] = useState<CameraType>('back');
+    const [isDropdownOpened, setIsDropdownOpened] = useState(false);
 
     const maskRowHeight = Math.round((layout.height - 250) / 20);
     const maskColWidth = (layout.width - 250) / 2;
@@ -88,11 +90,11 @@ const AssignQCModal = ({
         const data = (employees || []).map((employee) => {
             return {
                 value: `${employee.employeeCode}`,
-                title: `${employee.employeeCode},${employee.fullName}`,
+                label: `${employee.employeeCode},${employee.fullName}`,
             };
         });
 
-        data.push({ value: 'other', title: 'Thêm nhân viên' });
+        data.push({ value: 'other', label: 'Thêm nhân viên' });
         return data;
     }, [employees]);
 
@@ -185,6 +187,8 @@ const AssignQCModal = ({
                 }
             }
 
+            // refresh employee list
+            setRecallEmployee(new Date().getTime());
             setErrorCheckCode('');
             const assignedQcs = [...assignedQc];
             assignedQcs.unshift(qcCode);
@@ -309,74 +313,37 @@ const AssignQCModal = ({
                                 justifyContent="flex-start"
                                 alignItems="flex-start"
                             >
-                                <SelectDropdown
-                                    key={assignedQc?.length}
-                                    data={selectEmployeeOptions}
-                                    disabled={isLoadingSubmit}
-                                    onSelect={(selectedItem, index) => {
-                                        if (selectedItem.value == 'other') {
+                                <DropDownPicker
+                                    open={isDropdownOpened}
+                                    value={assignedQc.map((qcFullCode) => qcFullCode.split(',')[0])}
+                                    items={selectEmployeeOptions}
+                                    setOpen={setIsDropdownOpened}
+                                    setValue={() => {}}
+                                    onSelectItem={(items) => {
+                                        const selectedItem = items[items.length - 1];
+                                        
+                                        if (selectedItem?.value == 'other') {
                                             setShowOtherUser(true);
                                             setOtherQcCode('');
+                                            setIsDropdownOpened(false);
                                         } else {
                                             setShowOtherUser(false);
-                                            // handle add QC
-                                            handleAddQC(selectedItem.value);
+                                            setAssignedQc(items.map((item) => item.value as string));
                                         }
+
                                     }}
-                                    renderButton={(selectedItem, isOpened) => {
-                                        return (
-                                            <View style={styles.dropdownButtonStyle}>
-                                                <TextWrap style={styles.dropdownButtonTxtStyle}>
-                                                    {(selectedItem && selectedItem.title) ||
-                                                        'Chọn nhân viên'}
-                                                </TextWrap>
-                                                {isLoadingSubmit ? (
-                                                    <ActivityIndicator />
-                                                ) : (
-                                                    <>
-                                                        {isOpened ? (
-                                                            <Entypo
-                                                                name="chevron-small-up"
-                                                                size={24}
-                                                                color="black"
-                                                            />
-                                                        ) : (
-                                                            <Entypo
-                                                                name="chevron-small-down"
-                                                                size={24}
-                                                                color="black"
-                                                            />
-                                                        )}
-                                                    </>
-                                                )}
-                                            </View>
-                                        );
+                                    setItems={() => {}}
+                                    multiple={true}
+                                    placeholder="Chọn nhân viên"
+                                    multipleText="Đã chọn {count} nhân viên"
+                                    style={{
+                                        borderColor: themeVariables.colors.borderColor,
+                                        borderRadius: 12,
                                     }}
-                                    renderItem={(item: any, index, isSelected) => {
-                                        const isSelectedQc =
-                                            isSelected ||
-                                            assignedQc.find(
-                                                (code: string) =>
-                                                    code == item.value || code == item.title
-                                            );
-                                        return (
-                                            <View
-                                                style={{
-                                                    ...styles.dropdownItemStyle,
-                                                    ...(isSelectedQc && {
-                                                        backgroundColor: '#D2D9DF',
-                                                    }),
-                                                    pointerEvents: isSelectedQc ? 'none' : 'auto',
-                                                }}
-                                            >
-                                                <TextWrap style={styles.dropdownItemTxtStyle}>
-                                                    {item.title}
-                                                </TextWrap>
-                                            </View>
-                                        );
+                                    dropDownContainerStyle={{
+                                        borderColor: themeVariables.colors.borderColor,
+                                        borderRadius: 12,
                                     }}
-                                    showsVerticalScrollIndicator={false}
-                                    dropdownStyle={styles.dropdownMenuStyle}
                                 />
                             </FlexBox>
                         </FlexBox>
@@ -560,6 +527,7 @@ export const styling = (themeVariables: IThemeVariables) =>
         description: {
             fontSize: 16,
             fontWeight: '400',
+            marginTop: 16,
         },
         button: {
             width: '46%',

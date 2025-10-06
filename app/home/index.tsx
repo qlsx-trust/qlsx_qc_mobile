@@ -264,9 +264,10 @@ const HomeScreen = () => {
                 )}
             </FlexBox>
 
-            {scanResult && showConfirmResultCode && (
+            {showConfirmResultCode && (
                 <ConfirmScanCodeModal
                     scanResult={scanResult}
+                    setShowCamera={setShowCamera}
                     modalProps={{
                         visible: showConfirmResultCode,
                         onClose: () => setShowConfirmResultCode(false),

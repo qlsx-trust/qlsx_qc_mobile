@@ -4,8 +4,8 @@ import { router, usePathname } from 'expo-router';
 import { createContext, ReactNode, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 
-import PubSub from 'pubsub-js';
 import { PUB_TOPIC } from '@/constants/pubTopic';
+import PubSub from 'pubsub-js';
 
 const initialState: StateType = {
     user: null,
@@ -82,7 +82,9 @@ export const AuthContextProvider = ({ children }: UserProviderProps) => {
         setUser(null);
         setLoading(false);
 
-        router.replace(SCREEN_KEY.login);
+        if (pathNameRef.current !== `/${SCREEN_KEY.login}`) {
+            router.replace(SCREEN_KEY.login);
+        }
     };
 
     // ========== Handle logout when not authorize ============

@@ -1,9 +1,11 @@
 import FlexBox from '@/components/common/FlexBox';
 import { useThemeContext } from '@/providers/ThemeProvider';
-import { IThemeVariables, THEME_WS, themeValues } from '@/shared/theme/themes';
+import { IThemeVariables, THEME_WS } from '@/shared/theme/themes';
+import { toastConfig } from '@/utils/ToastConfig';
 import React, { useState } from 'react';
-import { ModalProps, Pressable, StyleSheet, View } from 'react-native';
+import { ModalProps, Pressable, StyleSheet } from 'react-native';
 import Modal from 'react-native-modal';
+import Toast from 'react-native-toast-message';
 
 export interface CommonModalProps extends ModalProps {
     children?: React.ReactNode;
@@ -63,6 +65,11 @@ const CommonModal = ({
                     </FlexBox>
                 )}
             </Pressable>
+            <Toast 
+                position="top" 
+                config={toastConfig}
+                topOffset={50}
+            />
         </Modal>
     );
 };

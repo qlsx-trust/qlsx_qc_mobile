@@ -41,6 +41,7 @@ export interface ProductCheckItem {
     description: string;
     stepItem?: number;
     isSubmitted?: boolean;
+    isHasCavity?: boolean;
 }
 
 export interface IProductionPlan {
@@ -107,8 +108,11 @@ export const ProductionPlanContextProvider = ({ children }: ProductionPlanProvid
     };
 
     const getReviewTime = async () => {
-        const response = await CommonRepository.getConfigReviewTimeQC();
-        setGapReviewTime(checkVaidNumber(response?.data?.value) ? +response?.data?.value : 0);
+        // TODO: hard code - update later
+        setGapReviewTime(120);
+        
+        // const response = await CommonRepository.getConfigReviewTimeQC();
+        // setGapReviewTime(checkVaidNumber(response?.data?.value) ? +response?.data?.value : 0);
     };
 
     const updateProductionPlan = (productionPlan: IProductionPlan) => {

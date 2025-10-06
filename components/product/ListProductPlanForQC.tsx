@@ -1,22 +1,21 @@
 import { PAGE_SIZE, SCREEN_KEY } from '@/constants/common';
+import usePlanWarningColor from '@/hooks/usePlanWarningColor';
 import { IProductionPlan, useProductionPlanContext } from '@/providers/ProductionPlanProvider';
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { CommonRepository } from '@/repositories/CommonRepository';
 import { IThemeVariables } from '@/shared/theme/themes';
-import Moment from 'moment';
+import { toast } from '@/utils/ToastMessage';
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { default as Moment, default as moment } from 'moment';
 import { useEffect, useRef, useState } from 'react';
-import { Animated, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Animated, StyleSheet, TouchableOpacity } from 'react-native';
 import SearchBar from '../SearchBar';
 import EmptyFolder from '../common/EmptyList/EmptyFolder';
 import FlatListCustom from '../common/FlatListCustom';
 import FlexBox from '../common/FlexBox';
 import TextWrapper from '../common/TextWrap';
-import { router } from 'expo-router';
-import { toast } from '@/utils/ToastMessage';
-import { AntDesign, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-import moment from 'moment';
 import DateRangePickerModal from './DateRangePickerModal';
-import usePlanWarningColor from '@/hooks/usePlanWarningColor';
 
 interface IListProductPlanForQCProps {}
 
@@ -155,6 +154,7 @@ const ListProductPlanForQC = ({}: IListProductPlanForQCProps) => {
             );
             if (!isValidTimeCheckQc) {
                 toast.error('Chưa đến thời gian kiểm tra, vui lòng thử lại');
+                return;
             }
             updateProductionPlan(response.data);
             router.push(`${SCREEN_KEY.product}`);
@@ -276,6 +276,7 @@ const ProductPlanItem = ({ item }: { item: IProductionPlan }) => {
     const { themeVariables } = useThemeContext();
     const styles = styling(themeVariables);
     const { toleranceTime, gapReviewTime } = useProductionPlanContext();
+    const intervalId = useRef<NodeJS.Timeout | null>(null);
 
     const warningColor = usePlanWarningColor({
         machineStartTime: item.machineStartTime,
@@ -287,13 +288,24 @@ const ProductPlanItem = ({ item }: { item: IProductionPlan }) => {
 
     useEffect(() => {
         if (warningColor === 'red') {
-            Animated.timing(animatedValue, {
-                toValue: 1,
-                duration: 1000, // Thời gian chuyển đổi 1 giây
-                useNativeDriver: false,
-            }).start();
+            if (intervalId.current) {
+                return;
+            }
+            intervalId.current = setInterval(() => {
+                Animated.timing(animatedValue, {
+                    toValue: 1,
+                    duration: 1000,
+                    useNativeDriver: false,
+                }).start(() => {
+                    animatedValue.setValue(0);
+                });
+            }, 1000); 
         } else {
             animatedValue.setValue(0); // Reset về đỏ khi không ở trạng thái cảnh báo
+            if (intervalId.current) {
+                clearInterval(intervalId.current);
+                intervalId.current = null;
+            }
         }
     }, [warningColor, animatedValue]);
 

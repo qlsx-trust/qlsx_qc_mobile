@@ -1,14 +1,14 @@
+import { BUTTON_COMMON_TYPE } from '@/constants/common';
 import { ICheckItem, ProductCheckItem } from '@/providers/ProductionPlanProvider';
 import { useThemeContext } from '@/providers/ThemeProvider';
+import { IThemeVariables } from '@/shared/theme/themes';
+import { useState } from 'react';
+import { ScrollView, StyleSheet } from 'react-native';
+import AppButton from '../common/AppButton';
 import FlexBox from '../common/FlexBox';
 import TextWrap from '../common/TextWrap';
-import AppButton from '../common/AppButton';
-import { BUTTON_COMMON_TYPE } from '@/constants/common';
 import CheckListItem from './CheckListItem';
 import ManageProductDetailModal from './ManageProductDetailModal';
-import { useState } from 'react';
-import { IThemeVariables } from '@/shared/theme/themes';
-import { StyleSheet, ScrollView } from 'react-native';
 
 interface ProductEvaluationItemProps {
     layout: any;

@@ -5,10 +5,10 @@ import { StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import FlexBox from '@/components/common/FlexBox';
-import TextWrap from '@/components/common/TextWrap';
+import { default as TextWrap, default as TextWrapper } from '@/components/common/TextWrap';
 import ConfirmModal from '@/components/ConfirmModal';
 import ProductEvaluationItem from '@/components/product/ProductEvaluationItem';
-import { SCREEN_KEY } from '@/constants/common';
+import { API_ERROR_CODE } from '@/constants/errorCode';
 import {
     ICheckItem,
     ProductCheckItem,
@@ -16,10 +16,10 @@ import {
 } from '@/providers/ProductionPlanProvider';
 import { CommonRepository } from '@/repositories/CommonRepository';
 import { toast } from '@/utils/ToastMessage';
+import { AntDesign, MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import Moment from 'moment';
 import { useEffect, useState } from 'react';
-import { MaterialIcons } from '@expo/vector-icons';
 
 const ProductScreen = () => {
     // State to store layout dimensions
@@ -45,7 +45,7 @@ const ProductScreen = () => {
     >(undefined);
     const [stepItem, setStepItem] = useState<number>(0);
 
-    const isCavityProduct = productionPlan?.cavity == 1;
+    const [isCavityProduct, setIsCavityProduct] = useState<boolean>(false);
 
     const getProductCavity = async () => {
         try {
@@ -94,13 +94,8 @@ const ProductScreen = () => {
         if (!productionPlan) {
             return;
         }
-        // get cavity
-        if (productionPlan?.cavity == 1) {
-            getProductCavity();
-        } else {
-            getProductEvaluation();
-            qcPickUp(productionPlan?.id);
-        }
+         getProductEvaluation();
+
     }, [productionPlan]);
 
     useEffect(() => {
@@ -148,6 +143,11 @@ const ProductScreen = () => {
             );
             if (response.data) {
                 const productEvaluation = response.data;
+                setIsCavityProduct(!!productEvaluation?.isHasCavity);
+                if (productEvaluation?.isHasCavity) {
+                    getProductCavity();
+                    return;
+                }
                 if (productEvaluation?.checkItems?.length) {
                     const checkItemFormatted = productEvaluation.checkItems.map((item) => {
                         return {
@@ -162,12 +162,13 @@ const ProductScreen = () => {
                     });
                     setCheckItems(checkItemFormatted);
                 }
+                qcPickUp(productionPlan?.id);
             }
         } catch (error) {}
     };
 
     const backHomeScreen = () => {
-        router.replace(SCREEN_KEY.home);
+        router.back();
     };
 
     const handleAddEvaluation = (evaluationItem: any) => {
@@ -298,6 +299,10 @@ const ProductScreen = () => {
                 let response: any;
                 if(!nextSubmitId) {
                     response = await CommonRepository.submitQcTestResult(formdata);
+                    if (response.error) {
+                        handleSubmitError(response.error);
+                        return;
+                    }
                     nextSubmitId = response.data;
                 } else {
                     response = await CommonRepository.submitQcTestResultBatch(nextSubmitId, formdata);
@@ -364,6 +369,14 @@ const ProductScreen = () => {
         );
         if (productCavity) setCurrentSelectedProductCavity(productCavity);
     };
+
+    const handleSubmitError = (error: any) => {
+        if (error?.response?.data?.errorCode == API_ERROR_CODE.ER_QC_TEST_RESULT_EXISTS_BY_OTHERS) {
+            toast.error('Sản phẩm đã được QC khác đánh giá');
+            return;
+        }
+        toast.error('Gửi đánh giá thất bại');
+    }
 
     return (
         // <KeyboardAvoidingView behavior={isIOS ? 'padding' : 'height'}>
@@ -543,7 +556,7 @@ const ProductScreen = () => {
                                 )
                             )}
                         </FlexBox>
-                        {currentSelectedProductCavity && (
+                        {currentSelectedProductCavity ? (
                             <ProductEvaluationItem
                                 currentSelectedProductCavity={currentSelectedProductCavity}
                                 layout={layout}
@@ -558,6 +571,33 @@ const ProductScreen = () => {
                                 onSubmit={() => handleSubmit(true)}
                                 onAddEvaluation={handleAddEvaluationCavity}
                             />
+                        ) : (
+                            <FlexBox
+                                direction="column"
+                                justifyContent="center"
+                                alignItems="center"
+                                style={{ marginTop: 100, width: '100%' }}
+                            >
+                                <AntDesign
+                                    name="inbox"
+                                    size={50}
+                                    color={themeVariables.colors.textDefault}
+                                />
+                                <TextWrapper
+                                    fontSize={16}
+                                    color={themeVariables.colors.textDefault}
+                                    style={{ marginTop: 10 }}
+                                >
+                                    Chưa có tiêu chí đánh giá nào
+                                </TextWrapper>
+                                <TextWrapper
+                                    fontSize={14}
+                                    color={themeVariables.colors.textDefault}
+                                    style={{ marginTop: 5, textAlign: 'center', maxWidth: 300 }}
+                                >
+                                    Vui lòng thêm tiêu chí đánh giá để tiếp tục
+                                </TextWrapper>
+                            </FlexBox>
                         )}
                     </FlexBox>
                 )}

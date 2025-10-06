@@ -1,8 +1,8 @@
 import Config from '@/constants/config';
-import createRepository from './CreateRepository';
 import { ProductCheckItem } from '@/providers/ProductionPlanProvider';
-import { IProduct } from '@/types/product';
 import { INotification } from '@/types/notification';
+import { IProduct } from '@/types/product';
+import createRepository from './CreateRepository';
 
 export const CommonRepository = createRepository({
     login(fetch, payload: any) {
@@ -203,6 +203,12 @@ export const CommonRepository = createRepository({
 
     getQCEmployees(fetch) {
         return fetch<any>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/employee/list-qc`, {
+            method: 'GET',
+        });
+    },
+
+    getManagerQCEmployees(fetch) {
+        return fetch<any>(`${Config.EXPO_PUBLIC_BACKEND_URL}/api/v1/employee/list-manager-qc`, {
             method: 'GET',
         });
     },

@@ -7,6 +7,7 @@ import {
     BUTTON_COMMON_TYPE,
     KEY_REQUEST_CAMERA_PERMISSION,
 } from '@/constants/common';
+import { ICheckItem } from '@/providers/ProductionPlanProvider';
 import { useThemeContext } from '@/providers/ThemeProvider';
 import { IThemeVariables } from '@/shared/theme/themes';
 import { getDataStorage, setDataStorage } from '@/utils/KeychainHelper';
@@ -16,7 +17,6 @@ import { Camera } from 'expo-camera';
 import { useState } from 'react';
 import { Image, Keyboard, Linking, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import ImageSelection from '../ImageSelection';
-import { ICheckItem } from '@/providers/ProductionPlanProvider';
 
 interface IEvaluationFromModalProps {
     evaluationItem: ICheckItem;
@@ -38,7 +38,7 @@ const EvaluationFromModal = ({
         setLayout({ width, height });
     };
     const [imageUrl, setImageUrl] = useState<string>(evaluationItem.reportFileUri);
-    const [feedback, setFeedback] = useState<string>(evaluationItem.note);
+    const [feedback, setFeedback] = useState<string>('');
     const [showCamera, setShowCamera] = useState<boolean>(false);
 
     const handlePermissionCamera = async () => {
@@ -79,7 +79,7 @@ const EvaluationFromModal = ({
                     />
                 )}
                 <FlexBox direction="column" width={'100%'}>
-                    <TextWrap style={styles.header}>Phản hồi lỗi:</TextWrap>
+                    <TextWrap style={styles.header}>Phản hồi lỗi</TextWrap>
                 </FlexBox>
                 <FlexBox
                     direction="row"

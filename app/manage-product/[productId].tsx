@@ -422,7 +422,7 @@ const ProductDetailManagementScreen = () => {
                             </FlexBox>
                         </FlexBox>
                         {productCheckItems.length === 0 && (
-                                <FlexBox
+                            <FlexBox
                                 direction="column"
                                 justifyContent="center"
                                 alignItems="center"

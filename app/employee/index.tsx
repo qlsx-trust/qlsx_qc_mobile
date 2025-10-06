@@ -15,7 +15,7 @@ import { AntDesign, Feather } from '@expo/vector-icons';
 import axios, { HttpStatusCode } from 'axios';
 import { BarcodeScanningResult, CameraType, CameraView, useCameraPermissions } from 'expo-camera';
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Keyboard,
@@ -23,8 +23,14 @@ import {
     StyleSheet,
     TextInput,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
+import { Route, TabBar, TabView } from 'react-native-tab-view';
+
+const routes = [
+  { key: 'first', title: 'Nhân viên' },
+  { key: 'second', title: 'Quản lý' },
+];
 
 const ManageEmployeeScreen = () => {
     const { themeVariables } = useThemeContext();
@@ -39,11 +45,14 @@ const ManageEmployeeScreen = () => {
     const [selectedItem, setSelectedItem] = useState<IEmployee | null>(null);
     const [showConfirmDeleteItem, setShowConfirmDeleteItem] = useState<boolean>(false);
     const [isLoadingDelete, setIsLoadingDelete] = useState<boolean>(false);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isEmployeesLoading, setIsEmployeesLoading] = useState<boolean>(false);
+    const [isManagersLoading, setIsManagersLoading] = useState<boolean>(false);
     const [employees, setEmployees] = useState<IEmployee[]>([]);
+    const [managerEmployees, setManagerEmployees] = useState<IEmployee[]>([]);
     const [recallEmployee, setRecallEmployee] = useState<number>(0);
     const [employeeQcCode, setEmployeeQcCode] = useState<string>('');
     const [isLoadingSubmit, setIsLoadingSubmit] = useState<boolean>(false);
+    const [index, setIndex] = useState<number>(0);
 
     // scan qc code
     const [isReady, setIsReady] = useState(false);
@@ -81,17 +90,32 @@ const ManageEmployeeScreen = () => {
     useEffect(() => {
         const getQCEmployees = async () => {
             try {
-                setIsLoading(true);
+                setIsEmployeesLoading(true);
                 const response = await CommonRepository.getQCEmployees();
                 if (response.data) {
                     setEmployees(response.data || []);
                 }
             } catch (error) {
             } finally {
-                setIsLoading(false);
+                setIsEmployeesLoading(false);
             }
         };
+
+        const getManagerQCEmployees = async () => {
+            try {
+                setIsManagersLoading(true);
+                const response = await CommonRepository.getManagerQCEmployees();
+                if (response.data) {
+                    setManagerEmployees(response.data || []);
+                }
+            } catch (error) {
+            } finally {
+                setIsManagersLoading(false);
+            }
+        };
+
         getQCEmployees();
+        getManagerQCEmployees();
     }, [recallEmployee]);
 
     const handleAddQC = async () => {
@@ -102,6 +126,12 @@ const ManageEmployeeScreen = () => {
 
             const existEmployee = employees.find(employee => `${employee.employeeCode},${employee.fullName}` == employeeQcCode)
             if(existEmployee) {
+                 setErrorCheckCode('Mã nhân viên đã tồn tại');
+                 return
+            }
+
+            const existManager = managerEmployees.find(employee => `${employee.employeeCode},${employee.fullName}` == employeeQcCode)
+            if(existManager) {
                  setErrorCheckCode('Mã nhân viên đã tồn tại');
                  return
             }
@@ -158,6 +188,64 @@ const ManageEmployeeScreen = () => {
         } finally {
             setIsLoadingDelete(false);
         }
+    };
+
+    const renderScene = ({ route }: { route: Route }) => {
+        return (
+            <View style={{ paddingVertical: 10, }}>
+                <FlatListCustom
+                    isLoading={route.key === 'first' ? isEmployeesLoading : isManagersLoading}
+                    isLoadMore={false}
+                    styleMore={{ width: '100%', marginBottom: 50 }}
+                    onRefreshing={() => {
+                        setRecallEmployee(new Date().getTime());
+                    }}
+                    listData={route.key === 'first' ? employees : managerEmployees}
+                    renderItemComponent={(item: IEmployee) => {
+                        return (
+                            <FlexBox
+                                key={`employee-${item.employeeCode}`}
+                                justifyContent="space-between"
+                                alignItems="center"
+                                style={styles.productCardItem}
+                            >
+                                <TextWrapper
+                                    style={{ width: '90%' }}
+                                    numberOfLines={1}
+                                    fontSize={16}
+                                >
+                                    {item.employeeCode},{item.fullName}
+                                </TextWrapper>
+                                <TouchableOpacity
+                                    style={{}}
+                                    onPress={(e) => {
+                                        e.preventDefault();
+                                        setSelectedItem(item);
+                                        setShowConfirmDeleteItem(true);
+                                    }}
+                                    disabled={isLoadingDelete}
+                                >
+                                    {isLoadingDelete &&
+                                    selectedItem?.employeeCode == item.employeeCode ? (
+                                        <ActivityIndicator size={20} />
+                                    ) : (
+                                        <Feather
+                                            name="trash-2"
+                                            size={20}
+                                            color={themeVariables.colors.danger}
+                                        />
+                                    )}
+                                </TouchableOpacity>
+                            </FlexBox>
+                        );
+                    }}
+                    renderEmptyComponent={() => (
+                        <EmptyFolder title="Không có nhân viên nào" description="" />
+                    )}
+                    onLoadMore={() => {}}
+                />
+            </View>
+        );
     };
 
     return (
@@ -273,7 +361,7 @@ const ManageEmployeeScreen = () => {
                 width={'100%'}
                 justifyContent="flex-start"
                 alignItems="flex-start"
-                style={{...styles.header}}
+                style={{ ...styles.header }}
             >
                 <TextWrap style={styles.title}>Thêm nhân viên:</TextWrap>
                 <TextInput
@@ -294,7 +382,10 @@ const ManageEmployeeScreen = () => {
                         {errorCheckCode}
                     </TextWrap>
                 )}
-                <FlexBox justifyContent="space-between" style={{ width: '100%', paddingHorizontal: 5 }}>
+                <FlexBox
+                    justifyContent="space-between"
+                    style={{ width: '100%', paddingHorizontal: 5 }}
+                >
                     <AppButton
                         viewStyle={styles.button}
                         label="Quét mã"
@@ -315,61 +406,29 @@ const ManageEmployeeScreen = () => {
                 justifyContent="flex-start"
                 alignItems="flex-start"
                 gap={10}
-                style={{ paddingHorizontal: containerStyles.paddingHorizontal + 5, width: '100%', maxHeight: layout.height - 300 }}
+                style={{
+                    paddingHorizontal: containerStyles.paddingHorizontal + 5,
+                    width: '100%',
+                    maxHeight: layout.height - 300,
+                }}
             >
-                <TextWrap style={styles.title}>Danh sách nhân viên:</TextWrap>
-                <FlatListCustom
-                    isLoading={isLoading}
-                    isLoadMore={false}
-                    styleMore={{ width: '100%', marginBottom: 50 }}
-                    onRefreshing={() => {
-                        setRecallEmployee(new Date().getTime());
-                    }}
-                    listData={employees}
-                    renderItemComponent={(item: IEmployee) => {
-                        return (
-                            <FlexBox
-                                key={`employee-${item.employeeCode}`}
-                                justifyContent="space-between"
-                                alignItems="center"
-                                style={styles.productCardItem}
-                            >
-                                <TextWrapper
-                                    style={{ width: '90%' }}
-                                    numberOfLines={1}
-                                    fontSize={16}
-                                >
-                                    {item.employeeCode},{item.fullName}
-                                </TextWrapper>
-                                <TouchableOpacity
-                                    style={{}}
-                                    onPress={(e) => {
-                                        e.preventDefault();
-                                        setSelectedItem(item);
-                                        setShowConfirmDeleteItem(true);
-                                    }}
-                                    disabled={isLoadingDelete}
-                                >
-                                    {isLoadingDelete &&
-                                    selectedItem?.employeeCode == item.employeeCode ? (
-                                        <ActivityIndicator size={20} />
-                                    ) : (
-                                        <Feather
-                                            name="trash-2"
-                                            size={20}
-                                            color={themeVariables.colors.danger}
-                                        />
-                                    )}
-                                </TouchableOpacity>
-                            </FlexBox>
-                        );
-                    }}
-                    renderEmptyComponent={() => (
-                        <EmptyFolder title="Không có nhân viên nào" description="" />
-                    )}
-                    onLoadMore={() => {}}
-                />
+                <TextWrap style={styles.title}>Danh sách QC:</TextWrap>
             </FlexBox>
+            <TabView
+                style={{ margin: 20 }}
+                navigationState={{ index, routes }}
+                onIndexChange={setIndex}
+                renderScene={renderScene}
+                renderTabBar={(props) => (
+                    <TabBar
+                        {...props}
+                        style={{ backgroundColor: themeVariables.colors.bgDefault }}
+                        inactiveColor={themeVariables.colors.textDefault}
+                        activeColor={themeVariables.colors.textDefault}
+                        indicatorStyle={{ backgroundColor: themeVariables.colors.primary }} 
+                    />
+                )}
+            />
 
             {showConfirmDeleteItem && (
                 <ConfirmModal

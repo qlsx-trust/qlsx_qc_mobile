@@ -14,10 +14,15 @@ import { StyleSheet } from 'react-native';
 
 interface IConfirmScanCodeModalProps {
     scanResult: string;
+    setShowCamera: React.Dispatch<React.SetStateAction<boolean>>;
     modalProps: CommonModalProps;
 }
 
-const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalProps) => {
+const ConfirmScanCodeModal = ({
+    scanResult,
+    setShowCamera,
+    modalProps,
+}: IConfirmScanCodeModalProps) => {
     const { themeVariables } = useThemeContext();
     const { updateProductionPlan, toleranceTime } = useProductionPlanContext();
     const styles = styling(themeVariables);
@@ -82,6 +87,7 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
                 );
                 if (!isValidTimeCheckQc) {
                     toast.error('Chưa đến thời gian kiểm tra, vui lòng thử lại');
+                    return;
                 }
                 updateProductionPlan(response.data);
                 router.push(`${SCREEN_KEY.product}`);
@@ -94,6 +100,11 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
         } finally {
             setIsLoadingConfirm(false);
         }
+    };
+
+    const handleScanAgain = () => {
+        modalProps.onClose();
+        setShowCamera(true);
     };
 
     return (
@@ -153,10 +164,10 @@ const ConfirmScanCodeModal = ({ scanResult, modalProps }: IConfirmScanCodeModalP
                     />
                     <AppButton
                         viewStyle={styles.button}
-                        label="Xác nhận"
-                        onPress={handleConfirmCode}
+                        label={invalidProductPlan ? 'Quét lại' : 'Xác nhận'}
+                        onPress={invalidProductPlan ? handleScanAgain : handleConfirmCode}
                         isLoading={isLoadingConfirm}
-                        disabled={isLoadingConfirm || invalidProductPlan}
+                        disabled={isLoadingConfirm}
                     />
                 </FlexBox>
             </FlexBox>
