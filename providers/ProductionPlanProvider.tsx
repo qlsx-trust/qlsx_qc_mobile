@@ -107,12 +107,9 @@ export const ProductionPlanContextProvider = ({ children }: ProductionPlanProvid
         setToleranceTime(checkVaidNumber(response?.data?.value) ? +response?.data?.value : 0);
     };
 
-    const getReviewTime = async () => {
-        // TODO: hard code - update later
-        setGapReviewTime(120);
-        
-        // const response = await CommonRepository.getConfigReviewTimeQC();
-        // setGapReviewTime(checkVaidNumber(response?.data?.value) ? +response?.data?.value : 0);
+    const getReviewTime = async () => {        
+        const response = await CommonRepository.getConfigReviewTimeQC();
+        setGapReviewTime(checkVaidNumber(response?.data?.value) ? +response?.data?.value : 0);
     };
 
     const updateProductionPlan = (productionPlan: IProductionPlan) => {

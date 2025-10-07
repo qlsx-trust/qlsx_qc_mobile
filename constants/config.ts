@@ -9,12 +9,12 @@ let Config = {
 // STAGING
 if (Updates.channel === 'staging') {
     Config.EXPO_PUBLIC_ENV = 'staging';
-    Config.EXPO_PUBLIC_BACKEND_URL = 'https://iot-local.trustsoft.com.vn';
+    Config.EXPO_PUBLIC_BACKEND_URL = 'http://192.168.1.155:3000';
 }
 
 if (Updates.channel === 'main') {
     Config.EXPO_PUBLIC_ENV = 'production';
-    Config.EXPO_PUBLIC_BACKEND_URL = 'https://iot-local.trustsoft.com.vn';
+    Config.EXPO_PUBLIC_BACKEND_URL = 'http://192.168.1.155:3000';
 }
 
 export default Config;
